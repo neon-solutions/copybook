@@ -1,0 +1,65 @@
+---
+title: Variants
+description: One snippet in many frameworks, setups, and scenarios.
+---
+
+A snippet that comes in several forms declares **dimensions**, plus one entry in `variants` for each combination you show:
+
+```ts
+import { defineSnippet, p } from "@prompt-manager/core";
+
+export const chat = defineSnippet({
+  id: "ai-gateway.try-it.chat",
+  placements: ["console/ai-gateway/model"],
+  params: {
+    model: p.enum(MODELS).example("claude-haiku-5-5"),
+    token: p.secret({
+      env: "NEON_AI_GATEWAY_TOKEN",
+      placeholder: "<your-token>",
+    }),
+  },
+  dimensions: {
+    framework: { "ai-sdk": "AI SDK", python: "Python", curl: "cURL" },
+  },
+  variants: [
+    {
+      when: { framework: "ai-sdk" },
+      lang: "ts",
+      deps: { npm: ["ai", "@neondatabase/ai-sdk-provider"] },
+      template: (t, { model }) => t`
+        const { text } = await generateText({ model: neon("${model}"), prompt: "Hi" });
+      `,
+    },
+    {
+      when: { framework: "curl" },
+      lang: "bash",
+      template: (t, { token }) => t`curl -H "Authorization: Bearer ${token}" …`,
+    },
+  ],
+});
+```
+
+## Keys
+
+Each variant gets a canonical key, with dimensions in declaration order: `framework=ai-sdk`, or `framework=ai-sdk;setup=env` when there are several dimensions. Select one when rendering, by key or by dimensions:
+
+```ts
+render(chat, values, { variant: { framework: "curl" } });
+render(chat, values, { variant: "framework=curl" });
+```
+
+Without a selection, the first variant renders. Matrices can be sparse: declare only the combinations you show.
+
+## Avoiding the matrix explosion
+
+The Neon AI Gateway shows _models × scenarios × frameworks_. Model it like this:
+
+- **Model is a param**, not a dimension. Only one string changes between models.
+- **Scenario and framework are dimensions.** Their code really is different.
+- **Use a collection** only when per-item content truly differs. See [Collections](/docs/concepts/definitions#collections).
+
+That turns hundreds of near-copies into about 15 hand-written variants.
+
+## Dependencies
+
+`deps` lists what a variant needs to run. The test runner installs these packages into its sandbox before typechecking or running the variant.

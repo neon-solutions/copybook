@@ -1,0 +1,53 @@
+---
+title: Params
+description: Typed values with examples, defaults, and secrets.
+---
+
+Params are the values that change between users: org ids, project ids, endpoint URLs, and tokens. Declare them with the `p` builders.
+
+```ts
+import { p } from "@prompt-manager/core";
+
+const params = {
+  projectId: p.string().example("proj-example").describe("The Neon project id"),
+  branch: p.string().default("main"),
+  model: p.enum(["claude-haiku-5-5", "gpt-5-mini"]).example("claude-haiku-5-5"),
+  token: p.secret({ env: "NEON_API_KEY", placeholder: "<your-api-key>" }),
+  verbose: p.boolean().optional(),
+};
+```
+
+| Builder | Value type |
+| --- | --- |
+| `p.string()`, `p.url()` | `string` |
+| `p.number()` | `number` |
+| `p.boolean()` | `boolean` |
+| `p.enum([...])` | One of the given strings |
+| `p.secret({ placeholder, env? })` | `string` |
+| `p.schema(schema)` | The output type of any [Standard Schema](https://standardschema.dev) (Zod, Valibot, ArkType) |
+
+Every builder is immutable and chainable:
+
+- `.example(value)`: used for previews, snapshots, and Studio.
+- `.default(value)`: used when `render` gets no value. It also makes the param optional.
+- `.optional()`: the param may be missing, so it's `undefined` in the template.
+- `.describe(text)`: shown in Studio and the manifest.
+
+## Examples are required
+
+Every required param needs an `.example()` or a `.default()`. Without one, the CLI can't render a preview or a snapshot, and `prompt-manager check` fails.
+
+## Secrets
+
+`p.secret()` is always optional at render time. Without a value, it renders its placeholder, so real credentials only appear when you pass them explicitly:
+
+```ts
+render(snippet); // Authorization: Bearer <your-api-key>
+render(snippet, { token }); // Authorization: Bearer sk-…
+```
+
+In the rendered tree, secret params carry `secret: true`, and placeholders also carry `placeholder: true`. Test runs read the real value from `env` and redact it from all logs.
+
+## Highlighting
+
+When you interpolate a param directly into a `t` template, it becomes a **param node**, so UIs can highlight it. If you transform the value first, as in `` t`${projectId.toUpperCase()}` ``, it renders as plain text.

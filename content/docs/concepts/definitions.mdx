@@ -1,0 +1,110 @@
+---
+title: Definitions
+description: Commands, snippets, prompts, and collections.
+---
+
+Everything your product shows is a **definition**. Every definition has a stable `id`, typed `params`, and metadata that the CLI catalogs.
+
+| Kind | Helper | Example |
+| --- | --- | --- |
+| Command | `defineCommand` | `neon init --project-id <id>` |
+| Snippet | `defineSnippet` | An AI SDK example in TypeScript, Python, and cURL |
+| Prompt | `definePrompt` | A "set up this app" prompt for a coding agent |
+
+## Metadata
+
+All three helpers accept the same metadata:
+
+```ts
+defineCommand({
+  id: "neon.init", // required: lowercase, dotted, never reused
+  title: "Initialize a project",
+  description: "Links the current folder to a Neon project.",
+  placements: ["console/create-project"], // where the product shows it
+  tags: ["cli"],
+  owners: ["@devrel"],
+  aliases: ["neon.link"], // previous ids, so history follows a rename
+  template: (t) => t`neon init`,
+});
+```
+
+### Ids
+
+Ids are how everything else refers to a definition: snapshots, test results, eval history, and analytics. Use the form `area.surface.name`, keep ids lowercase, and never reuse one. When you rename a definition, add the old id to `aliases`.
+
+## Commands
+
+A command is one shell command. Its `verify` option tells the [test runner](/docs) how far to go:
+
+```ts
+import { defineCommand, skip } from "@prompt-manager/core";
+
+export const login = defineCommand({
+  id: "neon.login",
+  template: (t) => t`neon login`,
+  verify: skip("interactive: opens a browser"),
+});
+```
+
+| `verify`             | What the runner does                               |
+| -------------------- | -------------------------------------------------- |
+| `"syntax"` (default) | Parses it without running it                       |
+| `"typecheck"`        | Installs dependencies and typechecks it (snippets) |
+| `"run"`              | Runs it in a sandbox with fixture values           |
+| `skip(reason)`       | Never runs it, and records why                     |
+
+## Snippets
+
+A snippet is a code block. Give it a `lang` and a `template`, or static `code`:
+
+```ts
+import { defineSnippet } from "@prompt-manager/core";
+
+export const env = defineSnippet({
+  id: "acme.connect.env",
+  lang: "dotenv",
+  code: "DATABASE_URL=postgres://user:password@host/db",
+});
+```
+
+When one snippet comes in several languages or frameworks, declare [variants](/docs/concepts/variants).
+
+## Prompts
+
+A prompt is text for a coding agent. It usually embeds commands and snippets:
+
+```ts
+export const getStarted = definePrompt({
+  id: "console.create-project.agent",
+  template: (t) => t`
+    1. ${t.cmd(install)}
+    2. ${t.cmd(login)}
+  `,
+});
+```
+
+Embedded definitions keep their ids in the rendered tree. That's how the CLI knows that `neon.login` appears in this prompt, and how the test runner finds commands to run.
+
+## Collections
+
+Sometimes definitions come from data, such as one snippet per model. `defineCollection` builds them with ids derived from a stable key:
+
+```ts
+import { defineCollection, defineSnippet } from "@prompt-manager/core";
+
+export const modelPages = defineCollection({
+  idPrefix: "ai-gateway.model",
+  items: models,
+  key: (model) => model.slug, // never the array index
+  build: (model, { id }) =>
+    defineSnippet({ id, lang: "ts", template: (t) => t`...` }),
+});
+
+modelPages.get("claude-haiku-5-5"); // id: ai-gateway.model.claude-haiku-5-5
+```
+
+<Callout title="Prefer params over collections">
+  If only one string changes between items, such as a model id, make it a param
+  instead of generating a definition per item. See
+  [Variants](/docs/concepts/variants).
+</Callout>

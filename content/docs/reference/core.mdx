@@ -1,0 +1,69 @@
+---
+title: "@prompt-manager/core"
+description: API reference for definitions, params, and rendering.
+---
+
+## Definitions
+
+| Export | Description |
+| --- | --- |
+| `defineCommand(input)` | A shell command. `verify` defaults to `"syntax"`. |
+| `defineSnippet(input)` | A code block, either single (`lang` + `template` or `code`) or with `dimensions` and `variants`. |
+| `definePrompt(input)` | Text for a coding agent. |
+| `defineCollection({ idPrefix, items, key, build })` | Definitions generated from data, with ids `<idPrefix>.<key>`. |
+| `skip(reason)` | A `verify` value that never runs the definition. |
+| `isDefinition(value)`, `isCollection(value)` | Type guards based on the brands. |
+| `variantKey(dimensions, when)` | Builds a canonical variant key. |
+
+Definitions are frozen objects branded with `DEFINITION` (`Symbol.for("prompt-manager.def")`). Collections are branded with `COLLECTION`.
+
+## Params
+
+`p.string()`, `p.url()`, `p.number()`, `p.boolean()`, `p.enum(values)`, `p.secret({ placeholder, env? })`, and `p.schema(standardSchema)`. Each returns a `Param` with `.example()`, `.default()`, `.optional()`, `.describe()`, and `.toJSON()`.
+
+`InputValues<S>` is the type `render` accepts. `TemplateValues<S>` is the type a template receives.
+
+## Rendering
+
+| Export | Description |
+| --- | --- |
+| `render(definition, values?, options?)` | Renders with real values. Throws if a required param is missing. |
+| `renderExample(definition, { values?, variant? })` | Renders with example values, filling in any `values` you pass. |
+| `selectVariant(snippet, selection?)` | Returns the matching variant, or throws. |
+| `toText(rendered, { format? })` | The text to copy. `format` is `"markdown"` (default) or `"plain"`. |
+| `toSegments(rendered, { format? })` | Flat segments for highlighted UIs. |
+| `collectCommands(rendered)` | Every embedded command, as `{ id?, text }`. |
+| `collectEmbeds(rendered)` | The ids of every embedded definition. |
+
+## The rendered tree
+
+```ts
+interface Rendered {
+  id: string;
+  kind: "command" | "prompt" | "snippet";
+  lang?: string; // snippets
+  variant?: string; // snippets with variants
+  nodes: Node[];
+}
+
+type Node =
+  | { type: "text"; value: string }
+  | {
+      type: "param";
+      name: string;
+      value: string;
+      secret?: true;
+      placeholder?: true;
+    }
+  | { type: "command"; id?: string; children: Node[] }
+  | {
+      type: "code";
+      id?: string;
+      lang?: string;
+      variant?: string;
+      children: Node[];
+    }
+  | { type: "include"; id: string; kind: DefinitionKind; children: Node[] };
+```
+
+`Rendered` is plain JSON. Render on the server and pass it to client components.

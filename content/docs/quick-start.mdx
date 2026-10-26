@@ -1,0 +1,78 @@
+---
+title: Quick start
+description: Define a command and a prompt, then render them in your product.
+---
+
+## Install
+
+```npm
+npm i @prompt-manager/core
+```
+
+`@prompt-manager/core` has no dependencies. It runs in the browser, on the server, and at the edge.
+
+## Define a command
+
+A command is a shell command that your product shows to users. Its params are typed, and each one has an example value so the command can always be previewed.
+
+```ts title="content/acme.ts"
+import { defineCommand, p } from "@prompt-manager/core";
+
+export const init = defineCommand({
+  id: "acme.init",
+  params: {
+    projectId: p.string().example("proj-example"),
+    branch: p.string().default("main"),
+  },
+  template: (t, { projectId, branch }) =>
+    t`acme init --project-id ${projectId} --branch ${branch}`,
+});
+```
+
+## Define a prompt
+
+A prompt is text that users paste into a coding agent. Embed commands with `t.cmd()` instead of retyping them. When the command changes, every prompt that embeds it changes too.
+
+```ts title="content/create-project.ts"
+import { definePrompt, p } from "@prompt-manager/core";
+
+import { init } from "./acme";
+
+export const getStarted = definePrompt({
+  id: "console.create-project.agent",
+  placements: ["console/create-project"],
+  params: { projectId: p.string().example("proj-example") },
+  template: (t, params) => t`
+    Set up this app on Acme.
+    1. Install the CLI: ${t.cmd("npm i -g acme@latest")}
+    2. In the project root:
+       ${t.cmd(init, params)}
+    3. Run \`npm run build\` and report the output.
+  `,
+});
+```
+
+## Render it
+
+`render` takes a definition and real values, and returns a plain JSON tree. `toText` turns the tree into the text users copy.
+
+```tsx title="app/projects/[id]/page.tsx"
+import { render, toText } from "@prompt-manager/core";
+
+import { getStarted } from "@/content/create-project";
+
+export default async function Page({ params }) {
+  const { id } = await params;
+  const prompt = render(getStarted, { projectId: id });
+
+  return <pre>{toText(prompt)}</pre>;
+}
+```
+
+The tree marks every param, command, and code block, so a UI can highlight them. The [registry components](/docs) render it with copy buttons and tabs.
+
+## Next steps
+
+- [Definitions](/docs/concepts/definitions): commands, snippets, prompts, and collections.
+- [Templates](/docs/concepts/templates): the `t` tag, embedding, and indentation.
+- [Variants](/docs/concepts/variants): one snippet in many frameworks.

@@ -1,0 +1,76 @@
+---
+title: Templates
+description: The t tag, embedding, indentation, and text output.
+---
+
+Every definition has a `template` function. It receives the `t` tag and the param values, and returns a fragment.
+
+```ts
+template: (t, { projectId }) => t`acme init --project-id ${projectId}`;
+```
+
+## Dedent
+
+Templates are dedented, and a blank first or last line is dropped, so a template can open and close on its own lines:
+
+```ts
+template: (t) => t`
+  First line.
+    Indented line.
+`;
+// "First line.\n  Indented line."
+```
+
+## Interpolations
+
+| Value | Renders as |
+| --- | --- |
+| A param value | A param node |
+| A string or number | Text |
+| `t.cmd(...)`, `t.code(...)`, `t.include(...)` | Embedded nodes |
+| An array | Each item, in order |
+| `null`, `undefined`, `true`, `false` | Nothing, so `${flag && t.cmd(...)}` works |
+
+## Embedding
+
+- `t.cmd("npm test")` or `t.cmd(commandDefinition, values)` embeds a command.
+- `t.code("ts", code)` or `t.code(snippetDefinition, values, { variant })` embeds a code block.
+- `t.include(definition, values)` embeds another definition, such as a shared closing section for prompts.
+
+Embedding a definition keeps its id in the rendered tree:
+
+```ts
+const tree = render(getStarted, { projectId: "proj-1" });
+
+collectEmbeds(tree); // ["acme.install", "acme.init"]
+collectCommands(tree); // [{ id: "acme.init", text: "acme init --project-id proj-1" }, ...]
+```
+
+## Indentation
+
+A multi-line embed is indented to the column of the line it starts on. That keeps a code block nested under a list item:
+
+```ts
+template: (t) => t`
+  3. Create neon.ts:
+     ${t.code(neonTs)}
+`;
+```
+
+````md
+3. Create neon.ts:
+   ```ts
+   export default defineConfig({ … });
+   ```
+````
+
+## Text output
+
+`render` returns a serializable `Rendered` tree. Turn it into text with:
+
+- `toText(tree)`: the text users copy. By default, embedded code blocks get Markdown fences. Pass `{ format: "plain" }` to leave them out.
+- `toSegments(tree)`: flat segments (`text`, `param`, `fence`), each with the id and block it came from. Use these to render highlighted UIs.
+
+```
+
+```
