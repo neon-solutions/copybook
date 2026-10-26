@@ -8,12 +8,14 @@
     "./*": "./src/*.ts"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "pm": "prompt-manager"
   },
   "dependencies": {
     "@prompt-manager/core": "workspace:*"
   },
   "devDependencies": {
+    "@prompt-manager/cli": "workspace:*",
     "typescript": "5.9.3"
   }
 }

@@ -9,5 +9,7 @@ export default defineConfig({
     ".agents/skills/**",
     ".claude/skills/**",
     "public/r/**",
+    // Rendered snapshots must stay byte-for-byte what `prompt-manager snapshot` wrote.
+    "**/prompt-manager/snapshots/**",
   ],
 });
