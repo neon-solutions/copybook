@@ -21,7 +21,7 @@ Five services (Postgres, Storage, AI Gateway, Data API, Auth), each with an `.en
 
 - **One snippet with two dimensions**: `service` and `setup`. Only the combinations the dialog shows are declared, because sparse matrices are fine.
 - **Credentials are secrets**: `p.secret({ env, placeholder })`. Previews show `<your-generated-credential>`. Real values only appear when the product passes them, and the components warn when a copied prompt contains one.
-- **The setup comments embed the deploy command** (`run \`${t.cmd(deploy)}\``) instead of retyping it.
+- **The setup comments embed the deploy command** with `t.cmd(deploy)` instead of retyping it.
 - **Verify by language**: `.env` variants get a dotenv parse, and the OpenAI client variant is typechecked against the real `openai` package.
 
 ## 3. AI Gateway model pages
