@@ -37,14 +37,16 @@ export const CommandTabs = ({ defaultTab, onCopy, tabs }: CommandTabsProps) => {
     >
       <Tabs onValueChange={(value) => setActive(String(value))} value={active}>
         <div className="flex items-center justify-between gap-2 border-b pr-1">
-          <TabsList variant="line">
-            {tabs.map((tab) => (
-              <TabsTrigger key={tab.id} value={tab.id}>
-                {tab.kind === "prompt" ? <AgentIcon /> : null}
-                {tab.label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+          <div className="min-w-0 overflow-x-auto">
+            <TabsList variant="line">
+              {tabs.map((tab) => (
+                <TabsTrigger key={tab.id} value={tab.id}>
+                  {tab.kind === "prompt" ? <AgentIcon /> : null}
+                  {tab.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </div>
           {current ? (
             <CopyButton
               label={current.kind === "prompt" ? "Copy prompt" : "Copy command"}

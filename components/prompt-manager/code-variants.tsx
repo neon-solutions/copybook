@@ -42,13 +42,15 @@ export const CodeVariants = ({
     >
       <Tabs onValueChange={(value) => setActive(String(value))} value={active}>
         <div className="flex items-center justify-between gap-2 border-b pr-1">
-          <TabsList variant="line">
-            {items.map((item) => (
-              <TabsTrigger key={item.key} value={item.key}>
-                {item.label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+          <div className="min-w-0 overflow-x-auto">
+            <TabsList variant="line">
+              {items.map((item) => (
+                <TabsTrigger key={item.key} value={item.key}>
+                  {item.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </div>
           {current ? (
             <CopyButton
               label="Copy snippet"
