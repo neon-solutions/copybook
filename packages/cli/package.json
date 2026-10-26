@@ -41,7 +41,8 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint:package": "publint --strict && attw --pack . --profile esm-only"
   },
   "dependencies": {
     "@prompt-manager/core": "workspace:*",
@@ -49,7 +50,9 @@
     "picocolors": "^1.1.1"
   },
   "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.5",
     "@types/node": "^24",
+    "publint": "^0.3.25",
     "tsup": "^9.0.0",
     "typescript": "5.9.3",
     "vitest": "^5.0.5"

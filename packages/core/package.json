@@ -38,9 +38,15 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint:package": "publint --strict && attw --pack . --profile esm-only",
+    "size": "size-limit"
   },
   "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.5",
+    "@size-limit/preset-small-lib": "^14.2.0",
+    "publint": "^0.3.25",
+    "size-limit": "^14.2.0",
     "tsup": "^9.0.0",
     "typescript": "5.9.3",
     "vitest": "^5.0.5"
