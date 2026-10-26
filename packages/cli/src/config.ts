@@ -30,6 +30,11 @@ export interface Config {
   stubs?: string[];
   /** The tsconfig used to resolve path aliases. Defaults to `tsconfig.json`. */
   tsconfig?: string;
+  /**
+   * Globs of files that export `defineTest` and `defineEval` specs. Your
+   * product never imports these.
+   */
+  verify?: string[];
 }
 
 export interface ResolvedConfig extends Config {

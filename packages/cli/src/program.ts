@@ -5,6 +5,7 @@ import { registerInit } from "./commands/init";
 import { registerList } from "./commands/list";
 import { registerSnapshot } from "./commands/snapshot";
 import { registerStudio } from "./commands/studio";
+import { registerTest } from "./commands/test";
 import { BIN_NAME, VERSION } from "./meta";
 
 export const createProgram = (): Command => {
@@ -18,6 +19,7 @@ export const createProgram = (): Command => {
   registerList(program);
   registerSnapshot(program);
   registerCheck(program);
+  registerTest(program);
   registerStudio(program);
 
   return program;
