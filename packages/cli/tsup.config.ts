@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { cpSync, existsSync, readFileSync } from "node:fs";
 
 import { defineConfig } from "tsup";
 import type { Options } from "tsup";
@@ -6,6 +6,8 @@ import type { Options } from "tsup";
 const { version } = JSON.parse(readFileSync("package.json", "utf-8")) as {
   version: string;
 };
+
+const STUDIO_DIST = "../studio/dist";
 
 const shared: Options = {
   define: { __PM_VERSION__: JSON.stringify(version) },
@@ -16,6 +18,18 @@ const shared: Options = {
 };
 
 export default defineConfig([
-  { ...shared, clean: true, dts: true, entry: ["src/index.ts"] },
+  {
+    ...shared,
+    clean: true,
+    dts: true,
+    entry: ["src/index.ts"],
+    // Ship the prebuilt Studio UI next to the CLI bundle.
+    onSuccess: () => {
+      if (existsSync(STUDIO_DIST)) {
+        cpSync(STUDIO_DIST, "dist/studio", { recursive: true });
+      }
+      return Promise.resolve();
+    },
+  },
   { ...shared, banner: { js: "#!/usr/bin/env node" }, entry: ["src/bin.ts"] },
 ]);
