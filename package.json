@@ -14,7 +14,7 @@
     "lint": "oxlint",
     "check": "ultracite check",
     "fix": "ultracite fix",
-    "typecheck": "pnpm build:packages && next typegen && tsc --noEmit && pnpm --filter \"./packages/*\" typecheck",
+    "typecheck": "pnpm build:packages && next typegen && tsc --noEmit && pnpm --filter \"./packages/*\" --filter \"./examples/*\" typecheck",
     "prepare": "husky",
     "check:lockfile": "node scripts/check-lockfile.mjs",
     "check:packages": "pnpm build:packages && pnpm --filter \"./packages/*\" lint:package && pnpm --filter @prompt-manager/core size",

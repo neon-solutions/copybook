@@ -1,0 +1,19 @@
+{
+  "name": "@prompt-manager/example-acme",
+  "version": "0.0.0",
+  "private": true,
+  "description": "A fictional Acme DB console that mirrors Neon's onboarding screens.",
+  "type": "module",
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@prompt-manager/core": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3"
+  }
+}

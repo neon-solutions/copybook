@@ -246,6 +246,16 @@ importers:
         specifier: 8.0.1
         version: 8.0.1(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(oxfmt@0.71.0)(oxlint@1.88.0)(prettier@3.9.10)
 
+  examples/acme:
+    dependencies:
+      '@prompt-manager/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+    devDependencies:
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+
   packages/cli:
     dependencies:
       '@prompt-manager/core':
