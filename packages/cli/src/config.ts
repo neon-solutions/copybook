@@ -31,6 +31,14 @@ export interface Config {
   /** The tsconfig used to resolve path aliases. Defaults to `tsconfig.json`. */
   tsconfig?: string;
   /**
+   * Product files to scan for imports of definitions, so `usages`, `check`,
+   * and Studio can show where each one is actually rendered.
+   */
+  usage?: {
+    exclude?: string[];
+    include: string[];
+  };
+  /**
    * Globs of files that export `defineTest` and `defineEval` specs. Your
    * product never imports these.
    */

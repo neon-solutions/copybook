@@ -9,6 +9,7 @@ import { loadProject } from "../load";
 import { BIN_NAME } from "../meta";
 import { formatIssue, write, writeError } from "../output";
 import { compareSnapshots } from "../snapshot";
+import { findUsages } from "../usages";
 import { buildSnapshots } from "../validate";
 import type { Issue } from "../validate";
 
@@ -60,6 +61,18 @@ export const registerCheck = (program: Command) =>
           id: change.id,
           level: "error",
           message: "Snapshot is out of date:",
+        });
+      }
+      const embeds = new Map(
+        snapshots.map((snapshot) => [snapshot.id, snapshot.embeds])
+      );
+      const usage = await findUsages(project, embeds);
+      for (const id of usage?.unused ?? []) {
+        all.push({
+          id,
+          level: "warning",
+          message:
+            "Isn't rendered by any file in usage.include, directly or through an embed.",
         });
       }
       if (options.base) {

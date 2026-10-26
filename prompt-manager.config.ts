@@ -8,4 +8,5 @@ export default defineConfig({
     "site/docs/components": { route: "/docs/components/*" },
     "site/home/get-started": { route: "/" },
   },
+  usage: { include: ["app/**/*.tsx", "components/**/*.tsx"] },
 });

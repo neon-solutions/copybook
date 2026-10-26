@@ -58,3 +58,5 @@ export type {
   EvalResult,
   EvalTrial,
 } from "./eval/types";
+export { findUsages } from "./usages";
+export type { UsageReport } from "./usages";
