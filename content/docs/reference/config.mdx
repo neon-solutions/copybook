@@ -21,6 +21,7 @@ export default defineConfig({
 | Option | Description |
 | --- | --- |
 | `content` | Globs of files that export definitions, relative to the config file. Required. |
+| `verify` | Globs of files that export `defineTest`, `defineFixture`, and `defineEval` specs. Your product never imports these. |
 | `exclude` | Globs to leave out. `node_modules`, `dist`, and `.next` are always excluded. |
 | `tsconfig` | Used to resolve path aliases such as `@/`. Defaults to `tsconfig.json`. |
 | `stubs` | Modules to replace with empty ones while loading content, such as `server-only`. CSS imports are always stubbed. |

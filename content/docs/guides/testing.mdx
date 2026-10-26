@@ -1,0 +1,106 @@
+---
+title: Testing snippets and commands
+description: Parse, typecheck, and run what you show users.
+---
+
+```bash
+npx prompt-manager test                          # syntax + typecheck
+npx prompt-manager test --tier syntax,typecheck,run
+npx prompt-manager test --changed --base origin/main
+```
+
+## Tiers
+
+Every command and snippet variant gets the tiers its `verify` option allows, capped by what its language supports.
+
+| Tier | What runs | When to use it |
+| --- | --- | --- |
+| `syntax` | `bash -n` for shell, esbuild for JS and TS, a dotenv parser, Python's `ast`, and `JSON.parse` | Every pull request. It's fast and needs nothing. |
+| `typecheck` | Installs the variant's `deps.npm` into a cached sandbox, then runs `tsc --strict` | Every pull request. It catches SDK API drift. |
+| `run` | Executes the code in a sandbox, with values from a fixture | Nightly, or for changed definitions |
+
+```ts
+defineSnippet({
+  // …
+  variants: [
+    {
+      when: { framework: "ai-sdk" },
+      lang: "ts",
+      deps: { npm: ["ai", "@neondatabase/ai-sdk-provider"] },
+      verify: "typecheck",
+      template,
+    },
+    { when: { framework: "curl" }, lang: "bash", verify: "run", template },
+  ],
+});
+```
+
+Prompts don't have a `verify` option. Their embedded definitions are tested on their own, and literal commands such as `t.cmd("npm run build")` get a syntax check. To check that a prompt works, use [evals](/docs/guides/evals).
+
+Secrets never reach the syntax and typecheck tiers. They get stand-in values like `pm_test_token`.
+
+## Running for real
+
+The `run` tier needs real values, and usually a real resource. Put `defineTest` and `defineFixture` in files your product never imports, and list them in the config:
+
+```ts title="prompt-manager.config.ts"
+export default defineConfig({
+  content: ["src/**/*.prompts.ts"],
+  verify: ["verify/**/*.verify.ts"],
+});
+```
+
+```ts title="verify/gateway.verify.ts"
+import { defineFixture, defineTest } from "@prompt-manager/cli";
+
+import { tryIt } from "../src/ai-gateway.prompts";
+
+export const branch = defineFixture({
+  id: "neon.branch",
+  setup: async ({ runId }) => {
+    const created = await createBranch(`pm-${runId}`); // your API client
+    return {
+      value: created,
+      teardown: () => deleteBranch(created.id),
+    };
+  },
+});
+
+export const tryItCurl = defineTest(tryIt, {
+  fixture: branch,
+  params: (created) => ({
+    endpoint: created.aiGatewayUrl,
+    model: "claude-haiku-5-5",
+  }),
+  variants: ["framework=curl;scenario=chat"],
+  expect: { stdout: /content/ },
+  timeoutMs: 60_000,
+});
+```
+
+- A fixture is set up once per run, only if a selected test uses it. Its teardown always runs, even when tests fail.
+- Name what you create `pm-<runId>`, so anything a crashed run leaves behind is easy to find and clean up.
+- Secrets that `params` doesn't provide come from each secret's `env` variable. If neither has a value, the case is skipped and the output says which variable to set.
+- Secret values are redacted from all output.
+
+`examples/acme` runs its cURL snippet against a local mock gateway, so the `run` tier works without any accounts.
+
+## Sandboxes
+
+- **Environment:** only `PATH`, `HOME`, `LANG`, `TERM`, `TMPDIR`, `USER`, and npm, pip, and uv registry settings are passed through, plus the `env` that a fixture or test adds.
+- **npm:** installs go into `node_modules/.cache/prompt-manager/sandboxes`, cached by dependency list, with lifecycle scripts disabled.
+- **Python:** dependencies are installed with `uv run --with` when `uv` is available.
+- **Isolation:** sandboxes are temp directories, not containers. Run the `run` tier in CI or another disposable environment.
+
+## Reports
+
+| Flag | Description |
+| --- | --- |
+| `-t, --tier <tiers>` | Comma-separated tiers. Defaults to `syntax,typecheck`. |
+| `--only <ids...>` | Only these definitions. |
+| `--changed`, `--base <ref>` | Only definitions whose output changed since the ref. |
+| `--reporter <name>` | `pretty` (default), `json`, or `junit`. |
+| `-o, --output <file>` | Write the JSON or JUnit report to a file. |
+| `--concurrency <n>` | How many cases run at once. |
+
+Every run also writes `.prompt-manager/results/test.json`, which Studio reads. `test` exits with status 1 if any case fails.
