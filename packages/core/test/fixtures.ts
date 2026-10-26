@@ -30,7 +30,11 @@ export const init = defineCommand({
 
 export const client = defineSnippet({
   dimensions: {
-    framework: { "ai-sdk": "AI SDK", curl: "cURL", python: "Python" },
+    framework: [
+      { label: "AI SDK", value: "ai-sdk" },
+      { label: "cURL", value: "curl" },
+      { label: "Python", value: "python" },
+    ],
   },
   id: "acme.gateway.chat",
   params: {

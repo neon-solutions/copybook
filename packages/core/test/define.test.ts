@@ -32,7 +32,7 @@ describe("define", () => {
   it("rejects variants with unknown options or duplicate keys", () => {
     expect(() =>
       defineSnippet({
-        dimensions: { framework: { ts: "TypeScript" } },
+        dimensions: { framework: [{ label: "TypeScript", value: "ts" }] },
         id: "bad",
         // @ts-expect-error "go" isn't a framework option
         variants: [{ code: "", when: { framework: "go" } }],
@@ -41,7 +41,7 @@ describe("define", () => {
 
     expect(() =>
       defineSnippet({
-        dimensions: { framework: { ts: "TypeScript" } },
+        dimensions: { framework: [{ label: "TypeScript", value: "ts" }] },
         id: "dupe",
         variants: [
           { code: "a", when: { framework: "ts" } },
@@ -51,13 +51,13 @@ describe("define", () => {
     ).toThrow('Snippet "dupe" has two variants for "framework=ts".');
   });
 
-  it("orders variant keys by dimension declaration", () => {
-    expect(
-      variantKey(
-        { framework: {}, setup: {} },
-        { framework: "ts", setup: "env" }
-      )
-    ).toBe("framework=ts;setup=env");
+  it("builds variant keys in dimension order and skips unset ones", () => {
+    const dimensions = { framework: [], setup: [] };
+
+    expect(variantKey(dimensions, { framework: "ts", setup: "env" })).toBe(
+      "framework=ts;setup=env"
+    );
+    expect(variantKey(dimensions, { setup: "env" })).toBe("setup=env");
   });
 });
 

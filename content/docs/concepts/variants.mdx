@@ -19,7 +19,11 @@ export const chat = defineSnippet({
     }),
   },
   dimensions: {
-    framework: { "ai-sdk": "AI SDK", python: "Python", curl: "cURL" },
+    framework: [
+      { value: "ai-sdk", label: "AI SDK" },
+      { value: "python", label: "Python" },
+      { value: "curl", label: "cURL" },
+    ],
   },
   variants: [
     {
@@ -38,6 +42,8 @@ export const chat = defineSnippet({
   ],
 });
 ```
+
+Options are an array of `{ value, label }`, in display order. An array keeps that order even under lint rules that sort object keys.
 
 ## Keys
 

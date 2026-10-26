@@ -76,10 +76,16 @@ export interface Deps {
   readonly pip?: readonly string[];
 }
 
-/** Dimension name → option value → label, in display order. */
-export type Dimensions = Readonly<
-  Record<string, Readonly<Record<string, string>>>
->;
+export interface DimensionOption {
+  readonly label: string;
+  readonly value: string;
+}
+
+/**
+ * Dimension name → its options, in display order. Options are an array so
+ * their order survives lint rules that sort object keys.
+ */
+export type Dimensions = Readonly<Record<string, readonly DimensionOption[]>>;
 
 export interface DefinitionMeta {
   /** Previous ids, kept so history and results follow a rename. */

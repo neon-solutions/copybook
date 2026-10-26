@@ -40,6 +40,7 @@ export type {
   Definition,
   DefinitionMeta,
   Deps,
+  DimensionOption,
   Dimensions,
   Interpolation,
   PromptDefinition,

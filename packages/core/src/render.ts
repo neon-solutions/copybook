@@ -201,7 +201,9 @@ export const listVariants = (snippet: SnippetDefinition): VariantInfo[] =>
     const label = Object.entries(variant.when)
       .map(
         ([dimension, option]) =>
-          snippet.dimensions[dimension]?.[option] ?? option
+          snippet.dimensions[dimension]?.find(
+            (candidate) => candidate.value === option
+          )?.label ?? option
       )
       .join(" · ");
     const info: VariantInfo = { key: variant.key, label, when: variant.when };

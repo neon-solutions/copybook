@@ -80,7 +80,7 @@ type VariantInput<S extends ParamsShape, D extends Dimensions> = Body<S> & {
   lang?: string;
   verify?: Verify;
   /** The dimension options this variant covers. */
-  when: { readonly [K in keyof D]?: keyof D[K] & string };
+  when: { readonly [K in keyof D]?: D[K][number]["value"] };
 };
 
 type SingleSnippetInput<S extends ParamsShape> = Body<S> &
@@ -145,7 +145,8 @@ const assertVariants = (
   const seen = new Set<string>();
   for (const variant of variants) {
     for (const [dimension, option] of Object.entries(variant.when)) {
-      if (!dimensions[dimension]?.[option]) {
+      const options = dimensions[dimension] ?? [];
+      if (!options.some((candidate) => candidate.value === option)) {
         throw new Error(
           `Snippet "${id}" has a variant with unknown ${dimension} "${option}".`
         );
