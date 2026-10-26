@@ -1,21 +1,19 @@
 "use client";
 
-import { CheckIcon, CopyIcon } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 
+import { CheckIcon, CopyIcon } from "@/components/prompt-manager/icons";
 import { Button } from "@/components/ui/button";
 
 const RESET_AFTER_MS = 2000;
 
 interface CopyButtonProps {
-  className?: string;
   label?: string;
   onCopy?: (value: string) => void;
   value: string;
 }
 
 export const CopyButton = ({
-  className,
   label = "Copy to clipboard",
   onCopy,
   value,
@@ -39,9 +37,8 @@ export const CopyButton = ({
   return (
     <Button
       aria-label={copied ? "Copied" : label}
-      className={className}
       onClick={copy}
-      size="icon-xs"
+      size="icon-sm"
       title={label}
       variant="ghost"
     >

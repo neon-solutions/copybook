@@ -1,0 +1,141 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "prompt-manager",
+  "homepage": "https://github.com/TheOrcDev/prompt-manager",
+  "items": [
+    {
+      "name": "copy-button",
+      "type": "registry:component",
+      "title": "Copy Button",
+      "description": "An icon button that copies a value and confirms with a check.",
+      "registryDependencies": ["button"],
+      "files": [
+        {
+          "path": "components/prompt-manager/copy-button.tsx",
+          "target": "components/prompt-manager/copy-button.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "components/prompt-manager/icons.tsx",
+          "target": "components/prompt-manager/icons.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "rendered-text",
+      "type": "registry:component",
+      "title": "Rendered Text",
+      "description": "Renders a Prompt Manager tree as text with params highlighted.",
+      "dependencies": ["@prompt-manager/core"],
+      "registryDependencies": ["utils"],
+      "files": [
+        {
+          "path": "components/prompt-manager/rendered-text.tsx",
+          "target": "components/prompt-manager/rendered-text.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "agent-prompt",
+      "type": "registry:component",
+      "title": "Agent Prompt",
+      "description": "A prompt to paste into a coding agent, with a copy button and a warning when it contains a secret.",
+      "dependencies": ["@prompt-manager/core"],
+      "registryDependencies": ["button", "utils"],
+      "files": [
+        {
+          "path": "components/prompt-manager/agent-prompt.tsx",
+          "target": "components/prompt-manager/agent-prompt.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "components/prompt-manager/rendered-text.tsx",
+          "target": "components/prompt-manager/rendered-text.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "components/prompt-manager/copy-button.tsx",
+          "target": "components/prompt-manager/copy-button.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "components/prompt-manager/icons.tsx",
+          "target": "components/prompt-manager/icons.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "code-variants",
+      "type": "registry:component",
+      "title": "Code Variants",
+      "description": "One snippet in several frameworks or setups, as tabs with a copy button.",
+      "dependencies": ["@prompt-manager/core"],
+      "registryDependencies": ["button", "tabs", "utils"],
+      "files": [
+        {
+          "path": "components/prompt-manager/code-variants.tsx",
+          "target": "components/prompt-manager/code-variants.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "components/prompt-manager/agent-prompt.tsx",
+          "target": "components/prompt-manager/agent-prompt.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "components/prompt-manager/rendered-text.tsx",
+          "target": "components/prompt-manager/rendered-text.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "components/prompt-manager/copy-button.tsx",
+          "target": "components/prompt-manager/copy-button.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "components/prompt-manager/icons.tsx",
+          "target": "components/prompt-manager/icons.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "command-tabs",
+      "type": "registry:component",
+      "title": "Command Tabs",
+      "description": "Package-manager tabs for a command, with an optional agent prompt tab.",
+      "dependencies": ["@prompt-manager/core"],
+      "registryDependencies": ["button", "tabs", "utils"],
+      "files": [
+        {
+          "path": "components/prompt-manager/command-tabs.tsx",
+          "target": "components/prompt-manager/command-tabs.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "components/prompt-manager/agent-prompt.tsx",
+          "target": "components/prompt-manager/agent-prompt.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "components/prompt-manager/rendered-text.tsx",
+          "target": "components/prompt-manager/rendered-text.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "components/prompt-manager/copy-button.tsx",
+          "target": "components/prompt-manager/copy-button.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "components/prompt-manager/icons.tsx",
+          "target": "components/prompt-manager/icons.tsx",
+          "type": "registry:component"
+        }
+      ]
+    }
+  ]
+}

@@ -1,17 +1,29 @@
-import { CommandTabs } from "@/components/command-tabs";
-import type { CommandTab } from "@/components/command-tabs";
-import { INIT_COMMANDS, SETUP_AGENT_PROMPT } from "@/lib/get-started";
+import { render } from "@prompt-manager/core";
 
-const TABS: readonly CommandTab[] = [
-  { id: "prompt", kind: "prompt", label: "Prompt", value: SETUP_AGENT_PROMPT },
-  { id: "pnpm", label: "pnpm", value: INIT_COMMANDS.pnpm },
-  { id: "npm", label: "npm", value: INIT_COMMANDS.npm },
-  { id: "yarn", label: "yarn", value: INIT_COMMANDS.yarn },
-  { id: "bun", label: "bun", value: INIT_COMMANDS.bun },
+import { CommandTabs } from "@/components/prompt-manager/command-tabs";
+import type { CommandTab } from "@/components/prompt-manager/command-tabs";
+import {
+  init,
+  packageManagers,
+  setupPrompt,
+} from "@/content/definitions/get-started";
+
+const tabs: CommandTab[] = [
+  {
+    id: "prompt",
+    kind: "prompt",
+    label: "Prompt",
+    rendered: render(setupPrompt),
+  },
+  ...packageManagers.map((packageManager) => ({
+    id: packageManager,
+    label: packageManager,
+    rendered: render(init, { packageManager }),
+  })),
 ];
 
 export const GetStarted = () => (
   <div className="w-full max-w-2xl text-left">
-    <CommandTabs defaultTab="pnpm" tabs={TABS} />
+    <CommandTabs defaultTab="pnpm" tabs={tabs} />
   </div>
 );
