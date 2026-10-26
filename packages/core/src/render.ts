@@ -186,3 +186,27 @@ export const renderExample = (
   definition: Definition,
   options?: RenderOptions & { values?: Readonly<Record<string, unknown>> }
 ): Rendered => renderWith(definition, options?.values, options, "example");
+
+export interface VariantInfo {
+  key: string;
+  /** Option labels joined with " · ", such as `AI SDK · .env`. */
+  label: string;
+  lang?: string;
+  when: Readonly<Record<string, string>>;
+}
+
+/** Lists a snippet's variants with display labels, in declaration order. */
+export const listVariants = (snippet: SnippetDefinition): VariantInfo[] =>
+  snippet.variants.map((variant) => {
+    const label = Object.entries(variant.when)
+      .map(
+        ([dimension, option]) =>
+          snippet.dimensions[dimension]?.[option] ?? option
+      )
+      .join(" · ");
+    const info: VariantInfo = { key: variant.key, label, when: variant.when };
+    if (variant.lang !== undefined) {
+      info.lang = variant.lang;
+    }
+    return info;
+  });

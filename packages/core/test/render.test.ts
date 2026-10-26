@@ -6,6 +6,7 @@ import {
   defineCommand,
   definePrompt,
   defineSnippet,
+  listVariants,
   p,
   render,
   renderExample,
@@ -236,5 +237,24 @@ describe(renderExample, () => {
     expect(toText(rendered)).toBe(
       "acme init -y --org-id org-real --project-id proj-example --branch production"
     );
+  });
+});
+
+describe(listVariants, () => {
+  it("labels variants with their dimension options", () => {
+    expect(listVariants(client)).toStrictEqual([
+      {
+        key: "framework=ai-sdk",
+        label: "AI SDK",
+        lang: "ts",
+        when: { framework: "ai-sdk" },
+      },
+      {
+        key: "framework=curl",
+        label: "cURL",
+        lang: "bash",
+        when: { framework: "curl" },
+      },
+    ]);
   });
 });

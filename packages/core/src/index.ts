@@ -29,8 +29,8 @@ export type {
   ParamsShape,
   TemplateValues,
 } from "./params";
-export { render, renderExample, selectVariant } from "./render";
-export type { RenderOptions } from "./render";
+export { listVariants, render, renderExample, selectVariant } from "./render";
+export type { RenderOptions, VariantInfo } from "./render";
 export type { StandardSchemaV1 } from "./standard-schema";
 export { collectCommands, collectEmbeds, toSegments, toText } from "./text";
 export type { EmbeddedCommand, Segment, TextFormat } from "./text";
