@@ -1,4 +1,4 @@
-import type { Commit, RenderResult, StudioManifest } from "./types";
+import type { Commit, RenderResult, Results, StudioManifest } from "./types";
 
 const getJson = async <T>(url: string, init?: RequestInit): Promise<T> => {
   const response = await fetch(url, init);
@@ -10,6 +10,10 @@ const getJson = async <T>(url: string, init?: RequestInit): Promise<T> => {
 };
 
 export const fetchManifest = () => getJson<StudioManifest>("api/manifest");
+
+/** `version` changes on every reload, so new reports show up. */
+export const fetchResults = (version: string) =>
+  getJson<Results>(`api/results?v=${encodeURIComponent(version)}`);
 
 /** `version` changes on every reload, so new commits show up. */
 export const fetchHistory = (id: string, version: string) =>

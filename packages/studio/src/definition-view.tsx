@@ -3,6 +3,7 @@ import { useState } from "react";
 import { History } from "./history";
 import { initialValues, ParamsForm, toParamValues } from "./params-form";
 import { Preview } from "./preview";
+import { TestResults } from "./results";
 import { SnapshotBadge } from "./snapshot-badge";
 import type { Entry } from "./types";
 import { hrefFor } from "./use-hash-route";
@@ -75,22 +76,36 @@ export const DefinitionView = ({ entry, loadedAt }: DefinitionViewProps) => {
       </header>
 
       <Section title="Where it's shown">
-        {entry.placements.length === 0 ? (
-          <p className="text-muted-foreground text-sm">
-            No placements declared.
-          </p>
-        ) : (
-          <ul className="flex flex-wrap gap-2">
-            {entry.placements.map((placement) => (
-              <li
-                className="bg-muted px-2 py-1 font-mono text-xs"
-                key={placement}
-              >
-                {placement}
-              </li>
-            ))}
-          </ul>
-        )}
+        <div className="flex flex-col gap-3">
+          {entry.placements.length === 0 ? (
+            <p className="text-muted-foreground text-sm">
+              No placements declared.
+            </p>
+          ) : (
+            <ul className="flex flex-wrap gap-2">
+              {entry.placements.map((placement) => (
+                <li
+                  className="bg-muted px-2 py-1 font-mono text-xs"
+                  key={placement}
+                >
+                  {placement}
+                </li>
+              ))}
+            </ul>
+          )}
+          {entry.renderedIn.length > 0 ? (
+            <div className="flex flex-col gap-1">
+              <p className="text-muted-foreground text-xs">Rendered in</p>
+              <ul className="flex flex-col gap-1">
+                {entry.renderedIn.map((file) => (
+                  <li className="font-mono text-xs" key={file}>
+                    {file}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+        </div>
       </Section>
 
       <Section title="Params">
@@ -113,6 +128,10 @@ export const DefinitionView = ({ entry, loadedAt }: DefinitionViewProps) => {
           <IdLinks empty="Not embedded anywhere." ids={entry.usedBy} />
         </Section>
       </div>
+
+      <Section title="Tests and evals">
+        <TestResults id={entry.id} loadedAt={loadedAt} />
+      </Section>
 
       <Section title="History">
         <History id={entry.id} loadedAt={loadedAt} />

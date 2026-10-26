@@ -30,6 +30,7 @@ export interface Entry {
   owners: string[];
   params: Record<string, ParamInfo>;
   placements: string[];
+  renderedIn: string[];
   snapshot: SnapshotState;
   source: { export: string; file: string };
   tags: string[];
@@ -61,4 +62,31 @@ export interface Commit {
 export interface RenderResult {
   rendered: Rendered;
   text: string;
+}
+
+export interface TestResult {
+  durationMs: number;
+  id: string;
+  label?: string;
+  message?: string;
+  status: "fail" | "pass" | "skip";
+  tier: "run" | "syntax" | "typecheck";
+  variant?: string;
+}
+
+export interface EvalResult {
+  agent: string;
+  agentVersion: string;
+  costUsd: number;
+  id: string;
+  passRate: number;
+  reason?: string;
+  status: "cached" | "fail" | "pass" | "skip";
+  threshold: number;
+  trials: { passed: boolean; trial: number }[];
+}
+
+export interface Results {
+  eval?: { finishedAt: string; results: EvalResult[] };
+  test?: { finishedAt: string; results: TestResult[] };
 }

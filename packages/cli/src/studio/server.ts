@@ -89,6 +89,10 @@ const handleApi = async (
     sendJson(response, 200, state.manifest());
     return;
   }
+  if (url.pathname === "/api/results") {
+    sendJson(response, 200, await state.results());
+    return;
+  }
   if (url.pathname === "/api/history") {
     sendJson(
       response,
