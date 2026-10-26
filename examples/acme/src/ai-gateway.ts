@@ -50,7 +50,8 @@ export const tryIt = defineSnippet({
 
         console.log(text);
       `,
-      verify: "typecheck",
+      // @acme/ai-sdk-provider is fictional, so only check the syntax.
+      verify: "syntax",
       when: { framework: "ai-sdk", scenario: "chat" },
     },
     {
@@ -81,6 +82,8 @@ export const tryIt = defineSnippet({
           -H "Content-Type: application/json" \\
           -d '{"model": "${model}", "messages": [{"role": "user", "content": "Explain serverless Postgres."}]}'
       `,
+      // Runs against a local mock gateway; see verify/gateway.verify.ts.
+      verify: "run",
       when: { framework: "curl", scenario: "chat" },
     },
     {
@@ -99,7 +102,7 @@ export const tryIt = defineSnippet({
           process.stdout.write(chunk);
         }
       `,
-      verify: "typecheck",
+      verify: "syntax",
       when: { framework: "ai-sdk", scenario: "stream" },
     },
   ],

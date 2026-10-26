@@ -10,4 +10,5 @@ export default defineConfig({
     "console/create-project/done": { route: "/projects/new" },
     "console/projects/footer": { route: "/projects" },
   },
+  verify: ["verify/**/*.verify.ts"],
 });

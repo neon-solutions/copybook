@@ -6,7 +6,7 @@ export const install = defineCommand({
   id: "acme.cli.install",
   template: (t) => t`npm i -g acme@latest`,
   title: "Install the Acme CLI",
-  verify: "run",
+  verify: "syntax",
 });
 
 export const login = defineCommand({
@@ -35,7 +35,7 @@ export const init = defineCommand({
   template: (t, values) =>
     t`acme init -y --org-id ${values.orgId} --project-id ${values.projectId} --branch ${values.branch} --services ${values.services}`,
   title: "Link the project folder",
-  verify: "run",
+  verify: "syntax",
 });
 
 export const deploy = defineCommand({
@@ -43,7 +43,7 @@ export const deploy = defineCommand({
   id: "acme.cli.deploy",
   template: (t) => t`acme deploy`,
   title: "Provision services and pull env vars",
-  verify: "run",
+  verify: "syntax",
 });
 
 export const psql = defineCommand({
