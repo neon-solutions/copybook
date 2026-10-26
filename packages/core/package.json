@@ -1,0 +1,48 @@
+{
+  "name": "@prompt-manager/core",
+  "version": "0.0.0",
+  "description": "Define code snippets, commands, and agent prompts as typed, testable content.",
+  "keywords": [
+    "agent",
+    "code-snippets",
+    "devrel",
+    "llm",
+    "prompts"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TheOrcDev/prompt-manager.git",
+    "directory": "packages/core"
+  },
+  "files": [
+    "dist",
+    "LICENSE.md",
+    "README.md"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "tsup": "^9.0.0",
+    "typescript": "5.9.3",
+    "vitest": "^5.0.5"
+  }
+}

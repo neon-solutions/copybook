@@ -1,0 +1,60 @@
+{
+  "name": "@prompt-manager/cli",
+  "version": "0.0.0",
+  "description": "Catalog, snapshot, test, and evaluate the snippets and agent prompts in your product.",
+  "keywords": [
+    "agent",
+    "cli",
+    "code-snippets",
+    "devrel",
+    "evals",
+    "prompts"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TheOrcDev/prompt-manager.git",
+    "directory": "packages/cli"
+  },
+  "bin": {
+    "prompt-manager": "dist/bin.js"
+  },
+  "files": [
+    "dist",
+    "LICENSE.md",
+    "README.md"
+  ],
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@prompt-manager/core": "workspace:*",
+    "commander": "^15.0.0",
+    "picocolors": "^1.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24",
+    "tsup": "^9.0.0",
+    "typescript": "5.9.3",
+    "vitest": "^5.0.5"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}
