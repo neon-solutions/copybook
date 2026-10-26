@@ -1,8 +1,11 @@
+import { RootProvider } from "fumadocs-ui/provider/next";
+import type { Metadata } from "next";
 import { Geist_Mono, Nunito_Sans, Outfit } from "next/font/google";
 import type { ReactNode } from "react";
 
 import "./globals.css";
-import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeHotkey } from "@/components/theme-hotkey";
+import { siteConfig } from "@/lib/shared";
 import { cn } from "@/lib/utils";
 
 const nunitoSansHeading = Nunito_Sans({
@@ -17,6 +20,14 @@ const fontMono = Geist_Mono({
   variable: "--font-mono",
 });
 
+export const metadata: Metadata = {
+  description: siteConfig.description,
+  title: {
+    default: siteConfig.name,
+    template: `%s | ${siteConfig.name}`,
+  },
+};
+
 const RootLayout = ({ children }: Readonly<{ children: ReactNode }>) => (
   <html
     className={cn(
@@ -29,8 +40,18 @@ const RootLayout = ({ children }: Readonly<{ children: ReactNode }>) => (
     lang="en"
     suppressHydrationWarning
   >
-    <body>
-      <ThemeProvider>{children}</ThemeProvider>
+    <body className="flex min-h-screen flex-col">
+      <RootProvider
+        theme={{
+          attribute: "class",
+          defaultTheme: "system",
+          disableTransitionOnChange: true,
+          enableSystem: true,
+        }}
+      >
+        <ThemeHotkey />
+        {children}
+      </RootProvider>
     </body>
   </html>
 );

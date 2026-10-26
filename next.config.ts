@@ -1,5 +1,18 @@
+import { createMDX } from "fumadocs-mdx/next";
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {};
+const withMDX = createMDX();
 
-export default nextConfig;
+const nextConfig: NextConfig = {
+  reactStrictMode: true,
+  // Serve each docs page as Markdown at `/docs/<page>.md`.
+  rewrites: () =>
+    Promise.resolve([
+      {
+        destination: "/llms.mdx/docs/:path*/content.md",
+        source: "/docs/:path*.md",
+      },
+    ]),
+};
+
+export default withMDX(nextConfig);

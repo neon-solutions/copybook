@@ -1,0 +1,33 @@
+---
+title: Introduction
+description: Treat the code snippets and agent prompts in your product as typed, tested, versioned content.
+---
+
+Developer tools ship a lot of copy-paste content: "Connect" dialogs with snippets in five languages, model pages with per-framework examples, and "paste this into your coding agent" prompts. That content usually lives as strings scattered across components, so nobody can easily answer:
+
+- **What** snippets and prompts do we show, and **where**?
+- **Do** all the code examples still **work**?
+- Do the prompts still **perform well** with today's agents?
+- **When** did each one last change?
+
+Prompt Manager answers these questions by making every snippet, command, and prompt a definition with a stable id, typed params, and declared placements. Your product renders definitions with real values. The CLI catalogs them, snapshots their rendered output so every change shows up in review, runs them in sandboxes, and evaluates prompts with real coding agents.
+
+<Callout title="Pre-release">
+  Prompt Manager is under active development, and its APIs will change.
+</Callout>
+
+## How it fits together
+
+| Question | Answered by |
+| --- | --- |
+| What exists | `prompt-manager list`, the manifest, and Studio |
+| Where it's shown | Declared `placements` |
+| When it changed | Rendered snapshots committed next to your code |
+| Does it work | `prompt-manager test`, with syntax, typecheck, and run tiers |
+| Does it perform well | `prompt-manager eval`, which runs prompts through agent adapters |
+
+## Packages
+
+- `@prompt-manager/core`: isomorphic, zero-dependency definitions and rendering. This is what your product imports.
+- `@prompt-manager/cli`: catalog, snapshots, tests, evals, and the local Studio.
+- **Registry components**: shadcn components for agent prompts, code variants, and command tabs. You install them with `shadcn add`.

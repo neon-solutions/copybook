@@ -44,3 +44,6 @@ next-env.d.ts
 
 # prompt-manager
 .prompt-manager/
+
+# fumadocs
+.source/

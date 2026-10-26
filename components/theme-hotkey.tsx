@@ -1,8 +1,7 @@
 "use client";
 
-import { ThemeProvider as NextThemesProvider, useTheme } from "next-themes";
+import { useTheme } from "next-themes";
 import { useEffect } from "react";
-import type { ComponentProps } from "react";
 
 const isTypingTarget = (target: EventTarget | null) => {
   if (!(target instanceof HTMLElement)) {
@@ -18,7 +17,7 @@ const isTypingTarget = (target: EventTarget | null) => {
 };
 
 /** Toggles light/dark mode when `d` is pressed outside a text field. */
-const ThemeHotkey = () => {
+export const ThemeHotkey = () => {
   const { resolvedTheme, setTheme } = useTheme();
 
   useEffect(() => {
@@ -51,21 +50,3 @@ const ThemeHotkey = () => {
 
   return null;
 };
-
-const ThemeProvider = ({
-  children,
-  ...props
-}: ComponentProps<typeof NextThemesProvider>) => (
-  <NextThemesProvider
-    attribute="class"
-    defaultTheme="system"
-    disableTransitionOnChange
-    enableSystem
-    {...props}
-  >
-    <ThemeHotkey />
-    {children}
-  </NextThemesProvider>
-);
-
-export { ThemeHotkey, ThemeProvider };
