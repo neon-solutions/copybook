@@ -1,33 +1,61 @@
-# Next.js template
+# Prompt Manager
 
-This is a Next.js template with shadcn/ui.
+> Working name. The project is pre-release, and its APIs will change.
 
-## Adding components
+Code snippets and agent prompts that live in product UIs, defined as code, tested, and tracked.
 
-To add components to your app, run the following command:
+Developer tools now ship a lot of copy-paste content: "Connect" dialogs with snippets in five languages, model pages with per-framework examples, and "paste this into your coding agent" prompts. That content usually lives as strings scattered across components, so nobody can easily answer:
+
+- **What** snippets and prompts do we show, and **where**?
+- **Do** all the code examples still **work**?
+- Do the prompts still **perform well** with today's agents?
+- **When** did each one last change?
+
+Prompt Manager answers these by making every snippet, command, and prompt a typed, versioned definition:
+
+```ts
+import { defineCommand, definePrompt, p } from "@prompt-manager/core";
+
+export const init = defineCommand({
+  id: "acme.init",
+  params: { projectId: p.string().example("proj-example") },
+  template: (t, { projectId }) => t`acme init --project-id ${projectId}`,
+});
+
+export const getStarted = definePrompt({
+  id: "console.create-project.agent",
+  placements: ["console/create-project"],
+  params: { projectId: p.string().example("proj-example") },
+  template: (t, params) => t`
+    Set up this app on Acme.
+    1. Install the CLI: ${t.cmd("npm i -g acme@latest")}
+    2. In the project root: ${t.cmd(init, params)}
+  `,
+});
+```
+
+## Packages
+
+| Package | Description |
+| --- | --- |
+| `@prompt-manager/core` | Isomorphic, zero-dependency definitions and rendering. This is what your product imports. |
+| `@prompt-manager/cli` | Catalog, snapshots, tests, evals, and the local Studio. |
+| Registry components | shadcn components for agent prompts, code variants, and command tabs. |
+
+## Development
+
+This repository is a pnpm workspace. The Next.js site (landing page, docs, and shadcn registry) lives at the root, and the publishable packages live in `packages/*`.
 
 ```bash
-npx shadcn@latest add button
+pnpm install
+pnpm dev         # site
+pnpm check       # lint + format check (Ultracite)
+pnpm typecheck
+pnpm test
 ```
 
-This will place the ui components in the `components` directory.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
-## Using components
+## License
 
-To use the components in your app, import them as follows:
-
-```tsx
-import { Button } from "@/components/ui/button";
-```
-
-# prompt-manager
-
-# prompt-manager
-
-# prompt-manager
-
-# prompt-manager
-
-# prompt-manager
-
-# prompt-manager
+[MIT](LICENSE.md)
