@@ -1,6 +1,7 @@
 import { Command } from "commander";
 
 import { registerCheck } from "./commands/check";
+import { registerEval } from "./commands/eval";
 import { registerInit } from "./commands/init";
 import { registerList } from "./commands/list";
 import { registerSnapshot } from "./commands/snapshot";
@@ -20,6 +21,7 @@ export const createProgram = (): Command => {
   registerSnapshot(program);
   registerCheck(program);
   registerTest(program);
+  registerEval(program);
   registerStudio(program);
 
   return program;

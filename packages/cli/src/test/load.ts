@@ -4,13 +4,14 @@ import { glob } from "tinyglobby";
 
 import { bundleAndImport } from "../bundle";
 import type { ResolvedConfig } from "../config";
+import { isEvalSpec } from "../eval/define";
+import type { EvalSpec } from "../eval/define";
 import { isTestSpec } from "./define";
 import type { TestSpec } from "./define";
 
-/** Loads every `defineTest` exported from the config's `verify` globs. */
-export const loadTestSpecs = async (
+const loadVerifyModules = async (
   config: ResolvedConfig
-): Promise<TestSpec[]> => {
+): Promise<Record<string, unknown>[]> => {
   if (!config.verify || config.verify.length === 0) {
     return [];
   }
@@ -32,13 +33,28 @@ export const loadTestSpecs = async (
     ...(config.stubs ? { stubs: config.stubs } : {}),
     ...(config.tsconfig ? { tsconfig: config.tsconfig } : {}),
   });
-  const modules = loaded.modules as Record<string, unknown>[];
-  return modules.flatMap((namespace) =>
+  return loaded.modules as Record<string, unknown>[];
+};
+
+const collect = <T>(
+  modules: readonly Record<string, unknown>[],
+  guard: (value: unknown) => value is T
+): T[] =>
+  modules.flatMap((namespace) =>
     Object.values(namespace).flatMap((value) => {
-      if (isTestSpec(value)) {
+      if (guard(value)) {
         return [value];
       }
-      return Array.isArray(value) ? value.filter(isTestSpec) : [];
+      return Array.isArray(value) ? value.filter(guard) : [];
     })
   );
-};
+
+/** Loads every `defineTest` exported from the config's `verify` globs. */
+export const loadTestSpecs = async (
+  config: ResolvedConfig
+): Promise<TestSpec[]> => collect(await loadVerifyModules(config), isTestSpec);
+
+/** Loads every `defineEval` exported from the config's `verify` globs. */
+export const loadEvalSpecs = async (
+  config: ResolvedConfig
+): Promise<EvalSpec[]> => collect(await loadVerifyModules(config), isEvalSpec);

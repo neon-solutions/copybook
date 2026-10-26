@@ -31,3 +31,30 @@ export type {
   TestResult,
   TestStatus,
 } from "./test/types";
+export { claudeCode, codex, literal, scriptAgent } from "./eval/adapters";
+export type { AgentAdapter, AgentInput, AgentRun } from "./eval/adapters";
+export {
+  assertThat,
+  defineEval,
+  fileContains,
+  fileExists,
+  notRan,
+  ran,
+  ranInOrder,
+  succeeds,
+} from "./eval/define";
+export type {
+  Assertion,
+  AssertContext,
+  AssertResult,
+  EvalOptions,
+  EvalSpec,
+} from "./eval/define";
+export { runEvals } from "./eval/runner";
+export type { Shim, ShimCall } from "./eval/shims";
+export type {
+  EvalHistoryEntry,
+  EvalReport,
+  EvalResult,
+  EvalTrial,
+} from "./eval/types";
