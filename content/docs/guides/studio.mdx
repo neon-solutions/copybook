@@ -1,0 +1,30 @@
+---
+title: Studio
+description: Browse, preview, and trace every definition in a local UI.
+---
+
+```bash
+npx prompt-manager studio
+```
+
+Studio opens on [http://127.0.0.1:4983](http://127.0.0.1:4983). It loads your config, watches your content files, and reloads when they change. Nothing is hosted or uploaded.
+
+For every definition, Studio shows:
+
+- **What it is**: its id, kind, title, description, and the file and export it comes from.
+- **Where it's shown**: its declared placements.
+- **A live preview**: edit any param and see every variant re-render, with the same registry components your product uses.
+- **Embeds and used-by**: which commands a prompt embeds, and which prompts embed a command. Follow the links to trace a change.
+- **History**: the commits that touched its snapshot, with authors and dates.
+- **Snapshot status**: up to date, out of date, or missing.
+
+| Flag                | Description                                            |
+| ------------------- | ------------------------------------------------------ |
+| `-p, --port <port>` | The port. Defaults to `4983`.                          |
+| `--host <host>`     | The host to bind. Defaults to `127.0.0.1`.             |
+| `--api-only`        | Serve only the JSON API, for developing Studio itself. |
+
+<Callout title="Studio runs your code">
+  Like `snapshot` and `check`, Studio imports your content files to render them.
+  It binds to `127.0.0.1` by default. Don't expose it on a shared network.
+</Callout>
