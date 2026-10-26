@@ -1,0 +1,47 @@
+---
+title: CI
+description: Check snapshots, test changes, comment on pull requests, and run evals.
+---
+
+## On every pull request
+
+```yaml title=".github/workflows/prompt-manager.yml"
+- run: npx prompt-manager check --base origin/main
+- run: npx prompt-manager test --changed --base origin/main
+```
+
+- `check` fails when a snapshot is missing, stale, or orphaned, and warns about renames without aliases and about definitions nothing renders.
+- `test --changed` parses and typechecks only what the pull request changed. Add `--tier syntax,typecheck,run` once your fixtures have credentials.
+
+## Pull request comments
+
+`prompt-manager report` prints a Markdown summary of the definitions a pull request changes:
+
+- each definition's kind, placements, the files that render it, and its latest test results;
+- its rendered snapshot diff, collapsed.
+
+```bash
+npx prompt-manager test --changed --base origin/main
+npx prompt-manager report --base origin/main > report.md
+gh pr comment "$PR" --body-file report.md
+```
+
+The report starts with a hidden `<!-- prompt-manager-report -->` marker, so a workflow can find its earlier comment and update it instead of posting a new one. The repository's `pr-report.yml` workflow does exactly that.
+
+## Nightly
+
+```bash
+npx prompt-manager test --tier syntax,typecheck,run
+CI=true npx prompt-manager eval --history-dir eval-history --budget-usd 10
+```
+
+Run the `run` tier and evals on a schedule, with the credentials your fixtures need. Keep eval history in git (the repository's `evals.yml` uses an orphan `pm-results` branch), so unchanged prompts aren't re-evaluated and pass rates have a history. See [Evals](/docs/guides/evals).
+
+## Ownership
+
+Snapshots are plain files, so CODEOWNERS works on them:
+
+```txt title=".github/CODEOWNERS"
+prompt-manager/snapshots/console.* @acme/devrel
+prompt-manager/snapshots/ai-gateway.* @acme/ai-platform
+```

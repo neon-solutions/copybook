@@ -60,3 +60,5 @@ export type {
 } from "./eval/types";
 export { findUsages } from "./usages";
 export type { UsageReport } from "./usages";
+export { buildReport, REPORT_MARKER } from "./report";
+export type { ReportInput } from "./report";

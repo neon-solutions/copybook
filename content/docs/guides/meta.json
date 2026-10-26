@@ -1,4 +1,4 @@
 {
   "title": "Guides",
-  "pages": ["studio", "testing", "evals"]
+  "pages": ["studio", "testing", "evals", "ci"]
 }

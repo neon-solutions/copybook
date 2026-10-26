@@ -51,6 +51,22 @@ Parses, typechecks, and runs commands and snippets. See [Testing](/docs/guides/t
 
 Gives prompts to coding agents and checks what they did. See [Evals](/docs/guides/evals).
 
+## `usages`
+
+Shows which product files import each definition. Set `usage.include` in the config. Definitions embedded in a rendered one count as used.
+
+| Flag     | Description               |
+| -------- | ------------------------- |
+| `--json` | Print the report as JSON. |
+
+## `report`
+
+Prints a Markdown summary of changed definitions for pull request comments. See [CI](/docs/guides/ci#pull-request-comments).
+
+| Flag           | Description                                                |
+| -------------- | ---------------------------------------------------------- |
+| `--base <ref>` | The git ref to compare against. Defaults to `origin/main`. |
+
 ## `studio`
 
 Starts the local Studio UI. See [Studio](/docs/guides/studio).

@@ -11,6 +11,8 @@ export default defineConfig({
   exclude: ["src/legacy/**"],
   tsconfig: "tsconfig.json",
   stubs: ["server-only"],
+  verify: ["verify/**/*.verify.ts"],
+  usage: { include: ["src/**/*.tsx"] },
   snapshots: { dir: "prompt-manager/snapshots" },
   placements: {
     "console/create-project": { route: "/projects/new" },
@@ -26,6 +28,7 @@ export default defineConfig({
 | `tsconfig` | Used to resolve path aliases such as `@/`. Defaults to `tsconfig.json`. |
 | `stubs` | Modules to replace with empty ones while loading content, such as `server-only`. CSS imports are always stubbed. |
 | `snapshots.dir` | Where snapshots are written. Defaults to `prompt-manager/snapshots`. |
+| `usage.include`, `usage.exclude` | Product files to scan for imports of definitions, for `usages`, `check`, `report`, and Studio. |
 | `placements` | Known placements, each with an optional `route` and `description`. When you set this, `check` fails on placements that aren't listed. |
 
 ## How content loads
