@@ -8,7 +8,13 @@ import vitest from "ultracite/oxlint/vitest";
 export default defineConfig({
   env: core.env,
   extends: [core, react, next, shadcn, vitest],
-  ignorePatterns: [...(core.ignorePatterns ?? []), "public/r/**"],
+  ignorePatterns: [
+    ...(core.ignorePatterns ?? []),
+    // Vendored agent skills, managed by `skills` and skills-lock.json.
+    ".agents/skills/**",
+    ".claude/skills/**",
+    "public/r/**",
+  ],
   jsPlugins: shadcn.jsPlugins,
   overrides: [
     {
