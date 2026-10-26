@@ -24,6 +24,7 @@
     "@base-ui/react": "^1.9.0",
     "@phosphor-icons/react": "^2.1.10",
     "@prompt-manager/core": "workspace:*",
+    "@prompt-manager/example-acme": "workspace:*",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.5.0",
     "fumadocs-core": "^16.17.7",

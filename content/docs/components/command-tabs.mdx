@@ -1,0 +1,48 @@
+---
+title: Command Tabs
+description: A command per package manager, with an optional agent prompt tab.
+---
+
+The install commands on this site use Command Tabs, and so does the landing page's get-started block, where the first tab is an agent prompt.
+
+<InstallCommand item="command-tabs" />
+
+## Usage
+
+Make the package manager a param, then render one tab per value:
+
+```tsx
+import { render } from "@prompt-manager/core";
+
+import { CommandTabs } from "@/components/prompt-manager/command-tabs";
+import { init, setupPrompt } from "@/content/get-started";
+
+const managers = ["pnpm", "npm", "yarn", "bun"] as const;
+
+export const GetStarted = () => (
+  <CommandTabs
+    defaultTab="pnpm"
+    tabs={[
+      {
+        id: "prompt",
+        kind: "prompt",
+        label: "Prompt",
+        rendered: render(setupPrompt),
+      },
+      ...managers.map((packageManager) => ({
+        id: packageManager,
+        label: packageManager,
+        rendered: render(init, { packageManager }),
+      })),
+    ]}
+  />
+);
+```
+
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `tabs` | `{ id, label, rendered, kind? }[]` | One tab each, in order. `kind: "prompt"` wraps long lines and adds an agent icon. |
+| `defaultTab` | `string` | The tab that starts selected. |
+| `onCopy` | `(event: CopyEvent) => void` | Called with `{ id, text }` after a copy. |

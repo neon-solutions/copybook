@@ -1,0 +1,38 @@
+---
+title: Agent Prompt
+description: A prompt to paste into a coding agent, with a copy button.
+---
+
+<AgentPromptDemo />
+
+This is the Acme "Create project" prompt from `examples/acme`. Edit the params to see them update.
+
+## Installation
+
+<InstallCommand item="agent-prompt" />
+
+## Usage
+
+```tsx
+import { render } from "@prompt-manager/core";
+
+import { AgentPrompt } from "@/components/prompt-manager/agent-prompt";
+import { setUpWithAgent } from "@/content/create-project";
+
+export const CreateProjectDone = ({ orgId, projectId }) => (
+  <AgentPrompt
+    onCopy={({ id }) => track("prompt_copied", { id })}
+    rendered={render(setUpWithAgent, { orgId, projectId })}
+  />
+);
+```
+
+If the copied text would contain a real secret, rather than its placeholder, the component shows a warning under the prompt.
+
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `rendered` | `Rendered` | The rendered prompt. |
+| `title` | `string` | The header label. Defaults to `"Agent prompt"`. |
+| `onCopy` | `(event: CopyEvent) => void` | Called with `{ id, text }` after a copy. |

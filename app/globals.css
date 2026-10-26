@@ -129,3 +129,8 @@
     @apply font-sans;
   }
 }
+
+/* A marker class: Fumadocs' prose styles skip elements inside it. */
+@utility not-prose {
+  --pm-not-prose: 1;
+}

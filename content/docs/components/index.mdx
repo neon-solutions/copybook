@@ -1,0 +1,21 @@
+---
+title: Overview
+description: shadcn components that render definitions, installed with shadcn add.
+---
+
+The components are distributed as a [shadcn registry](https://ui.shadcn.com/docs/registry). You own the code, so restyle it to match your product.
+
+Each component takes a `Rendered` tree, not a definition. Call `render()` on the server and pass the result to the component. Only the variants you show reach the browser, and the tree is plain JSON.
+
+| Component | Use it for |
+| --- | --- |
+| [Agent Prompt](/docs/components/agent-prompt) | A prompt to paste into a coding agent |
+| [Code Variants](/docs/components/code-variants) | One snippet in several frameworks or setups |
+| [Command Tabs](/docs/components/command-tabs) | A command per package manager, with an optional prompt tab |
+
+Every component:
+
+- highlights params, and shows secret placeholders differently from real values;
+- sets `data-pm-id` (and `data-pm-variant`) on its root, so you can find definitions on a live page;
+- calls `onCopy({ id, variant, text })` after a copy, for analytics;
+- depends only on shadcn's `button`, `tabs`, and `utils`, plus `@prompt-manager/core`.

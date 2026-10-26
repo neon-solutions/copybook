@@ -1,0 +1,51 @@
+---
+title: Code Variants
+description: One snippet in several frameworks or setups, as tabs.
+---
+
+## Connect dialog
+
+The Acme "Connect to your branch" dialog: a tab per service, each with an `.env` and an `acme.ts + cli` setup. Both setups come from a single snippet with `service` and `setup` dimensions.
+
+<ConnectDialogDemo />
+
+## Try it out
+
+The AI Gateway model page. The model is a param, and the scenario and framework are dimensions.
+
+<TryItDemo />
+
+## Installation
+
+<InstallCommand item="code-variants" />
+
+## Usage
+
+Render each variant you show on the server, then pass them in:
+
+```tsx
+import { listVariants, render } from "@prompt-manager/core";
+
+import { CodeVariants } from "@/components/prompt-manager/code-variants";
+import { tryIt } from "@/content/ai-gateway";
+
+export const TryIt = ({ endpoint, model }) => (
+  <CodeVariants
+    items={listVariants(tryIt)
+      .filter((variant) => variant.when.scenario === "chat")
+      .map((variant) => ({
+        key: variant.key,
+        label: variant.label,
+        rendered: render(tryIt, { endpoint, model }, { variant: variant.key }),
+      }))}
+  />
+);
+```
+
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `items` | `{ key, label, rendered }[]` | One tab each, in order. |
+| `defaultKey` | `string` | The tab that starts selected. |
+| `onCopy` | `(event: CopyEvent) => void` | Called with `{ id, variant, text }` after a copy. |

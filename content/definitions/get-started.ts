@@ -3,7 +3,7 @@ import { defineCommand, definePrompt, p } from "@prompt-manager/core";
 const PACKAGE_MANAGERS = ["pnpm", "npm", "yarn", "bun"] as const;
 export type PackageManager = (typeof PACKAGE_MANAGERS)[number];
 
-const RUNNERS: Record<PackageManager, string> = {
+export const RUNNERS: Record<PackageManager, string> = {
   bun: "bunx",
   npm: "npx",
   pnpm: "pnpm dlx",

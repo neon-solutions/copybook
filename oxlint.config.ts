@@ -22,6 +22,7 @@ export default defineConfig({
       files: ["components/ui/**"],
       rules: {
         "func-style": "off",
+        "jsx-a11y/label-has-associated-control": "off",
         "react/function-component-definition": "off",
       },
     },

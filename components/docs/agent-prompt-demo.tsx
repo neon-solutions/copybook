@@ -1,0 +1,28 @@
+"use client";
+
+import { render } from "@prompt-manager/core";
+import { setUpWithAgent } from "@prompt-manager/example-acme/create-project";
+import { useState } from "react";
+
+import { ParamField } from "@/components/docs/param-field";
+import { AgentPrompt } from "@/components/prompt-manager/agent-prompt";
+
+/** The Acme "Create project" prompt, with editable params. */
+export const AgentPromptDemo = () => {
+  const [orgId, setOrgId] = useState("org-summer-dust-12345678");
+  const [projectId, setProjectId] = useState("round-bar-12345678");
+
+  return (
+    <div className="not-prose flex flex-col gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <ParamField label="orgId" onChange={setOrgId} value={orgId} />
+        <ParamField
+          label="projectId"
+          onChange={setProjectId}
+          value={projectId}
+        />
+      </div>
+      <AgentPrompt rendered={render(setUpWithAgent, { orgId, projectId })} />
+    </div>
+  );
+};
