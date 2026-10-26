@@ -43,3 +43,13 @@ The repository root is a private Next.js application. Only packages under `packa
 - Render functions must be pure. The same params must always produce the same output.
 - Add tests next to the code you change (`packages/*/test`).
 - Don't commit secrets. Tests and evals that need real credentials read them from the environment.
+
+## Releasing
+
+`@prompt-manager/core` and `@prompt-manager/cli` share one version.
+
+1. Bump `version` in `packages/core/package.json` and `packages/cli/package.json`, and move the changelog's "Unreleased" section under the new version.
+2. Merge to `main`, then publish a GitHub release tagged `v<version>`.
+3. The `Publish` workflow verifies the versions, runs every check, and publishes both packages to npm with provenance. Prereleases go to the `next` dist-tag.
+
+Never publish from a local machine.
