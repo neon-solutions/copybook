@@ -8,8 +8,7 @@
     "./*": "./src/*.ts"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit",
-    "pm": "prompt-manager"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@prompt-manager/core": "workspace:*"

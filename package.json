@@ -19,9 +19,9 @@
     "check:lockfile": "node scripts/check-lockfile.mjs",
     "check:packages": "pnpm build:packages && pnpm --filter \"./packages/*\" lint:package && pnpm --filter @prompt-manager/core size",
     "registry:build": "shadcn build",
-    "check:content": "prompt-manager check && pnpm --filter @prompt-manager/example-acme pm check",
+    "check:content": "prompt-manager check && pnpm --filter @prompt-manager/example-acme exec prompt-manager check",
     "dev:studio": "pnpm --filter @prompt-manager/cli build && (cd examples/acme && prompt-manager studio --api-only) & pnpm --filter @prompt-manager/studio dev",
-    "test:content": "prompt-manager test && pnpm --filter @prompt-manager/example-acme pm test --tier syntax,typecheck,run"
+    "test:content": "prompt-manager test && pnpm --filter @prompt-manager/example-acme exec prompt-manager test --tier syntax,typecheck,run"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
