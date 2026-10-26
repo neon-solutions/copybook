@@ -15,7 +15,8 @@
     "check": "ultracite check",
     "fix": "ultracite fix",
     "typecheck": "pnpm build:packages && next typegen && tsc --noEmit && pnpm --filter \"./packages/*\" typecheck",
-    "prepare": "husky"
+    "prepare": "husky",
+    "check:lockfile": "node scripts/check-lockfile.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
