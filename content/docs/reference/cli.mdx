@@ -1,0 +1,60 @@
+---
+title: "@prompt-manager/cli"
+description: Commands and flags.
+---
+
+```npm
+npm i -D @prompt-manager/cli
+```
+
+Every command finds `prompt-manager.config.ts` by walking up from the current directory. Pass `-c, --config <path>` to use another file.
+
+## `init`
+
+Creates `prompt-manager.config.ts` and installs `@prompt-manager/core` and `@prompt-manager/cli` with your package manager, which it detects from your lockfile.
+
+| Flag           | Description            |
+| -------------- | ---------------------- |
+| `--no-install` | Only write the config. |
+
+## `list`
+
+Lists every definition with its kind, variant count, and placements.
+
+| Flag | Description |
+| --- | --- |
+| `--json` | Print the manifest as JSON. |
+| `--changed` | Only definitions whose rendered output changed since `--base`. |
+| `--base <ref>` | The git ref to compare against. Defaults to `HEAD`. |
+
+## `snapshot`
+
+Writes a rendered snapshot of every definition. It only touches files whose content changed.
+
+| Flag      | Description                                           |
+| --------- | ----------------------------------------------------- |
+| `--prune` | Delete snapshots of definitions that no longer exist. |
+
+## `check`
+
+Validates definitions and compares snapshots. It exits with status 1 on any error. See [Snapshots](/docs/concepts/snapshots#check-in-ci).
+
+| Flag | Description |
+| --- | --- |
+| `--base <ref>` | Also warn about ids removed since this ref without an alias. |
+
+## Programmatic API
+
+The package also exports the building blocks the commands use: `loadProject`, `buildSnapshots`, `buildManifest`, `compareSnapshots`, `writeSnapshots`, `changedIds`, and `fileHistory`.
+
+```ts
+import {
+  buildManifest,
+  buildSnapshots,
+  loadProject,
+} from "@prompt-manager/cli";
+
+const project = await loadProject(process.cwd());
+const { snapshots } = buildSnapshots(project);
+const manifest = buildManifest(project.definitions, snapshots);
+```

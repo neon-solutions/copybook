@@ -1,0 +1,36 @@
+---
+title: Config
+description: prompt-manager.config.ts
+---
+
+```ts title="prompt-manager.config.ts"
+import { defineConfig } from "@prompt-manager/cli";
+
+export default defineConfig({
+  content: ["src/**/*.prompts.ts"],
+  exclude: ["src/legacy/**"],
+  tsconfig: "tsconfig.json",
+  stubs: ["server-only"],
+  snapshots: { dir: "prompt-manager/snapshots" },
+  placements: {
+    "console/create-project": { route: "/projects/new" },
+  },
+});
+```
+
+| Option | Description |
+| --- | --- |
+| `content` | Globs of files that export definitions, relative to the config file. Required. |
+| `exclude` | Globs to leave out. `node_modules`, `dist`, and `.next` are always excluded. |
+| `tsconfig` | Used to resolve path aliases such as `@/`. Defaults to `tsconfig.json`. |
+| `stubs` | Modules to replace with empty ones while loading content, such as `server-only`. CSS imports are always stubbed. |
+| `snapshots.dir` | Where snapshots are written. Defaults to `prompt-manager/snapshots`. |
+| `placements` | Known placements, each with an optional `route` and `description`. When you set this, `check` fails on placements that aren't listed. |
+
+## How content loads
+
+The CLI bundles your content files with esbuild, so tsconfig path aliases and extensionless imports work, then imports the bundle. npm dependencies stay external and resolve from your `node_modules`.
+
+Only **exported** definitions are found, including ones inside exported arrays, objects, and collections. A definition that's only embedded in another one still appears in that definition's snapshot, but it doesn't get a snapshot of its own.
+
+Keep content files free of imports that only work inside your app, such as React components or database clients, or list those modules in `stubs`.

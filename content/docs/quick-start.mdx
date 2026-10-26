@@ -71,8 +71,31 @@ export default async function Page({ params }) {
 
 The tree marks every param, command, and code block, so a UI can highlight them. The [registry components](/docs/components) render it with copy buttons and tabs.
 
+## Catalog and snapshot
+
+Install the CLI and point it at your definitions:
+
+```npm
+npm i -D @prompt-manager/cli
+```
+
+```ts title="prompt-manager.config.ts"
+import { defineConfig } from "@prompt-manager/cli";
+
+export default defineConfig({
+  content: ["content/**/*.ts"],
+});
+```
+
+```bash
+npx prompt-manager list      # what exists, and where it's shown
+npx prompt-manager snapshot  # write rendered snapshots; commit them
+npx prompt-manager check     # in CI: fail when a snapshot is stale
+```
+
 ## Next steps
 
 - [Definitions](/docs/concepts/definitions): commands, snippets, prompts, and collections.
 - [Templates](/docs/concepts/templates): the `t` tag, embedding, and indentation.
 - [Variants](/docs/concepts/variants): one snippet in many frameworks.
+- [Snapshots](/docs/concepts/snapshots): reviewable history for every definition.
