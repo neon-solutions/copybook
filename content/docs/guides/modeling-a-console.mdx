@@ -1,0 +1,37 @@
+---
+title: Modeling a console
+description: How Neon's onboarding screens map to definitions.
+---
+
+This guide walks through three real screens from the Neon Console and how to model each one. `examples/acme` implements all three for a fictional "Acme DB", and the [component docs](/docs/components) render them live.
+
+## 1. The "Create project" agent prompt
+
+The last step of the dialog shows a prompt for a coding agent. It mixes prose with commands: install the CLI, log in, `init` with the new project's ids, `deploy`, then prove the build works.
+
+- **Every command is a `defineCommand`**: `install`, `login`, `init`, and `deploy`. `login` uses `verify: skip("interactive: opens a browser sign-in")`.
+- **The prompt embeds them** with `t.cmd(init, params)`, so the org and project ids are typed params with examples.
+- **An eval checks that agents follow it**: `ranInOrder([/acme@latest/, /acme init/, "acme deploy"])`, then `succeeds("npm run build")` in a template app, with the CLI stubbed by shims.
+
+Because `deploy` is defined once, the drift Neon saw can't happen. Neon had one snippet telling users to run `npx neon link` while the prompt said `neon deploy`. Here, changing the command changes every snapshot that embeds it, all in the same pull request.
+
+## 2. The "Connect to your branch" dialog
+
+Five services (Postgres, Storage, AI Gateway, Data API, Auth), each with an `.env` tab and a `neon.ts + cli` tab.
+
+- **One snippet with two dimensions**: `service` and `setup`. Only the combinations the dialog shows are declared, because sparse matrices are fine.
+- **Credentials are secrets**: `p.secret({ env, placeholder })`. Previews show `<your-generated-credential>`. Real values only appear when the product passes them, and the components warn when a copied prompt contains one.
+- **The setup comments embed the deploy command** (`run \`${t.cmd(deploy)}\``) instead of retyping it.
+- **Verify by language**: `.env` variants get a dotenv parse, and the OpenAI client variant is typechecked against the real `openai` package.
+
+## 3. AI Gateway model pages
+
+Every model has a page with "Try it out": a scenario dropdown and AI SDK, Mastra, TypeScript, Python, and cURL tabs.
+
+- **The model is a param** (`p.enum(MODELS)`), not a dimension. One definition covers every model page, so you don't need one per model.
+- **Scenario and framework are dimensions.** Their code really differs.
+- **The cURL variant runs for real** in the `run` tier, against a fixture. In Acme it's a local mock gateway; for Neon it would be a temporary branch with a scoped token.
+
+## Where things are shown
+
+Each definition declares `placements`, such as `console/branch/connect-dialog`. With `usage.include` set, `prompt-manager usages` also finds the actual files that render it, and `check` warns about definitions nothing renders, such as a footer snippet left behind after a redesign.

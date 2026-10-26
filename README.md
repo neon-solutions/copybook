@@ -39,8 +39,18 @@ export const getStarted = definePrompt({
 | Package | Description |
 | --- | --- |
 | `@prompt-manager/core` | Isomorphic, zero-dependency definitions and rendering. This is what your product imports. |
-| `@prompt-manager/cli` | Catalog, snapshots, tests, evals, and the local Studio. |
+| `@prompt-manager/cli` | `list`, `snapshot`, `check`, `test`, `eval`, `usages`, `report`, and `studio`. |
 | Registry components | shadcn components for agent prompts, code variants, and command tabs. |
+
+```bash
+npx prompt-manager snapshot   # rendered snapshots; commit them
+npx prompt-manager check      # CI: fail when a snapshot is stale
+npx prompt-manager test       # parse, typecheck, and run snippets
+npx prompt-manager eval       # give prompts to coding agents (CI only)
+npx prompt-manager studio     # browse everything locally
+```
+
+`examples/acme` models Neon's onboarding screens for a fictional "Acme DB", and every command above runs against it without an account.
 
 ## Development
 
@@ -52,6 +62,9 @@ pnpm dev         # site
 pnpm check       # lint + format check (Ultracite)
 pnpm typecheck
 pnpm test
+pnpm check:content   # snapshots of the site and Acme
+pnpm test:content    # tests for the site and Acme
+pnpm dev:studio      # Studio UI against examples/acme
 ```
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
