@@ -4,4 +4,4 @@ Define code snippets, commands, and agent prompts as typed, testable content, an
 
 > Pre-release. The APIs will change.
 
-See the [repository README](https://github.com/TheOrcDev/prompt-manager#readme).
+See the [repository README](https://github.com/neon-solutions/prompt-manager#readme).

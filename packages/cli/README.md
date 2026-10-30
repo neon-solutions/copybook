@@ -4,4 +4,4 @@ Catalog, snapshot, test, and evaluate the code snippets and agent prompts in you
 
 > Pre-release. Commands and flags will change.
 
-See the [repository README](https://github.com/TheOrcDev/prompt-manager#readme).
+See the [repository README](https://github.com/neon-solutions/prompt-manager#readme).

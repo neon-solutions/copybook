@@ -1,7 +1,7 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry.json",
   "name": "prompt-manager",
-  "homepage": "https://github.com/TheOrcDev/prompt-manager",
+  "homepage": "https://github.com/neon-solutions/prompt-manager",
   "items": [
     {
       "name": "copy-button",

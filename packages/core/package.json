@@ -12,7 +12,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/TheOrcDev/prompt-manager.git",
+    "url": "git+https://github.com/neon-solutions/prompt-manager.git",
     "directory": "packages/core"
   },
   "files": [

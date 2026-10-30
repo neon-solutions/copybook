@@ -12,7 +12,7 @@ export const registryUrl = `${siteConfig.url}/r`;
 export const gitConfig = {
   branch: "main",
   repo: "prompt-manager",
-  user: "TheOrcDev",
+  user: "neon-solutions",
 } as const;
 
 export const githubUrl = `https://github.com/${gitConfig.user}/${gitConfig.repo}`;
