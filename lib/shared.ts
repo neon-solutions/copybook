@@ -1,10 +1,15 @@
 import { createGetUrl } from "fumadocs-core/source";
 
+const defaultSiteUrl =
+  process.env.NODE_ENV === "production"
+    ? "https://copybook.dev"
+    : "http://localhost:3000";
+
 export const siteConfig = {
   description:
     "Define the code snippets and agent prompts in your product as typed, tested, versioned content.",
   name: "Copybook",
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
+  url: process.env.NEXT_PUBLIC_SITE_URL ?? defaultSiteUrl,
 } as const;
 
 export const registryUrl = `${siteConfig.url}/r`;
