@@ -1,5 +1,5 @@
-import { listVariants } from "@prompt-manager/core";
-import type { Verify } from "@prompt-manager/core";
+import { listVariants } from "@copybook/core";
+import type { Verify } from "@copybook/core";
 
 import type { LoadedDefinition } from "./load";
 import type { Snapshot } from "./snapshot";

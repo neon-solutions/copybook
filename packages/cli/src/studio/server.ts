@@ -69,7 +69,7 @@ const serveStatic = async (
     response.end(content);
   } catch {
     response.writeHead(404);
-    response.end("Studio UI not found. Build @prompt-manager/studio first.");
+    response.end("Studio UI not found. Build @copybook/studio first.");
   }
 };
 

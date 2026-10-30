@@ -1,5 +1,5 @@
-import { collectCommands, renderExample } from "@prompt-manager/core";
-import type { Definition, Verify } from "@prompt-manager/core";
+import { collectCommands, renderExample } from "@copybook/core";
+import type { Definition, Verify } from "@copybook/core";
 
 import type { LoadedDefinition } from "../load";
 import { TIERS } from "./define";

@@ -6,7 +6,7 @@ import {
   defineSnippet,
   p,
   skip,
-} from "@prompt-manager/core";
+} from "@copybook/core";
 import { describe, expect, it } from "vitest";
 
 import { defineFixture, defineTest } from "../src/test/define";

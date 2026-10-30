@@ -1,4 +1,4 @@
-import { defineConfig } from "@prompt-manager/cli";
+import { defineConfig } from "@copybook/cli";
 
 export default defineConfig({
   content: ["src/**/*.ts"],

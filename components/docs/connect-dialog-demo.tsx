@@ -1,11 +1,11 @@
 "use client";
 
-import { listVariants, render } from "@prompt-manager/core";
-import { connect } from "@prompt-manager/example-acme/connect";
+import { listVariants, render } from "@copybook/core";
+import { connect } from "@copybook/example-acme/connect";
 import { useState } from "react";
 
+import { CodeVariants } from "@/components/copybook/code-variants";
 import { ParamField } from "@/components/docs/param-field";
-import { CodeVariants } from "@/components/prompt-manager/code-variants";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const services = connect.dimensions.service ?? [];

@@ -1,4 +1,4 @@
-import type { Rendered } from "@prompt-manager/core";
+import type { Rendered } from "@copybook/core";
 
 /** Mirrors the CLI's Studio API. Kept local so Studio doesn't depend on the CLI. */
 export interface ParamInfo {

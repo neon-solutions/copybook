@@ -1,10 +1,10 @@
 "use client";
 
-import { listVariants, render } from "@prompt-manager/core";
-import { MODELS, tryIt } from "@prompt-manager/example-acme/ai-gateway";
+import { listVariants, render } from "@copybook/core";
+import { MODELS, tryIt } from "@copybook/example-acme/ai-gateway";
 import { useId, useState } from "react";
 
-import { CodeVariants } from "@/components/prompt-manager/code-variants";
+import { CodeVariants } from "@/components/copybook/code-variants";
 import { Label } from "@/components/ui/label";
 import {
   NativeSelect,

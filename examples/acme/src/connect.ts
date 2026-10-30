@@ -1,4 +1,4 @@
-import { defineSnippet, p } from "@prompt-manager/core";
+import { defineSnippet, p } from "@copybook/core";
 
 import { deploy } from "./commands";
 import { endpoint } from "./params";

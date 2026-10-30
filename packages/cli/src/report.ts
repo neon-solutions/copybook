@@ -12,7 +12,7 @@ export interface ReportInput {
 }
 
 /** Hidden in the comment, so CI can find and update its own comment. */
-export const REPORT_MARKER = "<!-- prompt-manager-report -->";
+export const REPORT_MARKER = "<!-- copybook-report -->";
 
 const escapeCell = (text: string) => text.replaceAll("|", String.raw`\|`);
 
@@ -43,7 +43,7 @@ export const buildReport = ({
   renderedIn = {},
   tests = [],
 }: ReportInput) => {
-  const lines = [REPORT_MARKER, "## Prompt Manager", ""];
+  const lines = [REPORT_MARKER, "## Copybook", ""];
   if (entries.length === 0) {
     lines.push(`No rendered snippets or prompts changed since \`${base}\`.`);
     return `${lines.join("\n")}\n`;

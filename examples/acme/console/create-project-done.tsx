@@ -1,6 +1,6 @@
 // A stand-in for the console page that shows the agent prompt, so
-// `prompt-manager usages` has product code to scan.
-import { render, toText } from "@prompt-manager/core";
+// `copybook usages` has product code to scan.
+import { render, toText } from "@copybook/core";
 
 import { setUpWithAgent } from "../src/create-project";
 

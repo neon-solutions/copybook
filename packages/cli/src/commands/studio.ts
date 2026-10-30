@@ -33,6 +33,6 @@ export const registerStudio = (program: Command) =>
         // The CLI bundle lives in dist/, next to dist/studio.
         staticDir: path.join(import.meta.dirname, "studio"),
       });
-      write(`${pc.bold("Prompt Manager Studio")} ${pc.cyan(studio.url)}`);
+      write(`${pc.bold("Copybook Studio")} ${pc.cyan(studio.url)}`);
       write(pc.dim("Watching for changes. Press Ctrl+C to stop."));
     });

@@ -2,7 +2,7 @@ import { once } from "node:events";
 import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
 
-import { defineFixture, defineTest } from "@prompt-manager/cli";
+import { defineFixture, defineTest } from "@copybook/cli";
 
 import { tryIt } from "../src/ai-gateway";
 

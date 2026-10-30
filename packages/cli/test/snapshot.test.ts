@@ -2,7 +2,7 @@ import { mkdtemp, readFile, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
-import { defineCommand, p } from "@prompt-manager/core";
+import { defineCommand, p } from "@copybook/core";
 import { describe, expect, it } from "vitest";
 
 import { frontmatter } from "../src/frontmatter";
@@ -15,7 +15,9 @@ const fixture = path.join(import.meta.dirname, "fixtures/basic");
 
 const loadIntoTemp = async (): Promise<Project> => {
   const project = await loadProject(fixture);
-  const snapshotsDir = await mkdtemp(path.join(os.tmpdir(), "pm-snapshots-"));
+  const snapshotsDir = await mkdtemp(
+    path.join(os.tmpdir(), "copybook-snapshots-")
+  );
   return { ...project, config: { ...project.config, snapshotsDir } };
 };
 

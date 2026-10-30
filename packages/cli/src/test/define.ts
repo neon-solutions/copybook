@@ -1,17 +1,13 @@
-import type {
-  Definition,
-  InputValues,
-  ParamsShape,
-} from "@prompt-manager/core";
+import type { Definition, InputValues, ParamsShape } from "@copybook/core";
 
-export const TEST = Symbol.for("prompt-manager.test");
-export const FIXTURE = Symbol.for("prompt-manager.fixture");
+export const TEST = Symbol.for("copybook.test");
+export const FIXTURE = Symbol.for("copybook.fixture");
 
 export type Tier = "run" | "syntax" | "typecheck";
 export const TIERS: readonly Tier[] = ["syntax", "typecheck", "run"];
 
 export interface FixtureContext {
-  /** Unique per test run. Name created resources `pm-<runId>` so leaks are easy to find. */
+  /** Unique per test run. Name created resources `copybook-<runId>` so leaks are easy to find. */
   runId: string;
 }
 
@@ -65,7 +61,7 @@ export interface TestSpec {
 }
 
 /**
- * Configures how `prompt-manager test --tier run` executes a definition.
+ * Configures how `copybook test --tier run` executes a definition.
  * `S` is inferred only from the definition and `V` only from the fixture,
  * which keeps literal types in `params` (such as an enum value) intact.
  */

@@ -1,11 +1,11 @@
 "use client";
 
-import { render } from "@prompt-manager/core";
-import { setUpWithAgent } from "@prompt-manager/example-acme/create-project";
+import { render } from "@copybook/core";
+import { setUpWithAgent } from "@copybook/example-acme/create-project";
 import { useState } from "react";
 
+import { AgentPrompt } from "@/components/copybook/agent-prompt";
 import { ParamField } from "@/components/docs/param-field";
-import { AgentPrompt } from "@/components/prompt-manager/agent-prompt";
 
 /** The Acme "Create project" prompt, with editable params. */
 export const AgentPromptDemo = () => {

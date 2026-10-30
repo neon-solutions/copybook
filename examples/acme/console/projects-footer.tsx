@@ -1,4 +1,4 @@
-import { render, toText } from "@prompt-manager/core";
+import { render, toText } from "@copybook/core";
 
 import { psql } from "../src/commands";
 

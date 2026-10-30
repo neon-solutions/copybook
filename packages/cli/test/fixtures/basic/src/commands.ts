@@ -1,5 +1,5 @@
 import "server-only";
-import { defineCommand, p } from "@prompt-manager/core";
+import { defineCommand, p } from "@copybook/core";
 
 export const hello = defineCommand({
   id: "fixture.hello",

@@ -1,6 +1,6 @@
-import { render } from "@prompt-manager/core";
+import { render } from "@copybook/core";
 
-import { CommandTabs } from "@/components/prompt-manager/command-tabs";
+import { CommandTabs } from "@/components/copybook/command-tabs";
 import { packageManagers } from "@/content/definitions/get-started";
 import { addComponent } from "@/content/definitions/registry";
 import { registryUrl } from "@/lib/shared";

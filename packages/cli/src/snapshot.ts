@@ -8,8 +8,8 @@ import {
   listVariants,
   renderExample,
   toText,
-} from "@prompt-manager/core";
-import type { AnyParam, Definition, Rendered } from "@prompt-manager/core";
+} from "@copybook/core";
+import type { AnyParam, Definition, Rendered } from "@copybook/core";
 
 import type { ResolvedConfig } from "./config";
 import { frontmatter } from "./frontmatter";

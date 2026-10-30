@@ -1,12 +1,12 @@
 "use client";
 
-import { toText } from "@prompt-manager/core";
-import type { Rendered } from "@prompt-manager/core";
+import { toText } from "@copybook/core";
+import type { Rendered } from "@copybook/core";
 import { useState } from "react";
 
-import type { CopyEvent } from "@/components/prompt-manager/agent-prompt";
-import { CopyButton } from "@/components/prompt-manager/copy-button";
-import { RenderedText } from "@/components/prompt-manager/rendered-text";
+import type { CopyEvent } from "@/components/copybook/agent-prompt";
+import { CopyButton } from "@/components/copybook/copy-button";
+import { RenderedText } from "@/components/copybook/rendered-text";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export interface CodeVariant {
@@ -37,8 +37,8 @@ export const CodeVariants = ({
   return (
     <div
       className="bg-card text-card-foreground border"
-      data-pm-id={current?.rendered.id}
-      data-pm-variant={current?.rendered.variant}
+      data-copybook-id={current?.rendered.id}
+      data-copybook-variant={current?.rendered.variant}
     >
       <Tabs onValueChange={(value) => setActive(String(value))} value={active}>
         <div className="flex items-center justify-between gap-2 border-b pr-1">

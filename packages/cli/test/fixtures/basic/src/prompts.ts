@@ -1,8 +1,4 @@
-import {
-  defineCollection,
-  definePrompt,
-  defineSnippet,
-} from "@prompt-manager/core";
+import { defineCollection, definePrompt, defineSnippet } from "@copybook/core";
 
 // Resolved through the tsconfig path alias.
 import { hello } from "@/commands";

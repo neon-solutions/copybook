@@ -24,7 +24,7 @@ export const App = () => {
     <div className="grid h-svh grid-rows-[auto_1fr]">
       <header className="flex items-center justify-between gap-4 border-b px-4 py-3">
         <p className="font-heading font-semibold">
-          Prompt Manager Studio{" "}
+          Copybook Studio{" "}
           <span className="text-muted-foreground font-normal">
             · {manifest.name}
           </span>

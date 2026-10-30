@@ -20,7 +20,7 @@ export interface Config {
    */
   placements?: Record<string, PlacementInfo>;
   snapshots?: {
-    /** Where rendered snapshots are written. Defaults to `prompt-manager/snapshots`. */
+    /** Where rendered snapshots are written. Defaults to `copybook/snapshots`. */
     dir?: string;
   };
   /**
@@ -52,16 +52,16 @@ export interface ResolvedConfig extends Config {
 }
 
 export const CONFIG_FILES = [
-  "prompt-manager.config.ts",
-  "prompt-manager.config.mts",
-  "prompt-manager.config.js",
-  "prompt-manager.config.mjs",
+  "copybook.config.ts",
+  "copybook.config.mts",
+  "copybook.config.js",
+  "copybook.config.mjs",
 ] as const;
 
 /** Declares a config with types. */
 export const defineConfig = (config: Config): Config => config;
 
-const DEFAULT_SNAPSHOTS_DIR = "prompt-manager/snapshots";
+const DEFAULT_SNAPSHOTS_DIR = "copybook/snapshots";
 
 export const findConfig = (cwd: string): string | undefined => {
   let directory = path.resolve(cwd);
@@ -92,7 +92,7 @@ export const loadConfig = async (
   const file = configPath ? path.resolve(cwd, configPath) : findConfig(cwd);
   if (!file || !existsSync(file)) {
     throw new Error(
-      "No prompt-manager.config.ts found. Run `prompt-manager init` to create one."
+      "No copybook.config.ts found. Run `copybook init` to create one."
     );
   }
   const root = path.dirname(file);

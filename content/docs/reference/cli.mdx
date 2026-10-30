@@ -1,17 +1,17 @@
 ---
-title: "@prompt-manager/cli"
+title: "@copybook/cli"
 description: Commands and flags.
 ---
 
 ```npm
-npm i -D @prompt-manager/cli
+npm i -D @copybook/cli
 ```
 
-Every command finds `prompt-manager.config.ts` by walking up from the current directory. Pass `-c, --config <path>` to use another file.
+Every command finds `copybook.config.ts` by walking up from the current directory. Pass `-c, --config <path>` to use another file.
 
 ## `init`
 
-Creates `prompt-manager.config.ts` and installs `@prompt-manager/core` and `@prompt-manager/cli` with your package manager, which it detects from your lockfile.
+Creates `copybook.config.ts` and installs `@copybook/core` and `@copybook/cli` with your package manager, which it detects from your lockfile.
 
 | Flag           | Description            |
 | -------------- | ---------------------- |
@@ -76,11 +76,7 @@ Starts the local Studio UI. See [Studio](/docs/guides/studio).
 The package also exports the building blocks the commands use: `loadProject`, `buildSnapshots`, `buildManifest`, `compareSnapshots`, `writeSnapshots`, `changedIds`, and `fileHistory`.
 
 ```ts
-import {
-  buildManifest,
-  buildSnapshots,
-  loadProject,
-} from "@prompt-manager/cli";
+import { buildManifest, buildSnapshots, loadProject } from "@copybook/cli";
 
 const project = await loadProject(process.cwd());
 const { snapshots } = buildSnapshots(project);

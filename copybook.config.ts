@@ -1,6 +1,6 @@
-import { defineConfig } from "@prompt-manager/cli";
+import { defineConfig } from "@copybook/cli";
 
-// The site dogfoods Prompt Manager: its install commands and setup prompt
+// The site dogfoods Copybook: its install commands and setup prompt
 // are definitions, snapshotted and checked in CI.
 export default defineConfig({
   content: ["content/definitions/**/*.ts"],

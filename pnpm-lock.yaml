@@ -169,15 +169,15 @@ importers:
       '@base-ui/react':
         specifier: ^1.9.0
         version: 1.9.0(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      '@copybook/core':
+        specifier: workspace:*
+        version: link:packages/core
+      '@copybook/example-acme':
+        specifier: workspace:*
+        version: link:examples/acme
       '@phosphor-icons/react':
         specifier: ^2.1.10
         version: 2.1.10(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
-      '@prompt-manager/core':
-        specifier: workspace:*
-        version: link:packages/core
-      '@prompt-manager/example-acme':
-        specifier: workspace:*
-        version: link:examples/acme
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -212,7 +212,7 @@ importers:
         specifier: ^1.4.0
         version: 1.4.0
     devDependencies:
-      '@prompt-manager/cli':
+      '@copybook/cli':
         specifier: workspace:*
         version: link:packages/cli
       '@shadcn/lint':
@@ -254,11 +254,11 @@ importers:
 
   examples/acme:
     dependencies:
-      '@prompt-manager/core':
+      '@copybook/core':
         specifier: workspace:*
         version: link:../../packages/core
     devDependencies:
-      '@prompt-manager/cli':
+      '@copybook/cli':
         specifier: workspace:*
         version: link:../../packages/cli
       '@types/node':
@@ -270,7 +270,7 @@ importers:
 
   packages/cli:
     dependencies:
-      '@prompt-manager/core':
+      '@copybook/core':
         specifier: workspace:*
         version: link:../core
       commander:
@@ -298,7 +298,7 @@ importers:
       '@arethetypeswrong/cli':
         specifier: ^0.18.5
         version: 0.18.5
-      '@prompt-manager/studio':
+      '@copybook/studio':
         specifier: workspace:*
         version: link:../studio
       '@types/node':
@@ -343,7 +343,7 @@ importers:
 
   packages/studio:
     dependencies:
-      '@prompt-manager/core':
+      '@copybook/core':
         specifier: workspace:*
         version: link:../core
       react:

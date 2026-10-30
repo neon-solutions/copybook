@@ -46,8 +46,8 @@ export const TestResults = ({
   if (tests.length === 0 && evals.length === 0) {
     return (
       <p className="text-muted-foreground text-sm">
-        No results yet. Run <code>prompt-manager test</code> or{" "}
-        <code>prompt-manager eval</code>.
+        No results yet. Run <code>copybook test</code> or{" "}
+        <code>copybook eval</code>.
       </p>
     );
   }

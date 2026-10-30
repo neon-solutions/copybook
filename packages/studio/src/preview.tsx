@@ -1,8 +1,8 @@
-import type { Rendered } from "@prompt-manager/core";
+import type { Rendered } from "@copybook/core";
 import { useEffect, useState } from "react";
 
-import { AgentPrompt } from "@/components/prompt-manager/agent-prompt";
-import { CodeVariants } from "@/components/prompt-manager/code-variants";
+import { AgentPrompt } from "@/components/copybook/agent-prompt";
+import { CodeVariants } from "@/components/copybook/code-variants";
 
 import { renderDefinition } from "./api";
 import type { Entry } from "./types";

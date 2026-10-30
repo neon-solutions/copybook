@@ -16,7 +16,7 @@ export default defineConfig({
     dedupe: ["react", "react-dom"],
   },
   server: {
-    // `prompt-manager studio --api-only` serves the API during development.
+    // `copybook studio --api-only` serves the API during development.
     proxy: { "/api": "http://127.0.0.1:4983" },
   },
 });

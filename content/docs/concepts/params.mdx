@@ -6,7 +6,7 @@ description: Typed values with examples, defaults, and secrets.
 Params are the values that change between users: org ids, project ids, endpoint URLs, and tokens. Declare them with the `p` builders.
 
 ```ts
-import { p } from "@prompt-manager/core";
+import { p } from "@copybook/core";
 
 const params = {
   projectId: p.string().example("proj-example").describe("The Neon project id"),
@@ -35,7 +35,7 @@ Every builder is immutable and chainable:
 
 ## Examples are required
 
-Every required param needs an `.example()` or a `.default()`. Without one, the CLI can't render a preview or a snapshot, and `prompt-manager check` fails.
+Every required param needs an `.example()` or a `.default()`. Without one, the CLI can't render a preview or a snapshot, and `copybook check` fails.
 
 ## Secrets
 

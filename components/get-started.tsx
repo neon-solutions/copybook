@@ -1,7 +1,7 @@
-import { render } from "@prompt-manager/core";
+import { render } from "@copybook/core";
 
-import { CommandTabs } from "@/components/prompt-manager/command-tabs";
-import type { CommandTab } from "@/components/prompt-manager/command-tabs";
+import { CommandTabs } from "@/components/copybook/command-tabs";
+import type { CommandTab } from "@/components/copybook/command-tabs";
 import {
   init,
   packageManagers,

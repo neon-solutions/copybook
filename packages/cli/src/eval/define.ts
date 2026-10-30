@@ -6,7 +6,7 @@ import type {
   InputValues,
   ParamsShape,
   PromptDefinition,
-} from "@prompt-manager/core";
+} from "@copybook/core";
 
 import type { Fixture } from "../test/define";
 import { exec } from "../test/exec";
@@ -14,7 +14,7 @@ import type { ExecResult } from "../test/exec";
 import type { AgentAdapter, AgentRun } from "./adapters";
 import type { Shim, ShimCall } from "./shims";
 
-export const EVAL = Symbol.for("prompt-manager.eval");
+export const EVAL = Symbol.for("copybook.eval");
 
 export interface AssertContext {
   agent: AgentRun;

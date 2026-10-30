@@ -27,7 +27,7 @@ const Page = () => (
       primary: { text: "Get started", url: "/docs" },
       secondary: { text: "GitHub", url: githubUrl },
     }}
-    description="Prompt Manager turns the code examples and coding-agent prompts in your UI into typed, versioned definitions. You always know what you show, where it's shown, whether it still works, and when it changed."
+    description="Copybook turns the code examples and coding-agent prompts in your UI into typed, versioned definitions. You always know what you show, where it's shown, whether it still works, and when it changed."
     heading="Manage your product's snippets and agent prompts as code"
     media={
       <div className="flex w-full flex-col items-center gap-8">

@@ -42,8 +42,8 @@ next-env.d.ts
 # local tool state
 .isaac/
 
-# prompt-manager
-.prompt-manager/
+# copybook
+.copybook/
 
 # fumadocs
 .source/

@@ -10,7 +10,7 @@ const { version } = JSON.parse(readFileSync("package.json", "utf-8")) as {
 const STUDIO_DIST = "../studio/dist";
 
 const shared: Options = {
-  define: { __PM_VERSION__: JSON.stringify(version) },
+  define: { __COPYBOOK_VERSION__: JSON.stringify(version) },
   format: ["esm"],
   platform: "node",
   sourcemap: true,

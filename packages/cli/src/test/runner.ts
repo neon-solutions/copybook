@@ -2,8 +2,8 @@ import { mkdtemp, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
-import { renderExample, toText } from "@prompt-manager/core";
-import type { AnyParam, Definition } from "@prompt-manager/core";
+import { renderExample, toText } from "@copybook/core";
+import type { AnyParam, Definition } from "@copybook/core";
 import { transform } from "esbuild";
 
 import type { Fixture, FixtureResult } from "./define";
@@ -34,7 +34,7 @@ const secretParams = (definition: Definition) =>
 /** Secrets get stand-in values, so code never contains placeholder syntax. */
 const standInSecrets = (definition: Definition) =>
   Object.fromEntries(
-    secretParams(definition).map(([name]) => [name, `pm_test_${name}`])
+    secretParams(definition).map(([name]) => [name, `copybook_test_${name}`])
   );
 
 const renderCode = (testCase: TestCase, values: Record<string, unknown>) =>
@@ -213,7 +213,7 @@ const prepareDir = async (testCase: TestCase, options: RunOptions) => {
   const sandbox =
     npm.length > 0
       ? await npmSandbox(options.root, npm)
-      : await mkdtemp(path.join(os.tmpdir(), "pm-run-"));
+      : await mkdtemp(path.join(os.tmpdir(), "copybook-run-"));
   const dir = await caseDir(
     sandbox,
     `${testCase.id}-${testCase.variant ?? ""}-${options.runId}`

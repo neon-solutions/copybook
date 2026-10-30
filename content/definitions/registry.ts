@@ -1,4 +1,4 @@
-import { defineCommand, p } from "@prompt-manager/core";
+import { defineCommand, p } from "@copybook/core";
 
 import { packageManagers, RUNNERS } from "./get-started";
 
@@ -7,7 +7,7 @@ export const addComponent = defineCommand({
   params: {
     item: p.string().example("agent-prompt"),
     packageManager: p.enum(packageManagers).default("npm"),
-    registryUrl: p.url().example("https://prompt-manager.dev/r"),
+    registryUrl: p.url().example("https://copybook.dev/r"),
   },
   placements: ["site/docs/components"],
   template: (t, { item, packageManager, registryUrl }) =>

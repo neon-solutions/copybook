@@ -1,5 +1,5 @@
 {
-  "name": "@prompt-manager/cli",
+  "name": "@copybook/cli",
   "version": "0.0.0",
   "description": "Catalog, snapshot, test, and evaluate the snippets and agent prompts in your product.",
   "keywords": [
@@ -13,11 +13,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/neon-solutions/prompt-manager.git",
+    "url": "git+https://github.com/neon-solutions/copybook.git",
     "directory": "packages/cli"
   },
   "bin": {
-    "prompt-manager": "dist/bin.js"
+    "copybook": "dist/bin.js"
   },
   "files": [
     "dist",
@@ -45,7 +45,7 @@
     "lint:package": "publint --strict && attw --pack . --profile esm-only"
   },
   "dependencies": {
-    "@prompt-manager/core": "workspace:*",
+    "@copybook/core": "workspace:*",
     "commander": "^15.0.0",
     "diff": "^9.0.0",
     "esbuild": "^0.28.2",
@@ -56,7 +56,7 @@
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",
-    "@prompt-manager/studio": "workspace:*",
+    "@copybook/studio": "workspace:*",
     "@types/node": "^24",
     "publint": "^0.3.25",
     "tsup": "^9.0.0",

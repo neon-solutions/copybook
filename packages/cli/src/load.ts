@@ -1,7 +1,7 @@
 import path from "node:path";
 
-import { isCollection, isDefinition } from "@prompt-manager/core";
-import type { Definition } from "@prompt-manager/core";
+import { isCollection, isDefinition } from "@copybook/core";
+import type { Definition } from "@copybook/core";
 import { glob } from "tinyglobby";
 
 import { bundleAndImport } from "./bundle";

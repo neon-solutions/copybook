@@ -3,9 +3,9 @@ title: Snapshots
 description: Rendered output committed next to your code, so every change shows up in review.
 ---
 
-`prompt-manager snapshot` renders every definition with its example values and writes one Markdown file per definition:
+`copybook snapshot` renders every definition with its example values and writes one Markdown file per definition:
 
-```md title="prompt-manager/snapshots/console.create-project.agent.md"
+```md title="copybook/snapshots/console.create-project.agent.md"
 ---
 id: console.create-project.agent
 kind: prompt
@@ -36,12 +36,12 @@ Snapshots track **output**, not source:
 - **Changes show up where they land.** Change `acme.cli.deploy` and the diff shows every prompt and snippet that embeds it, not just the one line you edited.
 - **Reviewers see what users see.** DevRel and docs reviewers can review a prompt change without reading TypeScript.
 - **"When did this change?" is `git log`.** Every snapshot file has its own history, including authors and pull requests. Studio shows it per definition.
-- **Ownership is a CODEOWNERS rule.** For example: `prompt-manager/snapshots/console.* @devrel`.
+- **Ownership is a CODEOWNERS rule.** For example: `copybook/snapshots/console.* @devrel`.
 
 ## Check in CI
 
 ```bash
-prompt-manager check
+copybook check
 ```
 
 `check` fails when a snapshot is missing, out of date (it prints the diff), or orphaned. It also validates the definitions:
@@ -56,13 +56,13 @@ Pass `--base origin/main` to also warn when an id disappears without being kept 
 ## Only what changed
 
 ```bash
-prompt-manager list --changed --base origin/main
+copybook list --changed --base origin/main
 ```
 
 This lists the definitions whose rendered output differs from the base ref, including ones that aren't snapshotted yet. Tests and evals use the same list, so a pull request only runs what it changed.
 
 <Callout title="Keep formatters away from snapshots" type="warn">
-  Snapshots must stay byte-for-byte what `prompt-manager snapshot` wrote. Add
-  the snapshot folder to your formatter's ignore list, for example
-  `**/prompt-manager/snapshots/**` in Prettier, Biome, or oxfmt.
+  Snapshots must stay byte-for-byte what `copybook snapshot` wrote. Add the
+  snapshot folder to your formatter's ignore list, for example
+  `**/copybook/snapshots/**` in Prettier, Biome, or oxfmt.
 </Callout>

@@ -1,6 +1,6 @@
 import path from "node:path";
 
-import { defineCommand } from "@prompt-manager/core";
+import { defineCommand } from "@copybook/core";
 import { describe, expect, it } from "vitest";
 
 import { collectDefinitions, loadProject } from "../src/load";

@@ -1,7 +1,7 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry.json",
-  "name": "prompt-manager",
-  "homepage": "https://github.com/neon-solutions/prompt-manager",
+  "name": "copybook",
+  "homepage": "https://github.com/neon-solutions/copybook",
   "items": [
     {
       "name": "copy-button",
@@ -11,13 +11,13 @@
       "registryDependencies": ["button"],
       "files": [
         {
-          "path": "components/prompt-manager/copy-button.tsx",
-          "target": "components/prompt-manager/copy-button.tsx",
+          "path": "components/copybook/copy-button.tsx",
+          "target": "components/copybook/copy-button.tsx",
           "type": "registry:component"
         },
         {
-          "path": "components/prompt-manager/icons.tsx",
-          "target": "components/prompt-manager/icons.tsx",
+          "path": "components/copybook/icons.tsx",
+          "target": "components/copybook/icons.tsx",
           "type": "registry:component"
         }
       ]
@@ -26,13 +26,13 @@
       "name": "rendered-text",
       "type": "registry:component",
       "title": "Rendered Text",
-      "description": "Renders a Prompt Manager tree as text with params highlighted.",
-      "dependencies": ["@prompt-manager/core"],
+      "description": "Renders a Copybook tree as text with params highlighted.",
+      "dependencies": ["@copybook/core"],
       "registryDependencies": ["utils"],
       "files": [
         {
-          "path": "components/prompt-manager/rendered-text.tsx",
-          "target": "components/prompt-manager/rendered-text.tsx",
+          "path": "components/copybook/rendered-text.tsx",
+          "target": "components/copybook/rendered-text.tsx",
           "type": "registry:component"
         }
       ]
@@ -42,27 +42,27 @@
       "type": "registry:component",
       "title": "Agent Prompt",
       "description": "A prompt to paste into a coding agent, with a copy button and a warning when it contains a secret.",
-      "dependencies": ["@prompt-manager/core"],
+      "dependencies": ["@copybook/core"],
       "registryDependencies": ["button", "utils"],
       "files": [
         {
-          "path": "components/prompt-manager/agent-prompt.tsx",
-          "target": "components/prompt-manager/agent-prompt.tsx",
+          "path": "components/copybook/agent-prompt.tsx",
+          "target": "components/copybook/agent-prompt.tsx",
           "type": "registry:component"
         },
         {
-          "path": "components/prompt-manager/rendered-text.tsx",
-          "target": "components/prompt-manager/rendered-text.tsx",
+          "path": "components/copybook/rendered-text.tsx",
+          "target": "components/copybook/rendered-text.tsx",
           "type": "registry:component"
         },
         {
-          "path": "components/prompt-manager/copy-button.tsx",
-          "target": "components/prompt-manager/copy-button.tsx",
+          "path": "components/copybook/copy-button.tsx",
+          "target": "components/copybook/copy-button.tsx",
           "type": "registry:component"
         },
         {
-          "path": "components/prompt-manager/icons.tsx",
-          "target": "components/prompt-manager/icons.tsx",
+          "path": "components/copybook/icons.tsx",
+          "target": "components/copybook/icons.tsx",
           "type": "registry:component"
         }
       ]
@@ -72,32 +72,32 @@
       "type": "registry:component",
       "title": "Code Variants",
       "description": "One snippet in several frameworks or setups, as tabs with a copy button.",
-      "dependencies": ["@prompt-manager/core"],
+      "dependencies": ["@copybook/core"],
       "registryDependencies": ["button", "tabs", "utils"],
       "files": [
         {
-          "path": "components/prompt-manager/code-variants.tsx",
-          "target": "components/prompt-manager/code-variants.tsx",
+          "path": "components/copybook/code-variants.tsx",
+          "target": "components/copybook/code-variants.tsx",
           "type": "registry:component"
         },
         {
-          "path": "components/prompt-manager/agent-prompt.tsx",
-          "target": "components/prompt-manager/agent-prompt.tsx",
+          "path": "components/copybook/agent-prompt.tsx",
+          "target": "components/copybook/agent-prompt.tsx",
           "type": "registry:component"
         },
         {
-          "path": "components/prompt-manager/rendered-text.tsx",
-          "target": "components/prompt-manager/rendered-text.tsx",
+          "path": "components/copybook/rendered-text.tsx",
+          "target": "components/copybook/rendered-text.tsx",
           "type": "registry:component"
         },
         {
-          "path": "components/prompt-manager/copy-button.tsx",
-          "target": "components/prompt-manager/copy-button.tsx",
+          "path": "components/copybook/copy-button.tsx",
+          "target": "components/copybook/copy-button.tsx",
           "type": "registry:component"
         },
         {
-          "path": "components/prompt-manager/icons.tsx",
-          "target": "components/prompt-manager/icons.tsx",
+          "path": "components/copybook/icons.tsx",
+          "target": "components/copybook/icons.tsx",
           "type": "registry:component"
         }
       ]
@@ -107,32 +107,32 @@
       "type": "registry:component",
       "title": "Command Tabs",
       "description": "Package-manager tabs for a command, with an optional agent prompt tab.",
-      "dependencies": ["@prompt-manager/core"],
+      "dependencies": ["@copybook/core"],
       "registryDependencies": ["button", "tabs", "utils"],
       "files": [
         {
-          "path": "components/prompt-manager/command-tabs.tsx",
-          "target": "components/prompt-manager/command-tabs.tsx",
+          "path": "components/copybook/command-tabs.tsx",
+          "target": "components/copybook/command-tabs.tsx",
           "type": "registry:component"
         },
         {
-          "path": "components/prompt-manager/agent-prompt.tsx",
-          "target": "components/prompt-manager/agent-prompt.tsx",
+          "path": "components/copybook/agent-prompt.tsx",
+          "target": "components/copybook/agent-prompt.tsx",
           "type": "registry:component"
         },
         {
-          "path": "components/prompt-manager/rendered-text.tsx",
-          "target": "components/prompt-manager/rendered-text.tsx",
+          "path": "components/copybook/rendered-text.tsx",
+          "target": "components/copybook/rendered-text.tsx",
           "type": "registry:component"
         },
         {
-          "path": "components/prompt-manager/copy-button.tsx",
-          "target": "components/prompt-manager/copy-button.tsx",
+          "path": "components/copybook/copy-button.tsx",
+          "target": "components/copybook/copy-button.tsx",
           "type": "registry:component"
         },
         {
-          "path": "components/prompt-manager/icons.tsx",
-          "target": "components/prompt-manager/icons.tsx",
+          "path": "components/copybook/icons.tsx",
+          "target": "components/copybook/icons.tsx",
           "type": "registry:component"
         }
       ]

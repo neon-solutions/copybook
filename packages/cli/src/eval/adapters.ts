@@ -1,5 +1,5 @@
-import { collectCommands } from "@prompt-manager/core";
-import type { Rendered } from "@prompt-manager/core";
+import { collectCommands } from "@copybook/core";
+import type { Rendered } from "@copybook/core";
 
 import { exec, hasCommand } from "../test/exec";
 

@@ -4,9 +4,9 @@ description: Parse, typecheck, and run what you show users.
 ---
 
 ```bash
-npx prompt-manager test                          # syntax + typecheck
-npx prompt-manager test --tier syntax,typecheck,run
-npx prompt-manager test --changed --base origin/main
+npx copybook test                          # syntax + typecheck
+npx copybook test --tier syntax,typecheck,run
+npx copybook test --changed --base origin/main
 ```
 
 ## Tiers
@@ -37,13 +37,13 @@ defineSnippet({
 
 Prompts don't have a `verify` option. Their embedded definitions are tested on their own, and literal commands such as `t.cmd("npm run build")` get a syntax check. To check that a prompt works, use [evals](/docs/guides/evals).
 
-Secrets never reach the syntax and typecheck tiers. They get stand-in values like `pm_test_token`.
+Secrets never reach the syntax and typecheck tiers. They get stand-in values like `copybook_test_token`.
 
 ## Running for real
 
 The `run` tier needs real values, and usually a real resource. Put `defineTest` and `defineFixture` in files your product never imports, and list them in the config:
 
-```ts title="prompt-manager.config.ts"
+```ts title="copybook.config.ts"
 export default defineConfig({
   content: ["src/**/*.prompts.ts"],
   verify: ["verify/**/*.verify.ts"],
@@ -51,14 +51,14 @@ export default defineConfig({
 ```
 
 ```ts title="verify/gateway.verify.ts"
-import { defineFixture, defineTest } from "@prompt-manager/cli";
+import { defineFixture, defineTest } from "@copybook/cli";
 
 import { tryIt } from "../src/ai-gateway.prompts";
 
 export const branch = defineFixture({
   id: "neon.branch",
   setup: async ({ runId }) => {
-    const created = await createBranch(`pm-${runId}`); // your API client
+    const created = await createBranch(`copybook-${runId}`); // your API client
     return {
       value: created,
       teardown: () => deleteBranch(created.id),
@@ -79,7 +79,7 @@ export const tryItCurl = defineTest(tryIt, {
 ```
 
 - A fixture is set up once per run, only if a selected test uses it. Its teardown always runs, even when tests fail.
-- Name what you create `pm-<runId>`, so anything a crashed run leaves behind is easy to find and clean up.
+- Name what you create `copybook-<runId>`, so anything a crashed run leaves behind is easy to find and clean up.
 - Secrets that `params` doesn't provide come from each secret's `env` variable. If neither has a value, the case is skipped and the output says which variable to set.
 - Secret values are redacted from all output.
 
@@ -88,7 +88,7 @@ export const tryItCurl = defineTest(tryIt, {
 ## Sandboxes
 
 - **Environment:** only `PATH`, `HOME`, `LANG`, `TERM`, `TMPDIR`, `USER`, and npm, pip, and uv registry settings are passed through, plus the `env` that a fixture or test adds.
-- **npm:** installs go into `node_modules/.cache/prompt-manager/sandboxes`, cached by dependency list, with lifecycle scripts disabled.
+- **npm:** installs go into `node_modules/.cache/copybook/sandboxes`, cached by dependency list, with lifecycle scripts disabled.
 - **Python:** dependencies are installed with `uv run --with` when `uv` is available.
 - **Isolation:** sandboxes are temp directories, not containers. Run the `run` tier in CI or another disposable environment.
 
@@ -103,4 +103,4 @@ export const tryItCurl = defineTest(tryIt, {
 | `-o, --output <file>` | Write the JSON or JUnit report to a file. |
 | `--concurrency <n>` | How many cases run at once. |
 
-Every run also writes `.prompt-manager/results/test.json`, which Studio reads. `test` exits with status 1 if any case fails.
+Every run also writes `.copybook/results/test.json`, which Studio reads. `test` exits with status 1 if any case fails.

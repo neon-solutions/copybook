@@ -1,5 +1,5 @@
-import { toSegments } from "@prompt-manager/core";
-import type { Rendered, Segment, TextFormat } from "@prompt-manager/core";
+import { toSegments } from "@copybook/core";
+import type { Rendered, Segment, TextFormat } from "@copybook/core";
 
 import { cn } from "@/lib/utils";
 
@@ -28,7 +28,7 @@ export const RenderedText = ({ format, rendered }: RenderedTextProps) =>
   toSegments(rendered, format ? { format } : {}).map((segment, index) => (
     <span
       className={segmentClassName(segment)}
-      data-pm-param={segment.name}
+      data-copybook-param={segment.name}
       // Segments are positional and never reorder.
       // oxlint-disable-next-line react/no-array-index-key
       key={index}

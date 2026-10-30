@@ -13,7 +13,7 @@ const nextConfig: NextConfig = {
         source: "/docs/:path*.md",
       },
     ]),
-  transpilePackages: ["@prompt-manager/example-acme"],
+  transpilePackages: ["@copybook/example-acme"],
 };
 
 export default withMDX(nextConfig);

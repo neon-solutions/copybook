@@ -1,4 +1,4 @@
-import { listVariants, render, toText } from "@prompt-manager/core";
+import { listVariants, render, toText } from "@copybook/core";
 
 import { connect } from "../src/connect";
 

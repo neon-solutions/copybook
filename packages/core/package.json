@@ -1,5 +1,5 @@
 {
-  "name": "@prompt-manager/core",
+  "name": "@copybook/core",
   "version": "0.0.0",
   "description": "Define code snippets, commands, and agent prompts as typed, testable content.",
   "keywords": [
@@ -12,7 +12,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/neon-solutions/prompt-manager.git",
+    "url": "git+https://github.com/neon-solutions/copybook.git",
     "directory": "packages/core"
   },
   "files": [

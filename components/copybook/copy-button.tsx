@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { CheckIcon, CopyIcon } from "@/components/prompt-manager/icons";
+import { CheckIcon, CopyIcon } from "@/components/copybook/icons";
 import { Button } from "@/components/ui/button";
 
 const RESET_AFTER_MS = 2000;

@@ -4,7 +4,7 @@ import {
   fileExists,
   ranInOrder,
   succeeds,
-} from "@prompt-manager/cli";
+} from "@copybook/cli";
 
 import { setUpWithAgent } from "../src/create-project";
 

@@ -1,8 +1,8 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
-import { renderExample, toText } from "@prompt-manager/core";
-import type { Rendered } from "@prompt-manager/core";
+import { renderExample, toText } from "@copybook/core";
+import type { Rendered } from "@copybook/core";
 
 import { RESULTS_DIR } from "../commands/test";
 import { fileHistory } from "../git";

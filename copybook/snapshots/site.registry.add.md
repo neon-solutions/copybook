@@ -8,11 +8,11 @@ placements:
 params:
   item: agent-prompt
   packageManager: npm
-  registryUrl: https://prompt-manager.dev/r
+  registryUrl: https://copybook.dev/r
 embeds: []
-hash: sha256:d242c9883c42fb19
+hash: sha256:67fe555d7e3ce152
 ---
 
 ```sh
-npx shadcn@latest add https://prompt-manager.dev/r/agent-prompt.json
+npx shadcn@latest add https://copybook.dev/r/agent-prompt.json
 ```

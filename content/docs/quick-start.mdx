@@ -6,17 +6,17 @@ description: Define a command and a prompt, then render them in your product.
 ## Install
 
 ```npm
-npm i @prompt-manager/core
+npm i @copybook/core
 ```
 
-`@prompt-manager/core` has no dependencies. It runs in the browser, on the server, and at the edge.
+`@copybook/core` has no dependencies. It runs in the browser, on the server, and at the edge.
 
 ## Define a command
 
 A command is a shell command that your product shows to users. Its params are typed, and each one has an example value so the command can always be previewed.
 
 ```ts title="content/acme.ts"
-import { defineCommand, p } from "@prompt-manager/core";
+import { defineCommand, p } from "@copybook/core";
 
 export const init = defineCommand({
   id: "acme.init",
@@ -34,7 +34,7 @@ export const init = defineCommand({
 A prompt is text that users paste into a coding agent. Embed commands with `t.cmd()` instead of retyping them. When the command changes, every prompt that embeds it changes too.
 
 ```ts title="content/create-project.ts"
-import { definePrompt, p } from "@prompt-manager/core";
+import { definePrompt, p } from "@copybook/core";
 
 import { init } from "./acme";
 
@@ -57,7 +57,7 @@ export const getStarted = definePrompt({
 `render` takes a definition and real values, and returns a plain JSON tree. `toText` turns the tree into the text users copy.
 
 ```tsx title="app/projects/[id]/page.tsx"
-import { render, toText } from "@prompt-manager/core";
+import { render, toText } from "@copybook/core";
 
 import { getStarted } from "@/content/create-project";
 
@@ -76,11 +76,11 @@ The tree marks every param, command, and code block, so a UI can highlight them.
 Install the CLI and point it at your definitions:
 
 ```npm
-npm i -D @prompt-manager/cli
+npm i -D @copybook/cli
 ```
 
-```ts title="prompt-manager.config.ts"
-import { defineConfig } from "@prompt-manager/cli";
+```ts title="copybook.config.ts"
+import { defineConfig } from "@copybook/cli";
 
 export default defineConfig({
   content: ["content/**/*.ts"],
@@ -88,9 +88,9 @@ export default defineConfig({
 ```
 
 ```bash
-npx prompt-manager list      # what exists, and where it's shown
-npx prompt-manager snapshot  # write rendered snapshots; commit them
-npx prompt-manager check     # in CI: fail when a snapshot is stale
+npx copybook list      # what exists, and where it's shown
+npx copybook snapshot  # write rendered snapshots; commit them
+npx copybook check     # in CI: fail when a snapshot is stale
 ```
 
 ## Next steps

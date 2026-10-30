@@ -1,6 +1,6 @@
-# Prompt Manager
+# Copybook
 
-> Working name. The project is pre-release, and its APIs will change.
+> The project is pre-release, and its APIs will change.
 
 Code snippets and agent prompts that live in product UIs, defined as code, tested, and tracked.
 
@@ -11,10 +11,10 @@ Developer tools now ship a lot of copy-paste content: "Connect" dialogs with sni
 - Do the prompts still **perform well** with today's agents?
 - **When** did each one last change?
 
-Prompt Manager answers these by making every snippet, command, and prompt a typed, versioned definition:
+Copybook answers these by making every snippet, command, and prompt a typed, versioned definition:
 
 ```ts
-import { defineCommand, definePrompt, p } from "@prompt-manager/core";
+import { defineCommand, definePrompt, p } from "@copybook/core";
 
 export const init = defineCommand({
   id: "acme.init",
@@ -38,16 +38,16 @@ export const getStarted = definePrompt({
 
 | Package | Description |
 | --- | --- |
-| `@prompt-manager/core` | Isomorphic, zero-dependency definitions and rendering. This is what your product imports. |
-| `@prompt-manager/cli` | `list`, `snapshot`, `check`, `test`, `eval`, `usages`, `report`, and `studio`. |
+| `@copybook/core` | Isomorphic, zero-dependency definitions and rendering. This is what your product imports. |
+| `@copybook/cli` | `list`, `snapshot`, `check`, `test`, `eval`, `usages`, `report`, and `studio`. |
 | Registry components | shadcn components for agent prompts, code variants, and command tabs. |
 
 ```bash
-npx prompt-manager snapshot   # rendered snapshots; commit them
-npx prompt-manager check      # CI: fail when a snapshot is stale
-npx prompt-manager test       # parse, typecheck, and run snippets
-npx prompt-manager eval       # give prompts to coding agents (CI only)
-npx prompt-manager studio     # browse everything locally
+npx copybook snapshot   # rendered snapshots; commit them
+npx copybook check      # CI: fail when a snapshot is stale
+npx copybook test       # parse, typecheck, and run snippets
+npx copybook eval       # give prompts to coding agents (CI only)
+npx copybook studio     # browse everything locally
 ```
 
 `examples/acme` models Neon's onboarding screens for a fictional "Acme DB", and every command above runs against it without an account.

@@ -1,14 +1,14 @@
 "use client";
 
-import { toText } from "@prompt-manager/core";
-import type { Rendered } from "@prompt-manager/core";
+import { toText } from "@copybook/core";
+import type { Rendered } from "@copybook/core";
 
-import { CopyButton } from "@/components/prompt-manager/copy-button";
-import { AgentIcon, WarningIcon } from "@/components/prompt-manager/icons";
+import { CopyButton } from "@/components/copybook/copy-button";
+import { AgentIcon, WarningIcon } from "@/components/copybook/icons";
 import {
   containsSecret,
   RenderedText,
-} from "@/components/prompt-manager/rendered-text";
+} from "@/components/copybook/rendered-text";
 
 export interface CopyEvent {
   id: string;
@@ -35,7 +35,7 @@ export const AgentPrompt = ({
   return (
     <figure
       className="bg-card text-card-foreground flex flex-col border"
-      data-pm-id={rendered.id}
+      data-copybook-id={rendered.id}
     >
       <figcaption className="flex items-center justify-between gap-2 border-b py-1 pr-1 pl-3 text-xs font-medium">
         <span className="flex items-center gap-2">

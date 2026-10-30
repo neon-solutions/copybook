@@ -1,16 +1,16 @@
 ---
 id: site.cli.init
 kind: command
-title: "Initialize Prompt Manager"
+title: "Initialize Copybook"
 source: content/definitions/get-started.ts#init
 placements:
   - site/home/get-started
 params:
   packageManager: npm
 embeds: []
-hash: sha256:02100989ca512b30
+hash: sha256:21cd1baf6893cc20
 ---
 
 ```sh
-npx @prompt-manager/cli init
+npx @copybook/cli init
 ```

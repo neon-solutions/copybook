@@ -1,10 +1,10 @@
 ---
 title: Config
-description: prompt-manager.config.ts
+description: copybook.config.ts
 ---
 
-```ts title="prompt-manager.config.ts"
-import { defineConfig } from "@prompt-manager/cli";
+```ts title="copybook.config.ts"
+import { defineConfig } from "@copybook/cli";
 
 export default defineConfig({
   content: ["src/**/*.prompts.ts"],
@@ -13,7 +13,7 @@ export default defineConfig({
   stubs: ["server-only"],
   verify: ["verify/**/*.verify.ts"],
   usage: { include: ["src/**/*.tsx"] },
-  snapshots: { dir: "prompt-manager/snapshots" },
+  snapshots: { dir: "copybook/snapshots" },
   placements: {
     "console/create-project": { route: "/projects/new" },
   },
@@ -27,7 +27,7 @@ export default defineConfig({
 | `exclude` | Globs to leave out. `node_modules`, `dist`, and `.next` are always excluded. |
 | `tsconfig` | Used to resolve path aliases such as `@/`. Defaults to `tsconfig.json`. |
 | `stubs` | Modules to replace with empty ones while loading content, such as `server-only`. CSS imports are always stubbed. |
-| `snapshots.dir` | Where snapshots are written. Defaults to `prompt-manager/snapshots`. |
+| `snapshots.dir` | Where snapshots are written. Defaults to `copybook/snapshots`. |
 | `usage.include`, `usage.exclude` | Product files to scan for imports of definitions, for `usages`, `check`, `report`, and Studio. |
 | `placements` | Known placements, each with an optional `route` and `description`. When you set this, `check` fails on placements that aren't listed. |
 

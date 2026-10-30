@@ -1,4 +1,4 @@
-import type { Definition, Deps } from "@prompt-manager/core";
+import type { Definition, Deps } from "@copybook/core";
 
 import type { TestSpec, Tier } from "./define";
 

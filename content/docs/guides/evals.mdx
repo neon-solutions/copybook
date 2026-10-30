@@ -12,7 +12,7 @@ import {
   fileExists,
   ranInOrder,
   succeeds,
-} from "@prompt-manager/cli";
+} from "@copybook/cli";
 
 import { setUpWithAgent } from "../src/create-project.prompts";
 
@@ -37,7 +37,7 @@ export const createProjectEval = defineEval(setUpWithAgent, {
 ```
 
 ```bash
-CI=true npx prompt-manager eval --budget-usd 10
+CI=true npx copybook eval --budget-usd 10
 ```
 
 ## How a trial runs
@@ -77,7 +77,7 @@ Anything that implements `AgentAdapter` (`name`, `available`, `version`, and `ru
 - `--history-dir <dir>` appends one line per prompt and agent to `<dir>/<id>.jsonl`, with the pass rate, cost, agent version, and the snapshot hash of the prompt. On the next run, a prompt whose text and agent version haven't changed is reported as `cached` and not re-run. Pass `--force` to re-run it anyway.
 - `--changed --base origin/main` only evaluates prompts whose rendered text changed.
 
-Transcripts are written to `.prompt-manager/results/evals/<id>/`.
+Transcripts are written to `.copybook/results/evals/<id>/`.
 
 ## Safety
 
@@ -93,5 +93,5 @@ Transcripts are written to `.prompt-manager/results/evals/<id>/`.
 The repository's `evals.yml` workflow shows a full setup:
 
 - It runs nightly and on demand, and on pull requests only when the `run-evals` label is added.
-- History is kept on an orphan `pm-results` branch, so git stays the only storage.
+- History is kept on an orphan `copybook-results` branch, so git stays the only storage.
 - Transcripts are uploaded as an artifact.

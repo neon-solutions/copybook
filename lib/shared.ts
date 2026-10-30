@@ -3,7 +3,7 @@ import { createGetUrl } from "fumadocs-core/source";
 export const siteConfig = {
   description:
     "Define the code snippets and agent prompts in your product as typed, tested, versioned content.",
-  name: "Prompt Manager",
+  name: "Copybook",
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
 } as const;
 
@@ -11,7 +11,7 @@ export const registryUrl = `${siteConfig.url}/r`;
 
 export const gitConfig = {
   branch: "main",
-  repo: "prompt-manager",
+  repo: "copybook",
   user: "neon-solutions",
 } as const;
 

@@ -39,7 +39,7 @@ export const npmSandbox = (
       root,
       "node_modules",
       ".cache",
-      "prompt-manager",
+      "copybook",
       "sandboxes",
       hash
     );

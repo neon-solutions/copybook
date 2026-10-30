@@ -1,4 +1,4 @@
-import { definePrompt } from "@prompt-manager/core";
+import { definePrompt } from "@copybook/core";
 
 import { deploy, init, install, login } from "./commands";
 import { orgId, projectId } from "./params";

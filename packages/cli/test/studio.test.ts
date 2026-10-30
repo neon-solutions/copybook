@@ -12,7 +12,7 @@ describe("studio server", () => {
   let studio: Awaited<ReturnType<typeof startStudio>>;
 
   beforeAll(async () => {
-    const staticDir = await mkdtemp(path.join(os.tmpdir(), "pm-studio-"));
+    const staticDir = await mkdtemp(path.join(os.tmpdir(), "copybook-studio-"));
     await writeFile(
       path.join(staticDir, "index.html"),
       "<!doctype html><p>studio</p>"

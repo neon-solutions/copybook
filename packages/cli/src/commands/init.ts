@@ -34,7 +34,7 @@ const addCommand = (manager: PackageManager, dev: boolean): string[] => {
   return dev ? [verb, "-D"] : [verb];
 };
 
-export const CONFIG_TEMPLATE = `import { defineConfig } from "@prompt-manager/cli";
+export const CONFIG_TEMPLATE = `import { defineConfig } from "@copybook/cli";
 
 export default defineConfig({
   // Files that export definitions. Keep them free of app-only imports,
@@ -50,8 +50,8 @@ interface InitOptions {
 export const registerInit = (program: Command) =>
   program
     .command("init")
-    .description("Create prompt-manager.config.ts and install the packages.")
-    .option("--no-install", "skip installing @prompt-manager/core and the CLI")
+    .description("Create copybook.config.ts and install the packages.")
+    .option("--no-install", "skip installing @copybook/core and the CLI")
     .action(async (options: InitOptions) => {
       const cwd = process.cwd();
       const existing = findConfig(cwd);
@@ -61,17 +61,14 @@ export const registerInit = (program: Command) =>
         return;
       }
 
-      await writeFile(
-        path.join(cwd, "prompt-manager.config.ts"),
-        CONFIG_TEMPLATE
-      );
-      write(`${pc.green("created")}  prompt-manager.config.ts`);
+      await writeFile(path.join(cwd, "copybook.config.ts"), CONFIG_TEMPLATE);
+      write(`${pc.green("created")}  copybook.config.ts`);
 
       if (options.install !== false) {
         const manager = detectPackageManager(cwd);
         for (const [pkg, dev] of [
-          ["@prompt-manager/core", false],
-          [`@prompt-manager/cli`, true],
+          ["@copybook/core", false],
+          [`@copybook/cli`, true],
         ] as const) {
           const args = [...addCommand(manager, dev), pkg];
           write(pc.dim(`$ ${manager} ${args.join(" ")}`));

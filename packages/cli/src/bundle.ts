@@ -21,7 +21,7 @@ const escapeRegExp = (value: string) =>
   value.replaceAll(/[.*+?^${}()|[\]\\]/gu, String.raw`\$&`);
 
 const stubPlugin = (stubs: readonly string[]): Plugin => ({
-  name: "prompt-manager-stubs",
+  name: "copybook-stubs",
   setup: (pluginBuild) => {
     if (stubs.length === 0) {
       return;
@@ -30,12 +30,12 @@ const stubPlugin = (stubs: readonly string[]): Plugin => ({
     // oxlint-disable-next-line require-unicode-regexp
     const filter = new RegExp(`^(${stubs.map(escapeRegExp).join("|")})$`);
     pluginBuild.onResolve({ filter }, (args) => ({
-      namespace: "prompt-manager-stub",
+      namespace: "copybook-stub",
       path: args.path,
     }));
     pluginBuild.onLoad(
       // oxlint-disable-next-line require-unicode-regexp -- esbuild filters are Go regexes
-      { filter: /.*/, namespace: "prompt-manager-stub" },
+      { filter: /.*/, namespace: "copybook-stub" },
       () => ({
         contents: "export default {};",
         loader: "js",
@@ -84,7 +84,7 @@ export const bundleAndImport = async ({
   // The bundle lives inside the project so bare imports resolve from its
   // node_modules. The hash keeps Node's module cache from serving old code.
   const hash = createHash("sha256").update(output.contents).digest("hex");
-  const cacheDir = path.join(root, "node_modules", ".cache", "prompt-manager");
+  const cacheDir = path.join(root, "node_modules", ".cache", "copybook");
   const file = path.join(cacheDir, `${name}-${hash.slice(0, 12)}.mjs`);
   await mkdir(cacheDir, { recursive: true });
   await writeFile(file, output.contents);

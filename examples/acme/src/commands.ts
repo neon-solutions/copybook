@@ -1,4 +1,4 @@
-import { defineCommand, p, skip } from "@prompt-manager/core";
+import { defineCommand, p, skip } from "@copybook/core";
 
 import { branch, orgId, projectId } from "./params";
 

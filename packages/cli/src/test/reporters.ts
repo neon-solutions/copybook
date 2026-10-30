@@ -74,7 +74,7 @@ export const toJUnit = (report: TestReport) => {
   return [
     '<?xml version="1.0" encoding="UTF-8"?>',
     `<testsuites tests="${report.results.length}" failures="${failures}" skipped="${skipped}" time="${seconds(total)}">`,
-    `  <testsuite name="prompt-manager" tests="${report.results.length}" failures="${failures}" skipped="${skipped}" time="${seconds(total)}">`,
+    `  <testsuite name="copybook" tests="${report.results.length}" failures="${failures}" skipped="${skipped}" time="${seconds(total)}">`,
     ...cases,
     "  </testsuite>",
     "</testsuites>",

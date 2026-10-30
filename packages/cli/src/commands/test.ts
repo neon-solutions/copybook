@@ -39,7 +39,7 @@ const parseTiers = (value: string): Tier[] => {
   return tiers as Tier[];
 };
 
-export const RESULTS_DIR = ".prompt-manager/results";
+export const RESULTS_DIR = ".copybook/results";
 
 export const registerTest = (program: Command) =>
   program

@@ -2,7 +2,7 @@ import { mkdtemp } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
-import { defineCommand, definePrompt, p } from "@prompt-manager/core";
+import { defineCommand, definePrompt, p } from "@copybook/core";
 import { describe, expect, it } from "vitest";
 
 import { literal, scriptAgent } from "../src/eval/adapters";
@@ -59,7 +59,7 @@ const target = (
 const options = async (
   extra: Partial<EvalRunOptions> = {}
 ): Promise<EvalRunOptions> => ({
-  root: await mkdtemp(path.join(os.tmpdir(), "pm-eval-root-")),
+  root: await mkdtemp(path.join(os.tmpdir(), "copybook-eval-root-")),
   runId: "test",
   ...extra,
 });
@@ -143,7 +143,7 @@ describe(runEvals, () => {
 
   it("reuses history for an unchanged prompt and agent", async () => {
     const historyDir = await mkdtemp(
-      path.join(os.tmpdir(), "pm-eval-history-")
+      path.join(os.tmpdir(), "copybook-eval-history-")
     );
     const { appendHistory } = await import("../src/eval/history");
     const first = await runEvals([target([followsPrompt])], await options());

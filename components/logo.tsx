@@ -2,7 +2,7 @@ import { ChatCenteredTextIcon } from "@phosphor-icons/react/dist/ssr";
 
 import { cn } from "@/lib/utils";
 
-/** The Prompt Manager mark. */
+/** The Copybook mark. */
 export const LogoMark = ({ className }: { className?: string }) => (
   <span
     aria-hidden="true"

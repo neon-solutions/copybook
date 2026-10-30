@@ -2,8 +2,8 @@ import { cp, mkdir, mkdtemp, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
-import { renderExample, toText } from "@prompt-manager/core";
-import type { AnyParam, Definition } from "@prompt-manager/core";
+import { renderExample, toText } from "@copybook/core";
+import type { AnyParam, Definition } from "@copybook/core";
 
 import type { FixtureResult } from "../test/define";
 import { baseEnv } from "../test/exec";
@@ -93,7 +93,7 @@ const runTrial = async ({
 }: TrialInput): Promise<EvalTrial> => {
   const { definition, spec } = target;
   const started = performance.now();
-  const sandbox = await mkdtemp(path.join(os.tmpdir(), "pm-eval-"));
+  const sandbox = await mkdtemp(path.join(os.tmpdir(), "copybook-eval-"));
   const cwd = path.join(sandbox, "project");
   await mkdir(cwd, { recursive: true });
   if (spec.options.sandbox?.template) {
@@ -128,7 +128,7 @@ const runTrial = async ({
 
   const transcripts = path.join(
     options.root,
-    ".prompt-manager",
+    ".copybook",
     "results",
     "evals",
     definition.id

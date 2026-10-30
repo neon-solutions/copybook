@@ -37,7 +37,7 @@ Ids are how everything else refers to a definition: snapshots, test results, eva
 A command is one shell command. Its `verify` option tells the [test runner](/docs/guides/testing) how far to go:
 
 ```ts
-import { defineCommand, skip } from "@prompt-manager/core";
+import { defineCommand, skip } from "@copybook/core";
 
 export const login = defineCommand({
   id: "neon.login",
@@ -58,7 +58,7 @@ export const login = defineCommand({
 A snippet is a code block. Give it a `lang` and a `template`, or static `code`:
 
 ```ts
-import { defineSnippet } from "@prompt-manager/core";
+import { defineSnippet } from "@copybook/core";
 
 export const env = defineSnippet({
   id: "acme.connect.env",
@@ -90,7 +90,7 @@ Embedded definitions keep their ids in the rendered tree. That's how the CLI kno
 Sometimes definitions come from data, such as one snippet per model. `defineCollection` builds them with ids derived from a stable key:
 
 ```ts
-import { defineCollection, defineSnippet } from "@prompt-manager/core";
+import { defineCollection, defineSnippet } from "@copybook/core";
 
 export const modelPages = defineCollection({
   idPrefix: "ai-gateway.model",

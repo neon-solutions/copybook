@@ -1,4 +1,4 @@
-import { p } from "@prompt-manager/core";
+import { p } from "@copybook/core";
 
 /** Params shared across the Acme console. */
 export const orgId = p.string().example("org-summer-dust-12345678");
