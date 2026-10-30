@@ -9,45 +9,18 @@ import {
 import { useSearchContext } from "fumadocs-ui/contexts/search";
 import { useTheme } from "next-themes";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 
 import { LinkButton, Logo } from "@/components/landing/primitives";
 import { githubUrl } from "@/lib/shared";
 
 const LINKS = [
-  { id: "problems", label: "Problems" },
-  { id: "how-it-works", label: "How it works" },
-  { id: "components", label: "Components" },
-  { id: "faq", label: "FAQ" },
+  { href: "/docs", label: "Docs" },
+  { href: "/docs/quick-start", label: "Quick start" },
+  { href: "/docs/components", label: "Components" },
+  { href: "/docs/guides/studio", label: "Studio" },
 ] as const;
 
-/** The id of the section in the middle of the viewport, if any. */
-const useActiveSection = () => {
-  const [active, setActive] = useState<string | null>(null);
-
-  useEffect(() => {
-    // Watch every section, so the highlight clears in the hero too.
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            setActive(entry.target.id);
-          }
-        }
-      },
-      { rootMargin: "-45% 0px -50% 0px" }
-    );
-    for (const section of document.querySelectorAll("main section[id]")) {
-      observer.observe(section);
-    }
-    return () => observer.disconnect();
-  }, []);
-
-  return active;
-};
-
 export const SiteNav = () => {
-  const active = useActiveSection();
   const { setOpenSearch } = useSearchContext();
   const { resolvedTheme, setTheme } = useTheme();
 
@@ -67,24 +40,15 @@ export const SiteNav = () => {
 
         <ul className="mx-auto hidden items-center gap-6 md:flex">
           {LINKS.map((link) => (
-            <li key={link.id}>
-              <a
-                aria-current={active === link.id ? "true" : undefined}
-                className="text-nav text-muted-foreground hover:text-foreground aria-[current]:text-foreground font-medium transition-colors"
-                href={`#${link.id}`}
+            <li key={link.href}>
+              <Link
+                className="text-nav text-muted-foreground hover:text-foreground font-medium transition-colors"
+                href={link.href}
               >
                 {link.label}
-              </a>
+              </Link>
             </li>
           ))}
-          <li>
-            <Link
-              className="text-nav text-muted-foreground hover:text-foreground font-medium transition-colors"
-              href="/docs"
-            >
-              Docs
-            </Link>
-          </li>
         </ul>
 
         <div className="ml-auto flex items-center gap-1.5 md:ml-0">

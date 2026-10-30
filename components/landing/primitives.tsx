@@ -18,54 +18,6 @@ export const Container = ({
   </div>
 );
 
-/** A page section, separated from the previous one by a hairline. */
-export const Section = ({
-  children,
-  className,
-  id,
-}: {
-  children: ReactNode;
-  className?: string;
-  id: string;
-}) => (
-  <section
-    aria-labelledby={`${id}-title`}
-    className={cn("py-section border-divider border-t", className)}
-    id={id}
-  >
-    <Container>{children}</Container>
-  </section>
-);
-
-export const SectionHeader = ({
-  children,
-  className,
-  eyebrow,
-  id,
-  title,
-}: {
-  children?: ReactNode;
-  className?: string;
-  eyebrow: string;
-  id: string;
-  title: string;
-}) => (
-  <div className={cn("mb-12 flex max-w-2xl flex-col gap-4", className)}>
-    <p className="eyebrow">{eyebrow}</p>
-    <h2
-      className="text-heading text-foreground tracking-heading md:text-heading-lg font-medium text-balance"
-      id={`${id}-title`}
-    >
-      {title}
-    </h2>
-    {children ? (
-      <div className="text-body-lg text-muted-foreground text-pretty">
-        {children}
-      </div>
-    ) : null}
-  </div>
-);
-
 /** The Copybook mark: the one place Neon green appears outside the aurora. */
 export const Logo = () => (
   <span className="flex shrink-0 items-center gap-2 whitespace-nowrap">

@@ -161,13 +161,9 @@
   --landing-divider: rgb(0 0 0 / 0.06);
   --landing-faint: #a5a6ab;
   --landing-selection: rgb(0 0 0 / 0.1);
-  --landing-shadow-key:
-    rgb(0 0 0 / 0.08) 0 0 0 1px, rgb(0 0 0 / 0.04) 0 1px 2px 0,
-    rgb(255 255 255 / 0.9) 0 1px 0 0 inset;
   --landing-shadow-button: rgb(0 0 0 / 0.1) 0 1px 2px 0;
   --landing-shadow-window:
     rgb(0 0 0 / 0.1) 0 16px 48px 0, rgb(0 0 0 / 0.1) 0 0 0 1px;
-  --landing-shadow-inset: rgb(255 255 255 / 0.8) 0 1px 0 0 inset;
   --font-sans:
     var(--font-inter), ui-sans-serif, system-ui, -apple-system, sans-serif;
 
@@ -198,15 +194,11 @@
   --landing-divider: rgb(255 255 255 / 0.06);
   --landing-faint: #6a6b6c;
   --landing-selection: rgb(255 255 255 / 0.18);
-  --landing-shadow-key:
-    rgb(255 255 255 / 0.05) 0 1px 0 0 inset, rgb(255 255 255 / 0.2) 0 0 0 1px,
-    rgb(0 0 0 / 0.2) 0 -1px 0 0 inset;
   --landing-shadow-button:
     rgb(0 0 0 / 0.03) 0 7px 3px 0, rgb(0 0 0 / 0.25) 0 4px 4px 0;
   --landing-shadow-window:
     rgb(0 0 0 / 0.4) 0 4px 40px 8px, rgb(0 0 0 / 0.8) 0 0 0 0.5px,
     rgb(255 255 255 / 0.3) 0 0.5px 0 0 inset;
-  --landing-shadow-inset: rgb(255 255 255 / 0.1) 0 1px 0 0 inset;
 
   color-scheme: dark;
 }
@@ -219,10 +211,8 @@
 @theme inline {
   --color-divider: var(--landing-divider);
   --color-faint: var(--landing-faint);
-  --shadow-key: var(--landing-shadow-key);
   --shadow-button: var(--landing-shadow-button);
   --shadow-window: var(--landing-shadow-window);
-  --shadow-inset-highlight: var(--landing-shadow-inset);
 }
 
 @theme {
@@ -235,19 +225,11 @@
   --text-body--line-height: 1.6;
   --text-body-lg: 18px;
   --text-body-lg--line-height: 1.55;
-  --text-subheading: 20px;
-  --text-subheading--line-height: 1.3;
-  --text-subheading--letter-spacing: 0.2px;
-  --text-heading: 32px;
-  --text-heading--line-height: 1.15;
-  --text-heading-lg: 40px;
-  --text-heading-lg--line-height: 1.15;
   --text-display: clamp(40px, 6vw, 56px);
   --text-display--line-height: 1.12;
   --text-nav: 13px;
   --text-nav--line-height: 1.4;
 
-  --tracking-heading: 0.2px;
   --tracking-display: 0.22px;
 
   --container-page: 1200px;
