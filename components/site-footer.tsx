@@ -12,13 +12,12 @@ export const SiteFooter = () => (
         Made by{" "}
         <a
           className="underline underline-offset-4"
-          href="https://orcdev.com"
+          href="https://neon.com"
           rel="noopener noreferrer"
           target="_blank"
         >
-          OrcDev
-        </a>{" "}
-        with <span aria-hidden="true">🪓</span>
+          Neon
+        </a>
       </p>
       <nav aria-label="Secondary" className="flex items-center gap-4 text-sm">
         <Link className={linkClassName} href="/docs">

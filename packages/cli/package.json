@@ -11,6 +11,10 @@
     "prompts"
   ],
   "license": "MIT",
+  "author": "Neon Inc. (https://neon.com)",
+  "contributors": [
+    "OrcDev (https://orcdev.com)"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/neon-solutions/copybook.git",
