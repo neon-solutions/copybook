@@ -6,7 +6,6 @@ export default defineConfig({
   content: ["content/definitions/**/*.ts"],
   placements: {
     "site/docs/components": { route: "/docs/components/*" },
-    "site/home/get-started": { route: "/" },
   },
   usage: { include: ["app/**/*.tsx", "components/**/*.tsx"] },
 });

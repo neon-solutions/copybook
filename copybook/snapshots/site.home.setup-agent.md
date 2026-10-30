@@ -4,7 +4,7 @@ kind: prompt
 title: "Set up Copybook with a coding agent"
 source: content/definitions/get-started.ts#setupPrompt
 placements:
-  - site/home/get-started
+  - site/docs/components
 params: {}
 embeds:
   - site.cli.init

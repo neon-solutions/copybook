@@ -4,7 +4,7 @@ kind: command
 title: "Initialize Copybook"
 source: content/definitions/get-started.ts#init
 placements:
-  - site/home/get-started
+  - site/docs/components
 params:
   packageManager: npm
 embeds: []

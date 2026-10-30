@@ -22,8 +22,9 @@ const tabs: CommandTab[] = [
   })),
 ];
 
-export const GetStarted = () => (
-  <div className="w-full max-w-2xl text-left">
+/** The agent prompt plus one tab per package manager, all definitions. */
+export const GetStartedDemo = () => (
+  <div className="not-prose w-full text-left">
     <CommandTabs defaultTab="pnpm" tabs={tabs} />
   </div>
 );

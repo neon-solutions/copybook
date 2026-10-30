@@ -3,7 +3,11 @@ title: Command Tabs
 description: A command per package manager, with an optional agent prompt tab.
 ---
 
-The install commands on this site use Command Tabs, and so does the landing page's get-started block, where the first tab is an agent prompt.
+The install commands on this site use Command Tabs. A tab can also hold an agent prompt, like the first tab here:
+
+<GetStartedDemo />
+
+Install it:
 
 <InstallCommand item="command-tabs" />
 
@@ -15,7 +19,7 @@ Make the package manager a param, then render one tab per value:
 import { render } from "@copybook/core";
 
 import { CommandTabs } from "@/components/copybook/command-tabs";
-import { init, setupPrompt } from "@/content/get-started";
+import { init, setupPrompt } from "@/content/definitions/get-started";
 
 const managers = ["pnpm", "npm", "yarn", "bun"] as const;
 

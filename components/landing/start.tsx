@@ -1,6 +1,6 @@
 import { ArrowRightIcon, GithubLogoIcon } from "@phosphor-icons/react/dist/ssr";
 
-import { GetStarted } from "@/components/get-started";
+import { GetStartedDemo } from "@/components/docs/get-started-demo";
 import {
   LinkButton,
   Section,
@@ -23,7 +23,9 @@ export const Start = () => (
           agent and let it do the setup.
         </p>
       </SectionHeader>
-      <GetStarted />
+      <div className="w-full max-w-2xl">
+        <GetStartedDemo />
+      </div>
       <div className="mt-8 flex flex-wrap justify-center gap-2">
         <LinkButton href="/docs/quick-start" size="lg">
           Read the quick start

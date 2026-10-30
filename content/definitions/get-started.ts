@@ -16,7 +16,7 @@ export const init = defineCommand({
   params: {
     packageManager: p.enum(PACKAGE_MANAGERS).default("npm"),
   },
-  placements: ["site/home/get-started"],
+  placements: ["site/docs/components"],
   template: (t, { packageManager }) =>
     t`${RUNNERS[packageManager]} @copybook/cli init`,
   title: "Initialize Copybook",
@@ -24,7 +24,7 @@ export const init = defineCommand({
 
 export const setupPrompt = definePrompt({
   id: "site.home.setup-agent",
-  placements: ["site/home/get-started"],
+  placements: ["site/docs/components"],
   template: (t) => t`
     Set up Copybook in this project.
     1. Run ${t.cmd(init)}. It adds @copybook/core and a copybook.config.ts.
