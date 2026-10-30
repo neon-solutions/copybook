@@ -44,9 +44,9 @@
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",
-    "@size-limit/preset-small-lib": "^14.2.0",
+    "@size-limit/preset-small-lib": "^14.3.0",
     "publint": "^0.3.25",
-    "size-limit": "^14.2.0",
+    "size-limit": "^14.3.0",
     "tsup": "^9.0.0",
     "typescript": "5.9.3",
     "vitest": "^5.0.5"
