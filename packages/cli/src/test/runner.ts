@@ -14,7 +14,7 @@ import { checkSyntax } from "./syntax";
 import type { Check } from "./syntax";
 import type { TestCase, TestReport, TestResult } from "./types";
 
-const TYPECHECK_PACKAGES = ["typescript@^5", "@types/node@^24"];
+const TYPECHECK_PACKAGES = ["typescript@^7", "@types/node@^24"];
 const OUTPUT_TAIL_LINES = 30;
 
 export interface RunOptions {
@@ -86,6 +86,8 @@ const typecheck = async (
   const result = await exec(
     path.join(sandbox, "node_modules", ".bin", "tsc"),
     [
+      // Sandboxes can sit below a project's tsconfig.json; these flags decide.
+      "--ignoreConfig",
       "--noEmit",
       "--strict",
       "--target",
