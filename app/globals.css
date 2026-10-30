@@ -156,7 +156,7 @@
   --accent: #f1f1f3;
   --accent-foreground: #0b0c0e;
   --border: #e2e2e6;
-  --input: #e2e2e6;
+  --input: #c9c9ce;
   --ring: #8a8b90;
   --landing-divider: rgb(0 0 0 / 0.06);
   --landing-faint: #a5a6ab;
@@ -193,7 +193,7 @@
   --accent: #1b1c1e;
   --accent-foreground: #ffffff;
   --border: #363739;
-  --input: #363739;
+  --input: #55565a;
   --ring: #9c9c9d;
   --landing-divider: rgb(255 255 255 / 0.06);
   --landing-faint: #6a6b6c;
