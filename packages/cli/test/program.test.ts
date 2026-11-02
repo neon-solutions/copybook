@@ -129,6 +129,37 @@ describe(runCli, () => {
     expect(status.next[0]).toMatchObject({ code: "write-snapshots" });
   });
 
+  it("shows a definition rendered with values", async () => {
+    const json = await run([
+      "show",
+      "fixture.hello",
+      "--json",
+      "--values",
+      '{"name":"agents"}',
+    ]);
+    const text = await run(["show", "fixture.hello", "--text"]);
+    const markdown = await run(["show", "fixture.hello"]);
+
+    expect(JSON.parse(json.stdout)).toMatchObject({
+      definition: { id: "fixture.hello", usedBy: ["fixture.greet"] },
+      outputs: [{ text: "echo hello agents" }],
+      snapshotFile: "copybook/snapshots/fixture.hello.md",
+    });
+    expect(text.stdout).toBe("echo hello world\n");
+    expect(markdown.stdout).toContain("# `fixture.hello` (command)");
+    expect(markdown.stdout).toContain("| `name` | string | `world` |");
+  });
+
+  it("suggests ids for typos and rejects bad values", async () => {
+    const typo = await run(["show", "fixture.helo"]);
+    const values = await run(["show", "fixture.hello", "--values", "[1]"]);
+
+    expect(typo.code).toBe(2);
+    expect(typo.stderr).toContain('Did you mean "fixture.hello"');
+    expect(values.code).toBe(2);
+    expect(values.stderr).toContain("--values must be a JSON object");
+  });
+
   it("exits 1 when check finds problems", async () => {
     const { code, stderr } = await run(["check"]);
 
