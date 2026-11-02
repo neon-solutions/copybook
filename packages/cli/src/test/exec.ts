@@ -106,6 +106,14 @@ export const exec = (
       timedOut,
     });
   });
+  // A process that exits before reading its input closes the pipe, so the
+  // write fails with EPIPE. Its exit code already says what happened.
+  child.stdin.on("error", (error: NodeJS.ErrnoException) => {
+    if (error.code !== "EPIPE") {
+      output += error.message;
+      stderr += error.message;
+    }
+  });
   child.stdin.end(input ?? "");
   return promise;
 };
