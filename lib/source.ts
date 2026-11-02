@@ -17,6 +17,8 @@ import { docsRoute, registryUrl, siteConfig } from "./shared";
 const docs = defineDocs({
   dir: "content/docs",
   docs: {
+    // From git, for the sitemap and each page's dateModified.
+    lastModified: true,
     postprocess: {
       includeProcessedMarkdown: true,
     },

@@ -12,7 +12,7 @@ import { notFound } from "next/navigation";
 
 import { JsonLd } from "@/components/json-ld";
 import { getMDXComponents } from "@/components/mdx";
-import { docsPageJsonLd } from "@/lib/seo";
+import { docsPageJsonLd, getLastModified } from "@/lib/seo";
 import {
   getPageImage,
   getPageMarkdownUrl,
@@ -89,6 +89,7 @@ export const generateMetadata = async (
         url: getPageImage(page).url,
       },
       locale: siteConfig.locale,
+      modifiedTime: getLastModified(page)?.toISOString(),
       siteName: siteConfig.name,
       title,
       type: "article",

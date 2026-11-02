@@ -29,6 +29,18 @@ export const getPageSections = (page: DocsPage) =>
   );
 
 /*
+ * Vercel clones a few commits deep unless VERCEL_DEEP_CLONE is set, and in
+ * a shallow clone the oldest commit claims every file, so git's dates are
+ * only used from a full clone.
+ */
+const hasFullHistory =
+  !process.env.VERCEL || process.env.VERCEL_DEEP_CLONE === "true";
+
+/** When the page's file last changed in git, if that's known. */
+export const getLastModified = (page: DocsPage) =>
+  hasFullHistory ? page.data.lastModified : undefined;
+
+/*
  * Structured data, as schema.org JSON-LD. The nodes reference each other
  * by `@id`, so the publisher and the site are described once.
  */
@@ -112,6 +124,7 @@ export const docsPageJsonLd = (page: DocsPage) => {
     "@type": "TechArticle",
     about: { "@id": ids.software },
     author: { "@id": ids.publisher },
+    dateModified: getLastModified(page)?.toISOString(),
     description: page.data.metaDescription ?? page.data.description,
     headline: page.data.metaTitle ?? page.data.title,
     image: absolute(getPageImage(page).url),
