@@ -1,3 +1,17 @@
+export {
+  analyzeProject,
+  checkIssues,
+  findDefinition,
+  loadAnalysis,
+  searchDefinitions,
+  suggestIds,
+} from "./analysis";
+export type {
+  Analysis,
+  DefinitionEntry,
+  FoundDefinition,
+  SnapshotState,
+} from "./analysis";
 export { changedIds } from "./changes";
 export { defineConfig, loadConfig } from "./config";
 export type { Config, PlacementInfo, ResolvedConfig } from "./config";
@@ -12,7 +26,11 @@ export { createProgram } from "./program";
 export { compareSnapshots, createSnapshot, writeSnapshots } from "./snapshot";
 export type { Snapshot, SnapshotStatus } from "./snapshot";
 export { buildSnapshots } from "./validate";
-export type { Issue } from "./validate";
+export type { Issue, IssueCode } from "./validate";
+export { readResults, RESULTS_DIR } from "./results";
+export type { Results } from "./results";
+export { runProjectTests } from "./test/run-project";
+export type { ProjectTestOptions, ProjectTestRun } from "./test/run-project";
 export { defineFixture, defineTest } from "./test/define";
 export type {
   Fixture,

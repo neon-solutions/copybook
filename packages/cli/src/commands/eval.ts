@@ -1,6 +1,5 @@
 import { execFile } from "node:child_process";
 import { randomBytes } from "node:crypto";
-import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
 
@@ -14,9 +13,9 @@ import { runEvals } from "../eval/runner";
 import type { EvalTarget } from "../eval/runner";
 import { loadProject } from "../load";
 import { write, writeError } from "../output";
+import { writeResults } from "../results";
 import { loadEvalSpecs } from "../test/load";
 import { buildSnapshots } from "../validate";
-import { RESULTS_DIR } from "./test";
 
 interface EvalCommandOptions {
   agent?: string[];
@@ -115,12 +114,7 @@ export const registerEval = (program: Command) =>
         runId,
       });
 
-      const resultsDir = path.join(project.config.root, RESULTS_DIR);
-      await mkdir(resultsDir, { recursive: true });
-      await writeFile(
-        path.join(resultsDir, "eval.json"),
-        JSON.stringify(report, null, 2)
-      );
+      await writeResults(project.config.root, "eval", report);
       if (historyDir) {
         const sha = await gitSha(project.config.root);
         const finished = report.results.filter(

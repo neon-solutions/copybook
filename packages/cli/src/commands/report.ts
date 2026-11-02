@@ -1,6 +1,4 @@
 import { execFile } from "node:child_process";
-import { readFile } from "node:fs/promises";
-import path from "node:path";
 import { promisify } from "node:util";
 
 import type { Command } from "commander";
@@ -10,11 +8,10 @@ import { loadProject } from "../load";
 import { buildManifest } from "../manifest";
 import { write } from "../output";
 import { buildReport } from "../report";
+import { readResults } from "../results";
 import { snapshotPath } from "../snapshot";
-import type { TestReport } from "../test/types";
 import { findUsages } from "../usages";
 import { buildSnapshots } from "../validate";
-import { RESULTS_DIR } from "./test";
 
 interface ReportOptions {
   base: string;
@@ -32,15 +29,8 @@ const snapshotDiff = async (root: string, base: string, file: string) => {
 };
 
 const readTests = async (root: string) => {
-  try {
-    const text = await readFile(
-      path.join(root, RESULTS_DIR, "test.json"),
-      "utf-8"
-    );
-    return (JSON.parse(text) as TestReport).results;
-  } catch {
-    return [];
-  }
+  const { test } = await readResults(root);
+  return test?.results ?? [];
 };
 
 export const registerReport = (program: Command) =>

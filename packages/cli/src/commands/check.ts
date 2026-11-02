@@ -1,36 +1,15 @@
-import path from "node:path";
-
 import type { Command } from "commander";
-import { createTwoFilesPatch } from "diff";
 import pc from "picocolors";
 
-import { removedWithoutAlias } from "../changes";
-import { loadProject } from "../load";
+import { checkIssues, loadAnalysis } from "../analysis";
+import { colorizeDiff, snapshotPatch } from "../diff";
 import { BIN_NAME } from "../meta";
 import { formatIssue, write, writeError } from "../output";
-import { compareSnapshots } from "../snapshot";
-import { findUsages } from "../usages";
-import { buildSnapshots } from "../validate";
-import type { Issue } from "../validate";
 
 interface CheckOptions {
   base?: string;
   config?: string;
 }
-
-const colorizeDiff = (patch: string) =>
-  patch
-    .split("\n")
-    .map((line) => {
-      if (line.startsWith("+") && !line.startsWith("+++")) {
-        return pc.green(line);
-      }
-      if (line.startsWith("-") && !line.startsWith("---")) {
-        return pc.red(line);
-      }
-      return line.startsWith("@@") ? pc.cyan(line) : line;
-    })
-    .join("\n");
 
 export const registerCheck = (program: Command) =>
   program
@@ -41,74 +20,27 @@ export const registerCheck = (program: Command) =>
     .option("--base <ref>", "also warn about ids removed since this git ref")
     .option("-c, --config <path>", "the config file")
     .action(async (options: CheckOptions) => {
-      const project = await loadProject(process.cwd(), options);
-      const { issues, snapshots } = buildSnapshots(project);
-      const status = await compareSnapshots(project.config, snapshots);
-      const all: Issue[] = [...issues];
+      const analysis = await loadAnalysis(process.cwd(), options);
+      const { project, snapshots, status } = analysis;
+      const issues = await checkIssues(analysis, options);
 
-      for (const id of status.missing) {
-        all.push({ id, level: "error", message: "Has no snapshot." });
-      }
-      for (const id of status.orphaned) {
-        all.push({
-          id,
-          level: "error",
-          message: "Has a snapshot but no definition.",
-        });
-      }
-      for (const change of status.changed) {
-        all.push({
-          id: change.id,
-          level: "error",
-          message: "Snapshot is out of date:",
-        });
-      }
-      const embeds = new Map(
-        snapshots.map((snapshot) => [snapshot.id, snapshot.embeds])
-      );
-      const usage = await findUsages(project, embeds);
-      for (const id of usage?.unused ?? []) {
-        all.push({
-          id,
-          level: "warning",
-          message:
-            "Isn't rendered by any file in usage.include, directly or through an embed.",
-        });
-      }
-      if (options.base) {
-        for (const id of await removedWithoutAlias(project, options.base)) {
-          all.push({
-            id,
-            level: "warning",
-            message: `Removed since ${options.base}. If it was renamed, add "${id}" to the new definition's aliases.`,
-          });
-        }
-      }
-
-      for (const issue of all) {
+      for (const issue of issues) {
         writeError(formatIssue(issue));
-        const change = status.changed.find((item) => item.id === issue.id);
-        if (change && issue.message.startsWith("Snapshot")) {
-          const file = path.relative(
-            process.cwd(),
-            path.join(project.config.snapshotsDir, `${change.id}.md`)
-          );
+        const change =
+          issue.code === "snapshot-changed"
+            ? status.changed.find((item) => item.id === issue.id)
+            : undefined;
+        if (change) {
           writeError(
             colorizeDiff(
-              createTwoFilesPatch(
-                file,
-                file,
-                change.current,
-                change.next,
-                "committed",
-                "rendered"
-              )
+              snapshotPatch(change, project.config, process.cwd()),
+              pc
             )
           );
         }
       }
 
-      const errors = all.filter((issue) => issue.level === "error").length;
+      const errors = issues.filter((issue) => issue.level === "error").length;
       if (errors > 0) {
         const hasSnapshotErrors =
           status.missing.length +
