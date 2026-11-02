@@ -16,9 +16,12 @@ import { loadProject } from "./load";
 import type { Project } from "./load";
 import { readResults } from "./results";
 import type { Results } from "./results";
-import { snapshotPath } from "./snapshot";
+import { writeSnapshots, snapshotPath } from "./snapshot";
 import { buildStatus } from "./status";
 import type { StatusReport } from "./status";
+import { runProjectTests } from "./test/run-project";
+import type { ProjectTestOptions, ProjectTestRun } from "./test/run-project";
+import type { Issue } from "./validate";
 
 const IGNORED_SEGMENTS = new Set([
   ".copybook",
@@ -57,9 +60,26 @@ export interface Workspace {
   ) => Promise<{ rendered: Rendered; text: string }>;
   results: () => Promise<Results>;
   root: () => string;
+  /**
+   * Runs tests against the current project, outside the queue, so Studio
+   * stays responsive during long typecheck installs.
+   */
+  runTests: (options: ProjectTestOptions) => Promise<ProjectTestRun>;
   status: () => Promise<StatusReport>;
   /** Watches the project, so edits show up without a restart. */
   watch: () => void;
+  writeSnapshots: (options?: { prune?: boolean }) => Promise<SnapshotWrite>;
+}
+
+/** What `writeSnapshots` changed, like `copybook snapshot --json`. */
+export interface SnapshotWrite {
+  issues: Issue[];
+  written: {
+    added: string[];
+    orphaned: string[];
+    removed: string[];
+    updated: string[];
+  };
 }
 
 const errorMessage = (error: unknown) =>
@@ -166,6 +186,10 @@ export const openWorkspace = async (
       return readResults(latest.project.config.root);
     },
     root: () => analysis.project.config.root,
+    runTests: async (testOptions) => {
+      const latest = await current();
+      return runProjectTests(latest.project, testOptions);
+    },
     status: async () => buildStatus(await current()),
     watch: () => {
       if (watcher) {
@@ -192,6 +216,23 @@ export const openWorkspace = async (
         }
       );
     },
+    writeSnapshots: (snapshotOptions = {}) =>
+      workspace.queue(async (latest) => {
+        const status = await writeSnapshots(
+          latest.project.config,
+          latest.snapshots,
+          snapshotOptions
+        );
+        return {
+          issues: latest.issues,
+          written: {
+            added: status.missing,
+            orphaned: snapshotOptions.prune ? [] : status.orphaned,
+            removed: snapshotOptions.prune ? status.orphaned : [],
+            updated: status.changed.map((change) => change.id),
+          },
+        };
+      }),
   };
   return workspace;
 };

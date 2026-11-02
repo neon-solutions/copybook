@@ -18,6 +18,8 @@ export interface ProjectTestOptions {
   concurrency?: number;
   ids?: readonly string[];
   onResult?: (result: TestResult) => void;
+  /** Defaults to a random id. */
+  runId?: string;
   tiers: readonly Tier[];
 }
 
@@ -68,7 +70,7 @@ export const runProjectTests = async (
     concurrency: options.concurrency ?? defaultConcurrency(),
     ...(options.onResult ? { onResult: options.onResult } : {}),
     root: project.config.root,
-    runId: randomBytes(4).toString("hex"),
+    runId: options.runId ?? randomBytes(4).toString("hex"),
   });
   await writeResults(project.config.root, "test", report);
   return { cases: cases.length, report, unknownIds };

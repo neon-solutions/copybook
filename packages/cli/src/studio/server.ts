@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import { once } from "node:events";
 import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
@@ -11,6 +12,9 @@ import type { CommandCatalog } from "../catalog";
 import { definitionMarkdown } from "../detail";
 import type { Project } from "../load";
 import { VERSION } from "../meta";
+import { nextActions } from "../next-actions";
+import type { Tier } from "../test/define";
+import type { Issue } from "../validate";
 import { openWorkspace } from "../workspace";
 import type { Workspace } from "../workspace";
 import {
@@ -88,6 +92,18 @@ export const ENDPOINTS: readonly Endpoint[] = [
     summary: "Renders a definition: `{ id, values?, variant? }`.",
   },
   {
+    method: "POST",
+    path: "/api/snapshot",
+    summary:
+      "Writes the missing and changed snapshots: `{ prune? }`. Same as `copybook snapshot --json`.",
+  },
+  {
+    method: "POST",
+    path: "/api/test",
+    summary:
+      "Runs the syntax and typecheck tests in the background: `{ ids?, tiers? }`. Answers 202 with a `runId`; results stream as `test` and `test-done` events and land in `/api/results`.",
+  },
+  {
     method: "GET",
     path: "/api/history?id={id}",
     summary: "The commits that changed a definition's snapshot.",
@@ -106,7 +122,7 @@ export const ENDPOINTS: readonly Endpoint[] = [
     method: "GET",
     path: "/api/events",
     summary:
-      "Server-sent events: `change` after a reload, `error` when one fails.",
+      "Server-sent events: `change` after a reload, `error` when one fails, and `test`, `test-done`, and `test-error` for test runs.",
   },
 ];
 
@@ -118,7 +134,7 @@ export const studioMarkdown = (
 
 > The local Studio for ${name}, served by \`copybook studio\` at ${url}. It shows every definition: where it's shown, its params, its rendered output, tests, and history.
 
-Start with \`GET ${url}/api/status\`. Its \`next\` field lists what to do, with the CLI command and MCP tool for each step. POST requests need \`Content-Type: application/json\`.
+Start with \`GET ${url}/api/status\`. Its \`next\` field lists what to do, with the CLI command and MCP tool for each step. POST requests need \`Content-Type: application/json\`. Writing snapshots and running tests only work while Studio listens on localhost; the run tier and evals stay in the CLI.
 
 ## Endpoints
 
@@ -190,82 +206,227 @@ const recordField = (body: Record<string, unknown>, key: string) => {
 type Handler = (
   request: IncomingMessage,
   url: URL
-) => Promise<{ json: unknown } | { markdown: string }>;
+) => Promise<{ json: unknown; status?: number } | { markdown: string }>;
+
+interface RouteContext {
+  baseUrl: () => string;
+  broadcast: (event: string, data: unknown) => void;
+  /** Writes are off when Studio listens beyond localhost. */
+  loopback: boolean;
+  options: StudioOptions;
+  /** The test run in progress, if any. */
+  tests: { runId?: string; running?: Promise<void> };
+  workspace: Workspace;
+}
+
+const TEST_TIERS = new Set<string>(["syntax", "typecheck"]);
+
+const requireWritable = (loopback: boolean) => {
+  if (!loopback) {
+    throw new HttpError(
+      403,
+      "READ_ONLY",
+      "Studio is read-only when it listens beyond localhost."
+    );
+  }
+};
+
+const parseTiers = (value: unknown): Tier[] => {
+  if (value === undefined) {
+    return ["syntax", "typecheck"];
+  }
+  if (
+    !Array.isArray(value) ||
+    !value.every((tier) => typeof tier === "string" && TEST_TIERS.has(tier))
+  ) {
+    throw new HttpError(
+      400,
+      "BAD_REQUEST",
+      'tiers must be a list of "syntax" and "typecheck". The run tier executes commands for real, so run `copybook test --tier run` yourself.'
+    );
+  }
+  return value as Tier[];
+};
+
+const parseIds = (value: unknown) => {
+  if (value === undefined) {
+    return;
+  }
+  if (!Array.isArray(value) || !value.every((id) => typeof id === "string")) {
+    throw new HttpError(400, "BAD_REQUEST", "ids must be a list of strings.");
+  }
+  return value as string[];
+};
+
+/** Runs tests and reports them as events, so the request returns now. */
+const runInBackground = async (
+  { broadcast, tests, workspace }: RouteContext,
+  options: { ids?: string[]; runId: string; tiers: Tier[] }
+) => {
+  const { runId } = options;
+  try {
+    const { report, unknownIds } = await workspace.runTests({
+      ...options,
+      onResult: (result) => broadcast("test", { result, runId }),
+    });
+    const count = (status: string) =>
+      report.results.filter((result) => result.status === status).length;
+    broadcast("test-done", {
+      failed: count("fail"),
+      next: nextActions([], { test: report }),
+      passed: count("pass"),
+      runId,
+      skipped: count("skip"),
+      unknownIds,
+    });
+  } catch (error) {
+    broadcast("test-error", {
+      message: error instanceof Error ? error.message : String(error),
+      runId,
+    });
+  } finally {
+    tests.runId = undefined;
+  }
+};
+
+const startTests = async (context: RouteContext, request: IncomingMessage) => {
+  requireWritable(context.loopback);
+  const body = await readJsonBody(request);
+  const tiers = parseTiers(body.tiers);
+  const ids = parseIds(body.ids);
+  // No await between the check and the claim, so runs can't overlap.
+  const { tests } = context;
+  if (tests.runId) {
+    throw new HttpError(
+      409,
+      "BUSY",
+      `Tests are already running (run ${tests.runId}). Wait for its test-done event.`
+    );
+  }
+  const runId = randomBytes(4).toString("hex");
+  tests.runId = runId;
+  tests.running = runInBackground(context, {
+    ...(ids ? { ids } : {}),
+    runId,
+    tiers,
+  });
+  return {
+    json: {
+      events: `${context.baseUrl()}/api/events`,
+      ok: true,
+      results: `${context.baseUrl()}/api/results`,
+      runId,
+      schemaVersion: 1,
+    },
+    status: 202,
+  };
+};
 
 const routes = (
-  workspace: Workspace,
-  options: StudioOptions,
-  baseUrl: () => string
-): Record<string, { method: "GET" | "POST"; run: Handler }> => ({
-  "/api": {
-    method: "GET",
-    run: async () => {
-      const analysis = await workspace.current();
-      return {
-        json: {
-          endpoints: ENDPOINTS,
-          llms: `${baseUrl()}/llms.txt`,
-          name: path.basename(analysis.project.config.root),
-          schemaVersion: 1,
-          version: VERSION,
-        },
-      };
+  context: RouteContext
+): Record<string, { method: "GET" | "POST"; run: Handler }> => {
+  const { baseUrl, options, workspace } = context;
+  return {
+    "/api": {
+      method: "GET",
+      run: async () => {
+        const analysis = await workspace.current();
+        return {
+          json: {
+            endpoints: ENDPOINTS,
+            llms: `${baseUrl()}/llms.txt`,
+            name: path.basename(analysis.project.config.root),
+            schemaVersion: 1,
+            version: VERSION,
+          },
+        };
+      },
     },
-  },
-  "/api/commands": {
-    method: "GET",
-    run: () => {
-      if (!options.catalog) {
-        throw new HttpError(404, "NOT_FOUND", "No command catalog.");
-      }
-      return Promise.resolve({ json: options.catalog });
+    "/api/commands": {
+      method: "GET",
+      run: () => {
+        if (!options.catalog) {
+          throw new HttpError(404, "NOT_FOUND", "No command catalog.");
+        }
+        return Promise.resolve({ json: options.catalog });
+      },
     },
-  },
-  "/api/history": {
-    method: "GET",
-    run: async (_request, url) => ({
-      json: await workspace.history(url.searchParams.get("id") ?? ""),
-    }),
-  },
-  "/api/manifest": {
-    method: "GET",
-    run: async () => {
-      const analysis = await workspace.current();
-      return {
-        json: {
-          definitions: analysis.entries,
-          issues: analysis.issues,
-          loadedAt: analysis.loadedAt,
-          name: path.basename(analysis.project.config.root),
-        },
-      };
+    "/api/history": {
+      method: "GET",
+      run: async (_request, url) => ({
+        json: await workspace.history(url.searchParams.get("id") ?? ""),
+      }),
     },
-  },
-  "/api/render": {
-    method: "POST",
-    run: async (request) => {
-      const body = await readJsonBody(request);
-      const variant = stringField(body, "variant");
-      return {
-        json: await workspace.render(
-          stringField(body, "id") ?? "",
-          recordField(body, "values"),
-          variant
-        ),
-      };
+    "/api/manifest": {
+      method: "GET",
+      run: async () => {
+        const analysis = await workspace.current();
+        return {
+          json: {
+            definitions: analysis.entries,
+            issues: analysis.issues,
+            loadedAt: analysis.loadedAt,
+            name: path.basename(analysis.project.config.root),
+          },
+        };
+      },
     },
-  },
-  "/api/results": {
-    method: "GET",
-    run: async () => ({ json: await workspace.results() }),
-  },
-  "/api/status": {
-    method: "GET",
-    run: async () => ({ json: await workspace.status() }),
-  },
-});
+    "/api/render": {
+      method: "POST",
+      run: async (request) => {
+        const body = await readJsonBody(request);
+        const variant = stringField(body, "variant");
+        return {
+          json: await workspace.render(
+            stringField(body, "id") ?? "",
+            recordField(body, "values"),
+            variant
+          ),
+        };
+      },
+    },
+    "/api/results": {
+      method: "GET",
+      run: async () => ({ json: await workspace.results() }),
+    },
+    "/api/snapshot": {
+      method: "POST",
+      run: async (request) => {
+        requireWritable(context.loopback);
+        const body = await readJsonBody(request);
+        const prune = body.prune === true;
+        const result = await workspace.writeSnapshots({ prune });
+        const orphaned: Issue[] = result.written.orphaned.map((id) => ({
+          code: "snapshot-orphaned",
+          id,
+          level: "warning",
+          message: "Has a snapshot but no definition.",
+        }));
+        return {
+          json: {
+            ...result,
+            next: nextActions([...result.issues, ...orphaned]),
+            ok: !result.issues.some((issue) => issue.level === "error"),
+            schemaVersion: 1,
+          },
+        };
+      },
+    },
+    "/api/status": {
+      method: "GET",
+      run: async () => ({ json: await workspace.status() }),
+    },
+    "/api/test": {
+      method: "POST",
+      run: (request) => startTests(context, request),
+    },
+  };
+};
 
-const definitionRoute = async (workspace: Workspace, pathname: string) => {
+const definitionRoute = async (
+  workspace: Workspace,
+  pathname: string
+): Promise<{ json: unknown; status?: number } | { markdown: string }> => {
   const id = decodeURIComponent(pathname.slice(DEFINITIONS_PREFIX.length));
   const base = id.endsWith(".md") ? id.slice(0, -".md".length) : undefined;
   if (base && findDefinition(await workspace.current(), base)) {
@@ -284,13 +445,23 @@ export const startStudio = async (options: StudioOptions) => {
   const loopback = isLoopback(options.host);
   const clients = new Set<ServerResponse>();
   let baseUrl = "";
-  const table = routes(workspace, options, () => baseUrl);
+  const broadcast = (event: string, data: unknown) => {
+    for (const client of clients) {
+      client.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+    }
+  };
+  const table = routes({
+    baseUrl: () => baseUrl,
+    broadcast,
+    loopback,
+    options,
+    tests: {},
+    workspace,
+  });
 
   workspace.onChange((event) => {
     const { type, ...data } = event;
-    for (const client of clients) {
-      client.write(`event: ${type}\ndata: ${JSON.stringify(data)}\n\n`);
-    }
+    broadcast(type, data);
   });
 
   const handle = async (request: IncomingMessage, response: ServerResponse) => {
@@ -339,7 +510,7 @@ export const startStudio = async (options: StudioOptions) => {
       if ("markdown" in result) {
         sendMarkdown(response, result.markdown);
       } else {
-        sendJson(response, 200, result.json);
+        sendJson(response, result.status ?? 200, result.json);
       }
       return;
     }

@@ -1,12 +1,15 @@
 import { once } from "node:events";
+import { existsSync } from "node:fs";
 import { mkdtemp, writeFile } from "node:fs/promises";
 import { request as httpRequest } from "node:http";
 import type { IncomingMessage } from "node:http";
 import os from "node:os";
 import path from "node:path";
+import { setTimeout as sleep } from "node:timers/promises";
 
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
+import { loadProject } from "../src/load";
 import { startStudio } from "../src/studio/server";
 
 const fixture = path.join(import.meta.dirname, "fixtures/basic");
@@ -18,6 +21,33 @@ const rawGet = async (url: string, headers: Record<string, string>) => {
   const [response] = (await once(request, "response")) as [IncomingMessage];
   response.resume();
   return response.statusCode ?? 0;
+};
+
+const postJson = (url: string, route: string, body: unknown) =>
+  fetch(`${url}${route}`, {
+    body: JSON.stringify(body),
+    headers: { "Content-Type": "application/json" },
+    method: "POST",
+  });
+
+interface TestRun {
+  results: { id: string; status: string }[];
+  runId: string;
+}
+
+/** Polls /api/results until the run's report lands. */
+const waitForRun = async (
+  url: string,
+  runId: string,
+  attempts = 100
+): Promise<TestRun | undefined> => {
+  const response = await fetch(`${url}/api/results`);
+  const { test } = (await response.json()) as { test?: TestRun };
+  if (test?.runId === runId || attempts === 0) {
+    return test;
+  }
+  await sleep(50);
+  return waitForRun(url, runId, attempts - 1);
 };
 
 describe("studio server", () => {
@@ -152,5 +182,93 @@ describe("studio server", () => {
     const response = await fetch(`${studio.url}/definitions/anything`);
 
     await expect(response.text()).resolves.toContain("studio");
+  });
+});
+
+describe("studio actions", () => {
+  let studio: Awaited<ReturnType<typeof startStudio>>;
+  let snapshotsDir: string;
+
+  beforeAll(async () => {
+    snapshotsDir = await mkdtemp(path.join(os.tmpdir(), "copybook-actions-"));
+    studio = await startStudio({
+      cwd: fixture,
+      host: "127.0.0.1",
+      load: async () => {
+        const project = await loadProject(fixture);
+        return { ...project, config: { ...project.config, snapshotsDir } };
+      },
+      port: 0,
+      staticDir: snapshotsDir,
+      watch: false,
+    });
+  });
+
+  afterAll(() => studio.close());
+
+  it("writes snapshots, then reports them up to date", async () => {
+    const response = await postJson(studio.url, "/api/snapshot", {});
+    const body = (await response.json()) as { written: { added: string[] } };
+    const status = await fetch(`${studio.url}/api/status`);
+    const { snapshots } = (await status.json()) as {
+      snapshots: { missing: string[] };
+    };
+
+    expect(body.written.added).toContain("fixture.hello");
+    expect(
+      existsSync(path.join(snapshotsDir, "fixture.hello.md"))
+    ).toBeTruthy();
+    expect(snapshots.missing).toStrictEqual([]);
+  });
+
+  it("runs tests in the background, one run at a time", async () => {
+    const responses = await Promise.all([
+      postJson(studio.url, "/api/test", {
+        ids: ["fixture.hello"],
+        tiers: ["syntax"],
+      }),
+      postJson(studio.url, "/api/test", { tiers: ["syntax"] }),
+    ]);
+    const statuses = responses.map((response) => response.status).toSorted();
+    const bodies = (await Promise.all(
+      responses.map((response) => response.json())
+    )) as { runId?: string }[];
+    const runId = bodies.map((body) => body.runId).find(Boolean) ?? "";
+    const test = await waitForRun(studio.url, runId);
+
+    expect(statuses).toStrictEqual([202, 409]);
+    expect(test?.results).toContainEqual(
+      expect.objectContaining({ id: "fixture.hello", status: "pass" })
+    );
+  });
+
+  it("leaves the run tier to the CLI", async () => {
+    const response = await postJson(studio.url, "/api/test", {
+      tiers: ["run"],
+    });
+
+    expect(response.status).toBe(400);
+  });
+
+  it("is read-only when it listens beyond localhost", async () => {
+    const exposed = await startStudio({
+      cwd: fixture,
+      host: "0.0.0.0",
+      port: 0,
+      staticDir: snapshotsDir,
+      watch: false,
+    });
+    const { port } = new URL(exposed.url);
+    const response = await postJson(
+      `http://127.0.0.1:${port}`,
+      "/api/snapshot",
+      {}
+    );
+    exposed.close();
+
+    expect(response.status).toBe(403);
+    await expect(response.json()).resolves.toMatchObject({
+      error: { code: "READ_ONLY" },
+    });
   });
 });
