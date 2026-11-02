@@ -1,5 +1,4 @@
 import { spawnSync } from "node:child_process";
-import { existsSync } from "node:fs";
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
 
@@ -8,26 +7,10 @@ import type { Command } from "commander";
 import { findConfig } from "../config";
 import { CopybookError } from "../errors";
 import { BIN_NAME, DOCS_URL } from "../meta";
-import { colors as pc, cwd, write } from "../output";
-
-type PackageManager = "bun" | "npm" | "pnpm" | "yarn";
-
-const LOCKFILES: readonly (readonly [string, PackageManager])[] = [
-  ["pnpm-lock.yaml", "pnpm"],
-  ["yarn.lock", "yarn"],
-  ["bun.lock", "bun"],
-  ["bun.lockb", "bun"],
-  ["package-lock.json", "npm"],
-];
-
-export const detectPackageManager = (root: string): PackageManager => {
-  for (const [lockfile, manager] of LOCKFILES) {
-    if (existsSync(path.join(root, lockfile))) {
-      return manager;
-    }
-  }
-  return "npm";
-};
+import type { NextAction } from "../next-actions";
+import { colors as pc, cwd, write, writeJson } from "../output";
+import { detectPackageManager } from "../package-manager";
+import type { PackageManager } from "../package-manager";
 
 const addCommand = (manager: PackageManager, dev: boolean): string[] => {
   const verb = manager === "npm" ? "install" : "add";
@@ -45,13 +28,39 @@ export default defineConfig({
 
 interface InitOptions {
   install?: boolean;
+  json?: boolean;
 }
+
+const NEXT_STEPS: NextAction[] = [
+  {
+    code: "define",
+    safe: true,
+    title:
+      "Move a snippet or prompt into a *.prompts.ts file with defineSnippet, defineCommand, or definePrompt.",
+  },
+  {
+    argv: ["snapshot"],
+    code: "write-snapshots",
+    command: `${BIN_NAME} snapshot`,
+    safe: true,
+    title: "Write the snapshots and commit them.",
+    tool: "write_snapshots",
+  },
+  {
+    argv: ["check"],
+    code: "add-check-to-ci",
+    command: `${BIN_NAME} check`,
+    safe: false,
+    title: "Add copybook check to CI.",
+  },
+];
 
 export const registerInit = (program: Command) =>
   program
     .command("init")
     .description("Create copybook.config.ts and install the packages.")
     .option("--no-install", "skip installing @copybook/core and the CLI")
+    .option("--json", "print what was created and installed as JSON")
     .action(async (options: InitOptions) => {
       const root = cwd();
       const existing = findConfig(root);
@@ -61,10 +70,16 @@ export const registerInit = (program: Command) =>
           `${path.basename(existing)} already exists.`
         );
       }
+      const human = (text: string) => {
+        if (!options.json) {
+          write(text);
+        }
+      };
 
       await writeFile(path.join(root, "copybook.config.ts"), CONFIG_TEMPLATE);
-      write(`${pc.green("created")}  copybook.config.ts`);
+      human(`${pc.green("created")}  copybook.config.ts`);
 
+      const installed: string[] = [];
       if (options.install !== false) {
         const manager = detectPackageManager(root);
         for (const [pkg, dev] of [
@@ -72,10 +87,11 @@ export const registerInit = (program: Command) =>
           [`@copybook/cli`, true],
         ] as const) {
           const args = [...addCommand(manager, dev), pkg];
-          write(pc.dim(`$ ${manager} ${args.join(" ")}`));
+          human(pc.dim(`$ ${manager} ${args.join(" ")}`));
+          // With --json, stdout carries only the result.
           const result = spawnSync(manager, args, {
             cwd: root,
-            stdio: "inherit",
+            stdio: options.json ? ["inherit", 2, 2] : "inherit",
           });
           if (result.status !== 0) {
             throw new CopybookError(
@@ -83,9 +99,20 @@ export const registerInit = (program: Command) =>
               `Installing ${pkg} failed. Install it yourself, then continue.`
             );
           }
+          installed.push(pkg);
         }
       }
 
+      if (options.json) {
+        writeJson({
+          created: ["copybook.config.ts"],
+          installed,
+          next: NEXT_STEPS,
+          ok: true,
+          schemaVersion: 1,
+        });
+        return;
+      }
       write(`
 Next steps:
   1. Move a snippet or prompt into a *.prompts.ts file with defineSnippet,

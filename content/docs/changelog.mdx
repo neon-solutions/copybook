@@ -7,6 +7,9 @@ description: What changed in each release.
 
 - **`@copybook/cli`**: exit codes now say what happened: 0 when everything is fine, 1 when a command found problems, and 2 when it couldn't run (no config, a bad option, content that fails to load, or `eval` outside CI). Scripts that check for a non-zero code are unaffected.
 - **`@copybook/cli`**: with `--json`, a failure prints `{ ok: false, error: { code, message }, next }` on stdout, and errors without `--json` end with the next step to run.
+- **`@copybook/cli`**: every command except `report` and `studio` takes `--json`. The output has `schemaVersion`, `ok`, and `next`: the steps to take, each with its command, MCP tool, affected ids, and whether an agent can take it without asking. `check --json` includes the snapshot diffs.
+- **`@copybook/cli`**: `list --grep <text>` finds the definitions whose id, title, placements, tags, or rendered output contain the text. `list --json` adds each definition's snapshot state, embedders, and rendering files, plus the validation issues.
+- **`@copybook/cli`**: `test` and `eval` warn about `--only` ids that match nothing, and human output ends with the next steps.
 - **`@copybook/cli`**: `test --json` is short for `--reporter json`, and `--reporter` rejects unknown values instead of falling back to JSON.
 - **`@copybook/cli`**: colors follow the output. They're off when stdout isn't a terminal, even when `CI` is set, and with `--json` or `NO_COLOR`.
 - **`@copybook/cli`**: `runCli`, `CopybookError`, and the project analysis behind `check` (`analyzeProject`, `checkIssues`, `findDefinition`, `searchDefinitions`) are exported. Every `Issue` has a `code`.

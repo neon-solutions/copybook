@@ -1,6 +1,7 @@
 import { CommanderError } from "commander";
 
 import { CopybookError, errorEnvelope } from "./errors";
+import { formatNextActions } from "./next-actions";
 import {
   configureCli,
   currentExitCode,
@@ -18,8 +19,8 @@ const report = (error: unknown, json: boolean) => {
   }
   writeError(error instanceof Error ? error.message : String(error));
   if (error instanceof CopybookError) {
-    for (const step of error.next) {
-      writeError(`Next: ${step.command ?? step.title}`);
+    for (const line of formatNextActions(error.next)) {
+      writeError(line);
     }
   }
 };

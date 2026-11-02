@@ -12,7 +12,16 @@ import { formatEvalResult, summarizeEvals } from "../eval/reporters";
 import { runEvals } from "../eval/runner";
 import type { EvalTarget } from "../eval/runner";
 import { loadProject } from "../load";
-import { cwd, env, colors as pc, setExitCode, write } from "../output";
+import { formatNextActions, nextActions } from "../next-actions";
+import {
+  colors as pc,
+  cwd,
+  env,
+  setExitCode,
+  write,
+  writeError,
+  writeJson,
+} from "../output";
 import { writeResults } from "../results";
 import { loadEvalSpecs } from "../test/load";
 import { buildSnapshots } from "../validate";
@@ -76,6 +85,9 @@ export const registerEval = (program: Command) =>
         ? new Set(await changedIds(project, snapshots, options.base))
         : undefined;
       const only = options.only ? new Set(options.only) : undefined;
+      const warnings = (options.only ?? [])
+        .filter((id) => !specs.some((spec) => spec.id === id))
+        .map((id) => `No eval for "${id}".`);
 
       const targets: EvalTarget[] = specs.flatMap((spec) => {
         const loaded = project.definitions.find(
@@ -129,14 +141,28 @@ export const registerEval = (program: Command) =>
         );
       }
 
-      if (options.json) {
-        write(JSON.stringify(report, null, 2));
-      } else {
-        write(
-          `\n${targets.length === 0 ? pc.dim("No evals selected.") : summarizeEvals(report)}`
-        );
-      }
-      if (report.results.some((result) => result.status === "fail")) {
+      const failed = report.results.some((result) => result.status === "fail");
+      if (failed) {
         setExitCode(1);
+      }
+      const next = nextActions([], { eval: report });
+      if (options.json) {
+        writeJson({
+          ...report,
+          next,
+          ok: !failed,
+          schemaVersion: 1,
+          warnings,
+        });
+        return;
+      }
+      for (const warning of warnings) {
+        writeError(`${pc.yellow("warning")} ${warning}`);
+      }
+      write(
+        `\n${targets.length === 0 ? pc.dim("No evals selected.") : summarizeEvals(report)}`
+      );
+      for (const line of formatNextActions(next)) {
+        writeError(line);
       }
     });

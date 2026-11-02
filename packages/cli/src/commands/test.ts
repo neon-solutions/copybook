@@ -6,7 +6,15 @@ import type { Command } from "commander";
 
 import { CopybookError } from "../errors";
 import { loadProject } from "../load";
-import { cwd, colors as pc, setExitCode, write } from "../output";
+import { formatNextActions, nextActions } from "../next-actions";
+import {
+  colors as pc,
+  cwd,
+  setExitCode,
+  write,
+  writeError,
+  writeJson,
+} from "../output";
 import { TIERS } from "../test/define";
 import type { Tier } from "../test/define";
 import { formatResult, summarize, toJUnit } from "../test/reporters";
@@ -65,7 +73,7 @@ export const registerTest = (program: Command) =>
       const reporter = options.json ? "json" : options.reporter;
       const project = await loadProject(cwd(), options);
       const pretty = reporter === "pretty";
-      const { cases, report } = await runProjectTests(project, {
+      const { cases, report, unknownIds } = await runProjectTests(project, {
         base: options.base,
         ...(options.changed ? { changed: true } : {}),
         ...(options.concurrency
@@ -78,24 +86,42 @@ export const registerTest = (program: Command) =>
         tiers,
       });
 
-      const serialized =
-        reporter === "junit"
-          ? toJUnit(report)
-          : JSON.stringify(report, null, 2);
+      const failed = report.results.some((result) => result.status === "fail");
+      const warnings = unknownIds.map((id) => `No definition "${id}".`);
+      if (failed) {
+        setExitCode(1);
+      }
       if (options.output) {
         await writeFile(
           path.resolve(options.output),
-          reporter === "junit" ? serialized : JSON.stringify(report, null, 2)
+          reporter === "junit"
+            ? toJUnit(report)
+            : JSON.stringify(report, null, 2)
         );
       }
-      if (pretty) {
+      if (reporter === "json" && !options.output) {
+        writeJson({
+          ...report,
+          next: nextActions([], { test: report }),
+          ok: !failed,
+          schemaVersion: 1,
+          warnings,
+        });
+        return;
+      }
+      for (const warning of warnings) {
+        writeError(`${pc.yellow("warning")} ${warning}`);
+      }
+      if (reporter === "junit" && !options.output) {
+        write(toJUnit(report));
+      } else if (pretty) {
         write(
           `\n${cases === 0 ? pc.dim("Nothing to test.") : summarize(report)}`
         );
-      } else if (!options.output) {
-        write(serialized);
-      }
-      if (report.results.some((result) => result.status === "fail")) {
-        setExitCode(1);
+        for (const line of formatNextActions(
+          nextActions([], { test: report })
+        )) {
+          writeError(line);
+        }
       }
     });

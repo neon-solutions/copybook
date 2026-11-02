@@ -1,8 +1,10 @@
 import type { Command } from "commander";
 
+import { embedsOf } from "../analysis";
 import { CopybookError } from "../errors";
 import { loadProject } from "../load";
-import { colors as pc, cwd, write } from "../output";
+import { nextActions } from "../next-actions";
+import { colors as pc, cwd, write, writeJson } from "../output";
 import { findUsages } from "../usages";
 import { buildSnapshots } from "../validate";
 
@@ -20,10 +22,7 @@ export const registerUsages = (program: Command) =>
     .action(async (options: UsagesOptions) => {
       const project = await loadProject(cwd(), options);
       const { snapshots } = buildSnapshots(project);
-      const embeds = new Map(
-        snapshots.map((snapshot) => [snapshot.id, snapshot.embeds])
-      );
-      const report = await findUsages(project, embeds);
+      const report = await findUsages(project, embedsOf(snapshots));
       if (!report) {
         throw new CopybookError(
           "USAGE_NOT_CONFIGURED",
@@ -31,7 +30,19 @@ export const registerUsages = (program: Command) =>
         );
       }
       if (options.json) {
-        write(JSON.stringify(report, null, 2));
+        writeJson({
+          ...report,
+          next: nextActions(
+            report.unused.map((id) => ({
+              code: "unused",
+              id,
+              level: "warning",
+              message: "Isn't rendered by any scanned file.",
+            }))
+          ),
+          ok: true,
+          schemaVersion: 1,
+        });
         return;
       }
       for (const [id, files] of Object.entries(report.usages)) {

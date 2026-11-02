@@ -43,7 +43,7 @@ describe(runCli, () => {
 
     expect(code).toBe(2);
     expect(stderr).toContain("No copybook.config.ts found.");
-    expect(stderr).toContain("Next: copybook init");
+    expect(stderr).toContain("Next: `copybook init`");
   });
 
   it("prints a JSON envelope for errors with --json", async () => {
@@ -76,6 +76,41 @@ describe(runCli, () => {
 
     expect(code).toBe(2);
     expect(stderr).toContain("CI=true");
+  });
+
+  it("prints issues, codes, and next steps with check --json", async () => {
+    const { code, stdout } = await run(["check", "--json"]);
+    const result = JSON.parse(stdout);
+
+    expect(code).toBe(1);
+    expect(result).toMatchObject({ ok: false, schemaVersion: 1 });
+    expect(result.issues).toContainEqual(
+      expect.objectContaining({ code: "snapshot-missing", id: "fixture.hello" })
+    );
+    expect(result.next).toContainEqual(
+      expect.objectContaining({
+        argv: ["snapshot"],
+        code: "write-snapshots",
+        tool: "write_snapshots",
+      })
+    );
+  });
+
+  it("filters list --json by rendered text", async () => {
+    const { code, stdout } = await run([
+      "list",
+      "--json",
+      "--grep",
+      "echo hello",
+    ]);
+    const result = JSON.parse(stdout);
+
+    expect(code).toBe(0);
+    expect(result).toMatchObject({ ok: true, schemaVersion: 1, version: 1 });
+    expect(
+      result.definitions.map((entry: { id: string }) => entry.id)
+    ).toContain("fixture.hello");
+    expect(result.definitions[0]).toHaveProperty("snapshot");
   });
 
   it("exits 1 when check finds problems", async () => {
