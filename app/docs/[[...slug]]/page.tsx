@@ -11,7 +11,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { getMDXComponents } from "@/components/mdx";
-import { getPageMarkdownUrl, gitConfig } from "@/lib/shared";
+import { getPageMarkdownUrl, gitConfig, siteConfig } from "@/lib/shared";
 import { source } from "@/lib/source";
 
 const Page = async (props: PageProps<"/docs/[[...slug]]">) => {
@@ -61,8 +61,17 @@ export const generateMetadata = async (
     notFound();
   }
 
+  // A segment's openGraph replaces the root layout's, so repeat siteName.
   return {
+    alternates: { canonical: page.url },
     description: page.data.description,
+    openGraph: {
+      description: page.data.description,
+      siteName: siteConfig.name,
+      title: page.data.title,
+      type: "article",
+      url: page.url,
+    },
     title: page.data.title,
   };
 };

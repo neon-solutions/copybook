@@ -22,10 +22,19 @@ const fontMono = Geist_Mono({
 
 export const metadata: Metadata = {
   description: siteConfig.description,
+  metadataBase: new URL(siteConfig.url),
+  openGraph: {
+    description: siteConfig.description,
+    siteName: siteConfig.name,
+    title: siteConfig.name,
+    type: "website",
+    url: "/",
+  },
   title: {
     default: siteConfig.name,
     template: `%s | ${siteConfig.name}`,
   },
+  twitter: { card: "summary" },
 };
 
 const RootLayout = ({ children }: Readonly<{ children: ReactNode }>) => (
