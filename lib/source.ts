@@ -2,6 +2,7 @@ import { render, toText } from "@copybook/core";
 import { llms, loader } from "fumadocs-core/source";
 import { metaSchema, pageSchema } from "fumadocs-core/source/schema";
 import { defineDocs } from "fumadocs-mdx/macro";
+import { z } from "zod";
 
 import {
   init,
@@ -19,7 +20,12 @@ const docs = defineDocs({
     postprocess: {
       includeProcessedMarkdown: true,
     },
-    schema: pageSchema,
+    schema: pageSchema.extend({
+      /** The meta description, when `description` is too short for search results. */
+      metaDescription: z.string().optional(),
+      /** The `<title>`, when the sidebar title is too generic on its own. */
+      metaTitle: z.string().optional(),
+    }),
   },
   meta: {
     schema: metaSchema,

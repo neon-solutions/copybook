@@ -1,5 +1,5 @@
 import { RootProvider } from "fumadocs-ui/provider/next";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist_Mono, Nunito_Sans, Outfit } from "next/font/google";
 import type { ReactNode } from "react";
 
@@ -21,21 +21,34 @@ const fontMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  description: siteConfig.description,
+  applicationName: siteConfig.name,
+  authors: [siteConfig.publisher],
+  creator: siteConfig.publisher.name,
+  description: siteConfig.metaDescription,
   metadataBase: new URL(siteConfig.url),
   openGraph: {
-    description: siteConfig.description,
+    description: siteConfig.metaDescription,
+    locale: siteConfig.locale,
     siteName: siteConfig.name,
-    title: siteConfig.name,
+    title: siteConfig.title,
     type: "website",
     url: "/",
   },
+  publisher: siteConfig.publisher.name,
   title: {
-    default: siteConfig.name,
+    default: siteConfig.title,
     template: `%s | ${siteConfig.name}`,
   },
   // X falls back to og:image, so the OG images serve it too.
   twitter: { card: "summary_large_image" },
+};
+
+/** The landing page's backgrounds, for the browser's toolbar. */
+export const viewport: Viewport = {
+  themeColor: [
+    { color: "#ffffff", media: "(prefers-color-scheme: light)" },
+    { color: "#040506", media: "(prefers-color-scheme: dark)" },
+  ],
 };
 
 const RootLayout = ({ children }: Readonly<{ children: ReactNode }>) => (

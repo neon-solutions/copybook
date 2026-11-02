@@ -67,24 +67,30 @@ export const generateMetadata = async (
     notFound();
   }
 
+  // Search results and link previews get the longer meta fields; the page
+  // itself and its image keep the short title and description.
+  const title = page.data.metaTitle ?? page.data.title;
+  const description = page.data.metaDescription ?? page.data.description;
+
   // A segment's openGraph replaces the root layout's, so repeat siteName,
   // and give the page its own image instead of the landing page's.
   return {
     alternates: { canonical: page.url },
-    description: page.data.description,
+    description,
     openGraph: {
-      description: page.data.description,
+      description,
       images: {
         ...ogImageSize,
         alt: `${page.data.title}, in the ${siteConfig.name} docs`,
         type: "image/png",
         url: getPageImage(page).url,
       },
+      locale: siteConfig.locale,
       siteName: siteConfig.name,
-      title: page.data.title,
+      title,
       type: "article",
       url: page.url,
     },
-    title: page.data.title,
+    title,
   };
 };

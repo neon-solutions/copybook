@@ -8,7 +8,14 @@ const defaultSiteUrl =
 export const siteConfig = {
   description:
     "Define the code snippets and agent prompts in your product as typed, tested, versioned content.",
+  locale: "en_US",
+  /** For search results, which show about 150 characters. */
+  metaDescription:
+    "Copybook is an open-source TypeScript toolkit that turns the code snippets and agent prompts in your product into typed, tested, versioned definitions.",
   name: "Copybook",
+  publisher: { name: "Neon", url: "https://neon.com" },
+  /** The landing page's `<title>`. "Copybook" alone is a common word. */
+  title: "Copybook: typed, tested code snippets and agent prompts",
   url: process.env.NEXT_PUBLIC_SITE_URL ?? defaultSiteUrl,
 } as const;
 
