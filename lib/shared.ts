@@ -46,3 +46,17 @@ export const getPageMarkdownUrl = (page: {
 
   return { segments, url: getContentUrl(segments, page.locale) };
 };
+
+/** Open Graph images are 1.91:1, the size every platform crops from. */
+export const ogImageSize = { height: 630, width: 1200 } as const;
+
+/** Each docs page's Open Graph image, rendered at build time. */
+export const docsImageRoute = "/og/docs";
+
+const getImageUrl = createGetUrl(docsImageRoute);
+
+export const getPageImage = (page: { locale?: string; slugs: string[] }) => {
+  const segments = [...page.slugs, "image.png"];
+
+  return { segments, url: getImageUrl(segments, page.locale) };
+};

@@ -6,7 +6,7 @@ import { siteConfig } from "@/lib/shared";
 /** The landing page's image, and the fallback for any page without one. */
 export const alt = `${siteConfig.name}: ${HOME.title}`;
 export const contentType = "image/png";
-export { OG_SIZE as size } from "@/lib/og";
+export { ogImageSize as size } from "@/lib/shared";
 
 const Image = () => renderOgImage(<OgHomeCard />);
 

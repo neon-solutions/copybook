@@ -4,8 +4,7 @@ import path from "node:path";
 import { ImageResponse } from "next/og";
 import type { ReactElement } from "react";
 
-/** The size every platform crops from: 1.91:1. */
-export const OG_SIZE = { height: 630, width: 1200 } as const;
+import { ogImageSize } from "./shared";
 
 const readFont = (file: string) =>
   readFile(path.join(process.cwd(), "assets/fonts", file));
@@ -26,4 +25,4 @@ const fonts = Promise.all([
 ]);
 
 export const renderOgImage = async (element: ReactElement) =>
-  new ImageResponse(element, { ...OG_SIZE, fonts: await fonts });
+  new ImageResponse(element, { ...ogImageSize, fonts: await fonts });

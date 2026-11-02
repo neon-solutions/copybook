@@ -6,7 +6,7 @@
  * like the hero's.
  */
 
-import { OG_SIZE } from "@/lib/og";
+import { ogImageSize } from "@/lib/shared";
 
 type Rgb = readonly [number, number, number];
 
@@ -16,7 +16,7 @@ const ACCENT: Rgb = [59, 130, 246];
 
 const COLUMNS = 110;
 const ROWS = 5;
-const PERIOD = OG_SIZE.width / COLUMNS;
+const PERIOD = ogImageSize.width / COLUMNS;
 const BAR_WIDTH = 3;
 /** Share of blocks that are lit. */
 const DENSITY = 0.34;
@@ -56,10 +56,13 @@ const MASKS: Record<AuroraLayout, (x: number, y: number) => number> = {
     smoothstep(
       0.7,
       1,
-      Math.hypot((x - OG_SIZE.width / 2) / 660, (y - OG_SIZE.height / 2) / 300)
+      Math.hypot(
+        (x - ogImageSize.width / 2) / 660,
+        (y - ogImageSize.height / 2) / 300
+      )
     ),
   // Copy on the left, so the bars gather on the right.
-  start: (x) => smoothstep(0.6, 0.94, x / OG_SIZE.width),
+  start: (x) => smoothstep(0.6, 0.94, x / ogImageSize.width),
 };
 
 interface Bar {
@@ -92,17 +95,17 @@ const layoutBars = (seed: number, layout: AuroraLayout) => {
   ) => {
     const left = column * PERIOD + (PERIOD - BAR_WIDTH) / 2;
     const breath = 0.55 + 0.45 * hash(column + seed, row);
-    const alpha = breath * mask(left, center * OG_SIZE.height);
+    const alpha = breath * mask(left, center * ogImageSize.height);
     if (alpha < MIN_ALPHA) {
       return;
     }
     const [red, green, blue] = barColor(column + seed, row);
     bars.push({
       color: `rgba(${red}, ${green}, ${blue}, ${alpha.toFixed(2)})`,
-      height: half * 2 * OG_SIZE.height,
+      height: half * 2 * ogImageSize.height,
       key: `${row}-${column}-${bars.length}`,
       left,
-      top: (center - half) * OG_SIZE.height,
+      top: (center - half) * ogImageSize.height,
     });
   };
 
