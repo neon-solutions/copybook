@@ -1,3 +1,5 @@
+import { isDeepStrictEqual } from "node:util";
+
 import type { PackageManager } from "../package-manager";
 
 export interface McpServerEntry {
@@ -31,10 +33,21 @@ export const mcpServerEntry = ({
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
+const ARRAY_OF_PRIMITIVES = /\[\n[^[\]{}]*\n\s*\]/gu;
+const INLINE_ARRAY_LIMIT = 60;
+
+/** JSON with short arrays on one line, the way formatters print it. */
+const formatJson = (value: unknown) =>
+  `${JSON.stringify(value, null, 2).replaceAll(ARRAY_OF_PRIMITIVES, (array) => {
+    const inline = `[${(JSON.parse(array) as unknown[]).map((item) => JSON.stringify(item)).join(", ")}]`;
+    return inline.length <= INLINE_ARRAY_LIMIT ? inline : array;
+  })}\n`;
+
 /**
  * Adds the `copybook` server to an MCP config's `key` (`mcpServers`, or
- * `servers` for VS Code), keeping every other server. Returns undefined
- * when the file isn't strict JSON, so it can be left alone.
+ * `servers` for VS Code), keeping every other server. Returns the file as
+ * it is when the server is already there, however it's formatted, and
+ * undefined when the file isn't strict JSON, so it can be left alone.
  */
 export const mergeMcpConfig = (
   text: string | undefined,
@@ -57,9 +70,8 @@ export const mergeMcpConfig = (
   if (servers !== undefined && !isRecord(servers)) {
     return undefined;
   }
-  return `${JSON.stringify(
-    { ...config, [key]: { ...servers, copybook: entry } },
-    null,
-    2
-  )}\n`;
+  if (text !== undefined && isDeepStrictEqual(servers?.copybook, entry)) {
+    return text;
+  }
+  return formatJson({ ...config, [key]: { ...servers, copybook: entry } });
 };

@@ -3,6 +3,7 @@ const END = "<!-- copybook:end -->";
 
 /** The Copybook section of AGENTS.md, between markers so it can update. */
 export const renderAgentsBlock = ({ runner }: { runner: string }) => `${START}
+
 ## Copybook
 
 The code snippets, shell commands, and coding-agent prompts in this product's UI are Copybook definitions, configured in \`copybook.config.ts\`. Before changing one, run \`${runner} status --json\`. After changing one, run \`${runner} snapshot\` and \`${runner} check\`, and commit the snapshots with the code. The Copybook skill in \`.agents/skills/copybook\` and the \`copybook\` MCP server have the details. Docs for agents: https://copybook.dev/llms.txt
