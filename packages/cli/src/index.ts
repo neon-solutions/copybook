@@ -34,6 +34,14 @@ export { buildSnapshots } from "./validate";
 export type { Issue, IssueCode } from "./validate";
 export { readResults, RESULTS_DIR } from "./results";
 export { buildStatus } from "./status";
+export { buildCatalog, COMMAND_META } from "./catalog";
+export type {
+  AgentPolicy,
+  CatalogCommand,
+  CatalogOption,
+  CommandCatalog,
+  CommandEffect,
+} from "./catalog";
 export { definitionDetail, definitionMarkdown, renderOutputs } from "./detail";
 export type { DefinitionDetail, DefinitionOutput } from "./detail";
 export type { StatusReport } from "./status";
