@@ -41,7 +41,9 @@ const toAgentMarkdown = (markdown: string, url: string) =>
     .replaceAll(DEMO, `_Interactive preview: ${siteConfig.url}${url}_`);
 
 export const docsLlms = llms(source, {
-  renderPage: async (page) => `# ${page.data.title} (${page.url})
+  renderPage: async (
+    page
+  ) => `# ${page.data.title} (${siteConfig.url}${page.url})
 
 ${toAgentMarkdown(await page.data.getText("processed"), page.url)}`,
 });
