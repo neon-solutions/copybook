@@ -64,7 +64,7 @@ export const COMMAND_META = {
     ],
     json: true,
     notes:
-      "Writes copybook.config.ts, an AGENTS.md section, the Copybook skill, MCP configs, and a .gitignore entry, and installs the packages. Safe to run again; --dry-run shows what would change.",
+      "It changes only what's out of date: copybook.config.ts, an AGENTS.md section, the Copybook skill, MCP configs, a .gitignore entry, and missing packages. --dry-run shows what would change.",
   },
   list: {
     agent: "safe",

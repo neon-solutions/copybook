@@ -1,3 +1,4 @@
+import { commandsMarkdown } from "@/lib/catalog";
 import { docsMcp, siteConfig } from "@/lib/shared";
 import { docsLlms } from "@/lib/source";
 
@@ -22,6 +23,12 @@ Start here: ${siteConfig.url}/index.md explains what Copybook is, how to set it 
 Every page in one file: ${siteConfig.url}/llms-full.txt
 
 Read, list, and search these docs over MCP: ${docsMcp.url}
+
+## CLI commands
+
+${commandsMarkdown()}
+
+## Docs
 `;
 
   return new Response(

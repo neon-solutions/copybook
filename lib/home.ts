@@ -3,6 +3,7 @@ import { render, toText } from "@copybook/core";
 import { EMBEDS, ENTRIES } from "@/components/landing/studio-data";
 import type { StudioEntry } from "@/components/landing/studio-data";
 import { init, setupPrompt } from "@/content/definitions/get-started";
+import { commandsMarkdown } from "@/lib/catalog";
 import { docsMcp, githubUrl, siteConfig } from "@/lib/shared";
 
 /** The landing page copy, shared by the page and its Markdown version. */
@@ -15,16 +16,6 @@ export const HOME = {
 } as const;
 
 const fence = (lang: string, body: string) => `\`\`\`${lang}\n${body}\n\`\`\``;
-
-/** The commands people run first, in order. */
-const FIRST_COMMANDS = [
-  ["npx copybook list", "what exists, and where it's shown"],
-  ["npx copybook snapshot", "write rendered snapshots; commit them"],
-  ["npx copybook check", "in CI: fail when a snapshot is stale"],
-  ["npx copybook test", "parse, typecheck, and run snippets"],
-  ["CI=true npx copybook eval", "give prompts to coding agents"],
-  ["npx copybook studio", "browse everything locally"],
-] as const;
 
 const describeEntry = ({ definition, source }: StudioEntry) => {
   const placements = definition.placements ?? [];
@@ -57,12 +48,13 @@ ${fence("text", toText(render(setupPrompt)))}
 
 ${fence("bash", toText(render(init)))}
 
-\`init\` writes \`copybook.config.ts\` and installs \`@copybook/core\` and \`@copybook/cli\`. Then:
+\`init\` writes \`copybook.config.ts\`, installs \`@copybook/core\` and \`@copybook/cli\`, and sets up coding agents: an \`AGENTS.md\` section, the Copybook skill, and the \`copybook\` MCP server. Then run \`npx copybook status --json\`: its \`next\` field lists what to do, with the command and MCP tool for each step.
 
-${fence(
-  "bash",
-  FIRST_COMMANDS.map(([command, what]) => `${command}  # ${what}`).join("\n")
-)}
+## Every command
+
+Every command except \`report\` takes \`--json\`. Exit codes: 0 when everything is fine, 1 when a command found problems, 2 when it couldn't run.
+
+${commandsMarkdown()}
 
 ## What Copybook Studio shows
 

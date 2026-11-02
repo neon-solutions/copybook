@@ -53,3 +53,18 @@ export const optionsMarkdown = (name: string) => {
     ),
   ].join("\n");
 };
+
+export const POLICY_LABELS = {
+  ask: "ask first",
+  "ci-only": "CI only",
+  safe: "agents can run it",
+} as const;
+
+/** Every command as a Markdown list, for index.md and llms.txt. */
+export const commandsMarkdown = () =>
+  cliCatalog.commands
+    .map(
+      (command) =>
+        `- \`${command.usage}\` (${POLICY_LABELS[command.agent]}): ${sentence(command.summary)}${command.notes ? ` ${command.notes}` : ""}`
+    )
+    .join("\n");
