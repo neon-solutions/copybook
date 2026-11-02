@@ -1,0 +1,53 @@
+name: Publish
+
+on:
+  release:
+    types:
+      - published
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: publish-${{ github.event.release.tag_name }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Verify and publish packages
+    environment: npm
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out release tag
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.release.tag_name }}
+      - name: Install pnpm
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+        with:
+          run_install: false
+      - name: Install Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+          registry-url: https://registry.npmjs.org
+      - name: Check lockfile hosts
+        run: node scripts/check-lockfile.mjs
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Verify release versions
+        run: node scripts/check-release.mjs "${{ github.event.release.tag_name }}"
+      - name: Check formatting and lint
+        run: pnpm check
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Test packages
+        run: pnpm test
+      - name: Check package exports and size
+        run: pnpm check:packages
+      - name: Check and test content
+        run: pnpm check:content && pnpm test:content
+      - name: Publish with provenance
+        run: pnpm --filter "./packages/*" publish --access public --provenance --no-git-checks --tag ${{ github.event.release.prerelease && 'next' || 'latest' }}

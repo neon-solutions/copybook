@@ -1,0 +1,81 @@
+name: Evals
+
+# Runs prompt evals with real coding agents. Agents get full permissions
+# inside a temp directory, so this only runs on GitHub-hosted runners.
+on:
+  schedule:
+    - cron: "0 4 * * *"
+  workflow_dispatch:
+  pull_request:
+    types: [labeled, synchronize]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: evals-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  evals:
+    name: Prompt evals
+    # Manual runs always go. Nightly runs wait for the RUN_EVALS repository
+    # variable, so nothing runs before the ANTHROPIC_API_KEY secret exists.
+    # Pull requests only run when a maintainer adds the run-evals label.
+    if: >-
+      github.event_name == 'workflow_dispatch' || (github.event_name == 'schedule' && vars.RUN_EVALS == 'true') || (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'run-evals'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      CI: "true"
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Install pnpm
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+        with:
+          run_install: false
+      - name: Install Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build packages
+        run: pnpm build:packages
+      - name: Install Claude Code
+        run: npm install --global @anthropic-ai/claude-code
+      - name: Check out eval history
+        # History lives on an orphan branch, so git stays the only storage.
+        run: |
+          if git ls-remote --exit-code --heads origin copybook-results >/dev/null; then
+            git worktree add copybook-results origin/copybook-results
+          else
+            git worktree add --orphan -b copybook-results copybook-results
+          fi
+      - name: Run evals
+        working-directory: examples/acme
+        run: |
+          args="--history-dir ../../copybook-results/evals --budget-usd 10"
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            args="$args --changed --base origin/${{ github.base_ref }}"
+          fi
+          pnpm exec copybook eval $args
+      - name: Upload transcripts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: eval-results
+          path: examples/acme/.copybook/results
+      - name: Save eval history
+        if: always() && github.event_name != 'pull_request'
+        working-directory: copybook-results
+        run: |
+          git add evals
+          if git diff --cached --quiet; then exit 0; fi
+          git -c user.name="github-actions[bot]" -c user.email="github-actions[bot]@users.noreply.github.com" commit -m "chore(evals) record results for ${GITHUB_SHA::7}"
+          git push origin HEAD:copybook-results
