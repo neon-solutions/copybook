@@ -12,10 +12,10 @@ description: API reference for definitions, params, and rendering.
 | `definePrompt(input)` | Text for a coding agent. |
 | `defineCollection({ idPrefix, items, key, build })` | Definitions generated from data, with ids `<idPrefix>.<key>`. |
 | `skip(reason)` | A `verify` value that never runs the definition. |
-| `isDefinition(value)`, `isCollection(value)` | Type guards based on the brands. |
+| `isDefinition(value)`, `isCollection(value)`, `isFragment(value)` | Type guards based on the brands. A fragment is what a `t` template returns. |
 | `variantKey(dimensions, when)` | Builds a canonical variant key. |
 
-Definitions are frozen objects branded with `DEFINITION` (`Symbol.for("copybook.def")`). Collections are branded with `COLLECTION`.
+Definitions are frozen objects branded with `DEFINITION` (`Symbol.for("copybook.def")`). Collections are branded with `COLLECTION`, and fragments with `FRAGMENT`.
 
 ## Params
 
@@ -30,6 +30,7 @@ Definitions are frozen objects branded with `DEFINITION` (`Symbol.for("copybook.
 | `render(definition, values?, options?)` | Renders with real values. Throws if a required param is missing. |
 | `renderExample(definition, { values?, variant? })` | Renders with example values, filling in any `values` you pass. |
 | `selectVariant(snippet, selection?)` | Returns the matching variant, or throws. |
+| `listVariants(snippet)` | Every variant as `{ key, label, when, lang? }`, in declaration order. `label` joins the option labels, such as `AI SDK · .env`. |
 | `toText(rendered, { format? })` | The text to copy. `format` is `"markdown"` (default) or `"plain"`. |
 | `toSegments(rendered, { format? })` | Flat segments for highlighted UIs. |
 | `collectCommands(rendered)` | Every embedded command, as `{ id?, text }`. |

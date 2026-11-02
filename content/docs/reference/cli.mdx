@@ -47,9 +47,32 @@ Validates definitions and compares snapshots. It exits with status 1 on any erro
 
 Parses, typechecks, and runs commands and snippets. See [Testing](/docs/guides/testing).
 
+| Flag | Description |
+| --- | --- |
+| `-t, --tier <tiers>` | Comma-separated tiers: `syntax`, `typecheck`, and `run`. Defaults to `syntax,typecheck`. |
+| `--only <ids...>` | Only these definition ids. |
+| `--changed` | Only definitions whose rendered output changed since `--base`. |
+| `--base <ref>` | The git ref to compare against. Defaults to `HEAD`. |
+| `--reporter <reporter>` | `pretty`, `json`, or `junit`. Defaults to `pretty`. |
+| `-o, --output <file>` | Also write the JSON or JUnit report to a file. |
+| `--concurrency <n>` | How many cases run at once. |
+
 ## `eval`
 
-Gives prompts to coding agents and checks what they did. See [Evals](/docs/guides/evals).
+Gives prompts to coding agents and checks what they did. It refuses to run outside CI unless you pass `--unsafe-local`. See [Evals](/docs/guides/evals).
+
+| Flag | Description |
+| --- | --- |
+| `--only <ids...>` | Only these prompt ids. |
+| `--agent <names...>` | Only these agents. |
+| `--trials <n>` | Override each eval's trial count. |
+| `--budget-usd <amount>` | Stop starting trials after spending this much. |
+| `--changed` | Only prompts whose rendered output changed since `--base`. |
+| `--base <ref>` | The git ref to compare against. Defaults to `HEAD`. |
+| `--history-dir <dir>` | Append results to `<dir>/<id>.jsonl`, and skip prompts already evaluated. |
+| `--force` | Re-run prompts that the history says are unchanged. |
+| `--json` | Print the report as JSON. |
+| `--unsafe-local` | Allow running outside CI. Agents get full permissions in a directory that isn't isolated from your machine. |
 
 ## `usages`
 
@@ -70,6 +93,12 @@ Prints a Markdown summary of changed definitions for pull request comments. See 
 ## `studio`
 
 Starts the local Studio UI. See [Studio](/docs/guides/studio).
+
+| Flag                | Description                                |
+| ------------------- | ------------------------------------------ |
+| `-p, --port <port>` | The port to listen on. Defaults to `4983`. |
+| `--host <host>`     | The host to bind. Defaults to `127.0.0.1`. |
+| `--api-only`        | Serve only the JSON API.                   |
 
 ## Programmatic API
 
