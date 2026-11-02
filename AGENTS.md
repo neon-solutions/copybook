@@ -135,3 +135,10 @@ Oxlint + Oxfmt will catch most mechanical issues automatically. Focus your atten
 ---
 
 Most formatting and common issues are automatically fixed by Oxlint + Oxfmt. Run `pnpm exec ultracite fix` before committing to ensure compliance.
+
+<!-- copybook:start -->
+
+## Copybook
+
+The code snippets, shell commands, and coding-agent prompts in this product's UI are Copybook definitions, configured in `copybook.config.ts`. Before changing one, run `pnpm exec copybook status --json`. After changing one, run `pnpm exec copybook snapshot` and `pnpm exec copybook check`, and commit the snapshots with the code. The Copybook skill in `.agents/skills/copybook` and the `copybook` MCP server have the details. Docs for agents: https://copybook.dev/llms.txt
+<!-- copybook:end -->

@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "copybook": {
+      "args": ["exec", "copybook", "mcp"],
+      "command": "pnpm"
+    }
+  }
+}
