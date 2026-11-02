@@ -26,6 +26,19 @@ import {
 type Definition = StudioEntry["definition"];
 type Select = (id: string) => void;
 
+/** A server-rendered panel that sits next to the definitions. */
+export interface StudioView {
+  id: string;
+  label: string;
+  panel: ReactNode;
+}
+
+/** Element ids for a sidebar item and the panel it controls. */
+interface Ids {
+  button: (id: string) => string;
+  panel: (id: string) => string;
+}
+
 const GROUPS = [
   { kind: "prompt", label: "Prompts" },
   { kind: "snippet", label: "Snippets" },
@@ -49,12 +62,19 @@ const SnapshotDot = () => (
   />
 );
 
+const itemClass =
+  "text-muted-foreground hover:bg-muted hover:text-foreground aria-[current]:bg-muted aria-[current]:text-foreground focus-visible:ring-ring/50 flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs outline-none focus-visible:ring-2";
+
 const Sidebar = ({
+  ids,
   onSelect,
   selected,
+  views,
 }: {
+  ids: Ids;
   onSelect: Select;
   selected: string;
+  views: readonly StudioView[];
 }) => {
   const searchId = useId();
   const [query, setQuery] = useState("");
@@ -88,10 +108,12 @@ const Sidebar = ({
                 {items.map(({ definition }) => (
                   <li key={definition.id}>
                     <button
+                      aria-controls={ids.panel(definition.id)}
                       aria-current={
                         definition.id === selected ? "true" : undefined
                       }
-                      className="text-muted-foreground hover:bg-muted hover:text-foreground aria-[current]:bg-muted aria-[current]:text-foreground focus-visible:ring-ring/50 flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left font-mono text-xs outline-none focus-visible:ring-2"
+                      className={`${itemClass} font-mono`}
+                      id={ids.button(definition.id)}
                       onClick={() => onSelect(definition.id)}
                       type="button"
                     >
@@ -106,6 +128,27 @@ const Sidebar = ({
         })}
         {visible.length === 0 ? (
           <p className="text-muted-foreground px-2 text-sm">No matches.</p>
+        ) : null}
+        {views.length > 0 ? (
+          <section className="flex flex-col gap-1">
+            <h4 className="eyebrow px-2">Project</h4>
+            <ul className="flex flex-col">
+              {views.map((view) => (
+                <li key={view.id}>
+                  <button
+                    aria-controls={ids.panel(view.id)}
+                    aria-current={view.id === selected ? "true" : undefined}
+                    className={itemClass}
+                    id={ids.button(view.id)}
+                    onClick={() => onSelect(view.id)}
+                    type="button"
+                  >
+                    {view.label}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </section>
         ) : null}
       </div>
     </nav>
@@ -238,11 +281,19 @@ const IdLinks = ({
     </ul>
   );
 
+const NO_VIEWS: readonly StudioView[] = [];
+
+const panelClass = "flex min-w-0 flex-1 flex-col gap-7 overflow-y-auto p-6";
+
 const DefinitionPanel = ({
   entry,
+  hidden,
+  ids,
   onSelect,
 }: {
   entry: StudioEntry;
+  hidden: boolean;
+  ids: Ids;
   onSelect: Select;
 }) => {
   const { definition } = entry;
@@ -252,7 +303,12 @@ const DefinitionPanel = ({
   const placements = definition.placements ?? [];
 
   return (
-    <article className="flex min-w-0 flex-1 flex-col gap-7 overflow-y-auto p-6">
+    <article
+      aria-labelledby={ids.button(definition.id)}
+      className={panelClass}
+      hidden={hidden}
+      id={ids.panel(definition.id)}
+    >
       <header className="flex flex-col gap-2">
         <p className="eyebrow">{definition.kind}</p>
         <h3 className="text-foreground font-mono text-lg font-semibold break-all">
@@ -264,7 +320,7 @@ const DefinitionPanel = ({
         <div className="text-muted-foreground flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
           <span className="inline-flex items-center gap-2">
             <SnapshotDot />
-            Snapshot up to date
+            Snapshot committed
           </span>
           <code className="font-mono">{entry.source}</code>
         </div>
@@ -352,12 +408,21 @@ const DefinitionPanel = ({
 
 /**
  * Copybook Studio in a window: the Acme example's real definitions, with
- * live params, rendered through the registry components.
+ * live params, rendered through the registry components. Every panel is in
+ * the server HTML, so agents that read the page see all of them; the
+ * inactive ones are `hidden`.
  */
-export const StudioWindow = () => {
+export const StudioWindow = ({
+  views = NO_VIEWS,
+}: {
+  views?: readonly StudioView[];
+}) => {
   const [selected, setSelected] = useState(ENTRIES[0]?.definition.id ?? "");
-  const entry =
-    ENTRIES.find(({ definition }) => definition.id === selected) ?? ENTRIES[0];
+  const base = useId();
+  const ids: Ids = {
+    button: (id) => `${base}-item-${id}`,
+    panel: (id) => `${base}-panel-${id}`,
+  };
 
   return (
     <div className="bg-card text-card-foreground shadow-window overflow-hidden rounded-xl">
@@ -382,14 +447,32 @@ export const StudioWindow = () => {
         </p>
       </div>
       <div className="flex flex-col md:h-160 md:flex-row">
-        <Sidebar onSelect={setSelected} selected={entry?.definition.id ?? ""} />
-        {entry ? (
+        <Sidebar
+          ids={ids}
+          onSelect={setSelected}
+          selected={selected}
+          views={views}
+        />
+        {ENTRIES.map((entry) => (
           <DefinitionPanel
             entry={entry}
+            hidden={entry.definition.id !== selected}
+            ids={ids}
             key={entry.definition.id}
             onSelect={setSelected}
           />
-        ) : null}
+        ))}
+        {views.map((view) => (
+          <section
+            aria-labelledby={ids.button(view.id)}
+            className={panelClass}
+            hidden={view.id !== selected}
+            id={ids.panel(view.id)}
+            key={view.id}
+          >
+            {view.panel}
+          </section>
+        ))}
       </div>
     </div>
   );

@@ -119,7 +119,8 @@ export const checksFor = (
 ): { label: string; check: string }[] => {
   if (definition.kind === "prompt") {
     return [
-      { check: "eval: 3 trials, pass rate 67%", label: "Agents" },
+      // From examples/acme/verify/create-project.verify.ts.
+      { check: "eval: 3 trials per agent, needs 67%", label: "Agents" },
       { check: "embedded commands tested", label: "Commands" },
     ];
   }

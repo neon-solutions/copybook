@@ -7,14 +7,8 @@ import {
   MetaStrip,
 } from "@/components/landing/primitives";
 import { NeonAurora } from "@/components/neon-aurora/neon-aurora";
+import { HOME } from "@/lib/home";
 import { githubUrl } from "@/lib/shared";
-
-const META = [
-  "MIT",
-  "TypeScript",
-  "shadcn registry",
-  "git is the only storage",
-];
 
 /** The copy rises in, staggered, while the aurora comes alive. */
 export const Hero = ({ window }: { window?: ReactNode }) => (
@@ -33,20 +27,15 @@ export const Hero = ({ window }: { window?: ReactNode }) => (
     </div>
 
     <Container className="flex flex-col items-center text-center">
-      <p className="hero-enter hero-delay-150 eyebrow">
-        Open-source toolkit for in-product snippets and agent prompts
-      </p>
+      <p className="hero-enter hero-delay-150 eyebrow">{HOME.eyebrow}</p>
       <h1
         className="hero-enter hero-delay-250 text-display tracking-display text-foreground mt-5 max-w-4xl font-normal text-balance"
         id="top-title"
       >
-        Your users copy it. Copybook proves it works.
+        {HOME.title}
       </h1>
       <p className="hero-enter hero-delay-400 text-body-lg text-muted-foreground mt-6 max-w-xl text-pretty">
-        Copybook turns the code snippets and coding-agent prompts in your UI
-        into typed, versioned definitions. It tests every example, measures
-        prompts against real agents, and tracks where each one is shown and when
-        it changed.
+        {HOME.description}
       </p>
       <div className="hero-enter hero-delay-550 mt-8 flex flex-wrap justify-center gap-2">
         <LinkButton href="/docs/quick-start" size="lg">
@@ -59,7 +48,7 @@ export const Hero = ({ window }: { window?: ReactNode }) => (
         </LinkButton>
       </div>
       <div className="hero-enter hero-delay-650 mt-5">
-        <MetaStrip items={META} />
+        <MetaStrip items={[...HOME.meta]} />
       </div>
       {window ? (
         <div className="hero-enter-window hero-delay-800 mt-16 w-full max-w-5xl text-left">
