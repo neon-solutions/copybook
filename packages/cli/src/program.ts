@@ -6,6 +6,7 @@ import { registerInit } from "./commands/init";
 import { registerList } from "./commands/list";
 import { registerReport } from "./commands/report";
 import { registerSnapshot } from "./commands/snapshot";
+import { registerStatus } from "./commands/status";
 import { registerStudio } from "./commands/studio";
 import { registerTest } from "./commands/test";
 import { registerUsages } from "./commands/usages";
@@ -36,6 +37,9 @@ export const createProgram = (options: { json?: boolean } = {}): Command => {
     .addHelpText(
       "after",
       `
+Agents: start with \`${BIN_NAME} status --json\`. Every command except
+report and studio takes --json, and its \`next\` field lists what to do.
+
 Exit codes: 0 when everything is fine, 1 when a command found problems,
 2 when it couldn't run.
 
@@ -43,6 +47,7 @@ Docs: ${DOCS_URL}`
     );
 
   registerInit(program);
+  registerStatus(program);
   registerList(program);
   registerSnapshot(program);
   registerCheck(program);

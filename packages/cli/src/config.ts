@@ -47,6 +47,8 @@ export interface Config {
 }
 
 export interface ResolvedConfig extends Config {
+  /** The config file's absolute path. */
+  file: string;
   /** The directory that holds the config file. Globs are relative to it. */
   root: string;
   snapshotsDir: string;
@@ -123,6 +125,7 @@ export const loadConfig = async (
   }
   return {
     ...config,
+    file,
     root,
     snapshotsDir: path.resolve(
       root,

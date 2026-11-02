@@ -11,12 +11,22 @@ const LOCKFILES: readonly (readonly [string, PackageManager])[] = [
   ["package-lock.json", "npm"],
 ];
 
-/** The project's package manager, from its lockfile. npm without one. */
+/**
+ * The project's package manager, from the nearest lockfile in `root` or a
+ * parent, so workspace packages find the workspace's. npm without one.
+ */
 export const detectPackageManager = (root: string): PackageManager => {
-  for (const [lockfile, manager] of LOCKFILES) {
-    if (existsSync(path.join(root, lockfile))) {
-      return manager;
+  let directory = path.resolve(root);
+  for (;;) {
+    for (const [lockfile, manager] of LOCKFILES) {
+      if (existsSync(path.join(directory, lockfile))) {
+        return manager;
+      }
     }
+    const parent = path.dirname(directory);
+    if (parent === directory) {
+      return "npm";
+    }
+    directory = parent;
   }
-  return "npm";
 };

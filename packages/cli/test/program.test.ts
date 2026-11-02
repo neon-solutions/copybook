@@ -113,6 +113,22 @@ describe(runCli, () => {
     expect(result.definitions[0]).toHaveProperty("snapshot");
   });
 
+  it("reports status, with what to do next, and exits 0", async () => {
+    const { code, stdout } = await run(["status", "--json"]);
+    const status = JSON.parse(stdout);
+
+    expect(code).toBe(0);
+    expect(status).toMatchObject({
+      clean: false,
+      config: { content: ["src/**/*.ts"], file: "copybook.config.ts" },
+      ok: true,
+      runner: "pnpm exec copybook",
+      schemaVersion: 1,
+    });
+    expect(status.snapshots.missing).toContain("fixture.hello");
+    expect(status.next[0]).toMatchObject({ code: "write-snapshots" });
+  });
+
   it("exits 1 when check finds problems", async () => {
     const { code, stderr } = await run(["check"]);
 

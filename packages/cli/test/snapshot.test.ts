@@ -84,6 +84,7 @@ const projectWith = (
 ): Project => ({
   config: {
     content: [],
+    file: "/copybook.config.ts",
     placements: { "docs/home": {} },
     root: "/",
     snapshotsDir: "/snapshots",
