@@ -48,6 +48,14 @@ export const SiteFooter = () => (
           >
             registry.json
           </Link>,
+          <Link
+            className="hover:text-foreground underline-offset-4 hover:underline"
+            href="/llms.txt"
+            key="llms"
+            prefetch={false}
+          >
+            llms.txt
+          </Link>,
         ]}
       />
       <p className="text-muted-foreground text-sm">

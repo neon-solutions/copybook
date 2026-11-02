@@ -9,10 +9,16 @@ const { rewrite: rewriteDocs } = rewritePath(
   `${docsContentRoute}{/*path}/content.md`
 );
 
-/** Serves docs pages as Markdown to agents that ask for it via `Accept`. */
+const rewriteHome = (path: string) => (path === "/" ? "/index.md" : false);
+
+/**
+ * Serves the landing page and docs pages as Markdown to agents that ask for
+ * it via `Accept`.
+ */
 export const proxy = (request: NextRequest) => {
   if (isMarkdownPreferred(request)) {
-    const negotiated = rewriteDocs(request.nextUrl.pathname);
+    const { pathname } = request.nextUrl;
+    const negotiated = rewriteHome(pathname) || rewriteDocs(pathname);
 
     if (negotiated) {
       return NextResponse.rewrite(new URL(negotiated, request.nextUrl), {
@@ -26,5 +32,5 @@ export const proxy = (request: NextRequest) => {
 };
 
 export const config = {
-  matcher: "/docs/:path*",
+  matcher: ["/", "/docs/:path*"],
 };

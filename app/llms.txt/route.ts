@@ -17,6 +17,8 @@ export const GET = async () => {
 
 > ${siteConfig.description}
 
+Start here: ${siteConfig.url}/index.md explains what Copybook is, how to set it up, and the prompt to give a coding agent.
+
 Every page in one file: ${siteConfig.url}/llms-full.txt
 `;
 
