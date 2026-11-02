@@ -10,7 +10,9 @@ import { createRelativeLink } from "fumadocs-ui/mdx";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { JsonLd } from "@/components/json-ld";
 import { getMDXComponents } from "@/components/mdx";
+import { docsPageJsonLd } from "@/lib/seo";
 import {
   getPageImage,
   getPageMarkdownUrl,
@@ -32,6 +34,7 @@ const Page = async (props: PageProps<"/docs/[[...slug]]">) => {
 
   return (
     <DocsPage full={page.data.full} toc={page.data.toc}>
+      <JsonLd data={docsPageJsonLd(page)} />
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription className="mb-0">
         {page.data.description}

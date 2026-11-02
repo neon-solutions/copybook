@@ -1,8 +1,10 @@
 import { Inter } from "next/font/google";
 import type { ReactNode } from "react";
 
+import { JsonLd } from "@/components/json-ld";
 import { SiteFooter } from "@/components/landing/site-footer";
 import { SiteNav } from "@/components/landing/site-nav";
+import { homeJsonLd } from "@/lib/seo";
 import { cn } from "@/lib/utils";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -10,6 +12,7 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 /** The landing page follows the same light or dark theme as the docs. */
 const HomeLayout = ({ children }: Readonly<{ children: ReactNode }>) => (
   <div className={cn("landing flex flex-1 flex-col", inter.variable)}>
+    <JsonLd data={homeJsonLd()} />
     <a
       className="bg-primary text-primary-foreground fixed top-3 left-3 z-50 -translate-y-20 rounded-lg px-3 py-2 text-sm font-medium focus-visible:translate-y-0"
       href="#main"
