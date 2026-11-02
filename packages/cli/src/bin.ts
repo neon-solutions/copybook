@@ -1,9 +1,3 @@
-import { writeError } from "./output";
-import { createProgram } from "./program";
+import { runCli } from "./run";
 
-try {
-  await createProgram().parseAsync(process.argv);
-} catch (error) {
-  writeError(error instanceof Error ? error.message : String(error));
-  process.exitCode = 1;
-}
+process.exitCode = await runCli(process.argv.slice(2));

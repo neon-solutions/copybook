@@ -7,6 +7,7 @@ import { glob } from "tinyglobby";
 import { bundleAndImport } from "./bundle";
 import { loadConfig } from "./config";
 import type { ResolvedConfig } from "./config";
+import { CopybookError } from "./errors";
 
 export interface LoadedDefinition {
   definition: Definition;
@@ -73,7 +74,8 @@ export const collectDefinitions = (
         seen.add(found.definition);
         const existing = byId.get(found.definition.id);
         if (existing) {
-          throw new Error(
+          throw new CopybookError(
+            "DUPLICATE_ID",
             `Duplicate id "${found.definition.id}" in ${existing.file}#${existing.exportName} and ${file}#${found.exportName}.`
           );
         }

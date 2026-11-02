@@ -3,6 +3,14 @@ title: Changelog
 description: What changed in each release.
 ---
 
+## Unreleased
+
+- **`@copybook/cli`**: exit codes now say what happened: 0 when everything is fine, 1 when a command found problems, and 2 when it couldn't run (no config, a bad option, content that fails to load, or `eval` outside CI). Scripts that check for a non-zero code are unaffected.
+- **`@copybook/cli`**: with `--json`, a failure prints `{ ok: false, error: { code, message }, next }` on stdout, and errors without `--json` end with the next step to run.
+- **`@copybook/cli`**: `test --json` is short for `--reporter json`, and `--reporter` rejects unknown values instead of falling back to JSON.
+- **`@copybook/cli`**: colors follow the output. They're off when stdout isn't a terminal, even when `CI` is set, and with `--json` or `NO_COLOR`.
+- **`@copybook/cli`**: `runCli`, `CopybookError`, and the project analysis behind `check` (`analyzeProject`, `checkIssues`, `findDefinition`, `searchDefinitions`) are exported. Every `Issue` has a `code`.
+
 ## 0.1.1
 
 Released November 2, 2026.

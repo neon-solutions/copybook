@@ -1,10 +1,16 @@
 import type { Command } from "commander";
-import pc from "picocolors";
 
 import { checkIssues, loadAnalysis } from "../analysis";
 import { colorizeDiff, snapshotPatch } from "../diff";
 import { BIN_NAME } from "../meta";
-import { formatIssue, write, writeError } from "../output";
+import {
+  cwd,
+  formatIssue,
+  colors as pc,
+  setExitCode,
+  write,
+  writeError,
+} from "../output";
 
 interface CheckOptions {
   base?: string;
@@ -20,7 +26,7 @@ export const registerCheck = (program: Command) =>
     .option("--base <ref>", "also warn about ids removed since this git ref")
     .option("-c, --config <path>", "the config file")
     .action(async (options: CheckOptions) => {
-      const analysis = await loadAnalysis(process.cwd(), options);
+      const analysis = await loadAnalysis(cwd(), options);
       const { project, snapshots, status } = analysis;
       const issues = await checkIssues(analysis, options);
 
@@ -32,10 +38,7 @@ export const registerCheck = (program: Command) =>
             : undefined;
         if (change) {
           writeError(
-            colorizeDiff(
-              snapshotPatch(change, project.config, process.cwd()),
-              pc
-            )
+            colorizeDiff(snapshotPatch(change, project.config, cwd()), pc)
           );
         }
       }
@@ -53,7 +56,7 @@ export const registerCheck = (program: Command) =>
               ? ` Run \`${BIN_NAME} snapshot${status.orphaned.length > 0 ? " --prune" : ""}\` to update snapshots.`
               : "")
         );
-        process.exitCode = 1;
+        setExitCode(1);
         return;
       }
       write(

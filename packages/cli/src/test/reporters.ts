@@ -1,5 +1,4 @@
-import pc from "picocolors";
-
+import { colors as pc } from "../output";
 import type { TestReport, TestResult } from "./types";
 
 const ICONS = {

@@ -1,10 +1,16 @@
 import path from "node:path";
 
 import type { Command } from "commander";
-import pc from "picocolors";
 
 import { loadProject } from "../load";
-import { formatIssue, write, writeError } from "../output";
+import {
+  cwd,
+  formatIssue,
+  colors as pc,
+  setExitCode,
+  write,
+  writeError,
+} from "../output";
 import { writeSnapshots } from "../snapshot";
 import { buildSnapshots } from "../validate";
 
@@ -20,11 +26,10 @@ export const registerSnapshot = (program: Command) =>
     .option("--prune", "delete snapshots of definitions that no longer exist")
     .option("-c, --config <path>", "the config file")
     .action(async (options: SnapshotOptions) => {
-      const project = await loadProject(process.cwd(), options);
+      const project = await loadProject(cwd(), options);
       const { issues, snapshots } = buildSnapshots(project);
       const status = await writeSnapshots(project.config, snapshots, options);
-      const dir =
-        path.relative(process.cwd(), project.config.snapshotsDir) || ".";
+      const dir = path.relative(cwd(), project.config.snapshotsDir) || ".";
 
       for (const issue of issues) {
         writeError(formatIssue(issue));
@@ -49,6 +54,6 @@ export const registerSnapshot = (program: Command) =>
         )
       );
       if (issues.some((issue) => issue.level === "error")) {
-        process.exitCode = 1;
+        setExitCode(1);
       }
     });

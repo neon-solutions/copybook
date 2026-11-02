@@ -6,7 +6,7 @@ import type { Command } from "commander";
 import { changedIds } from "../changes";
 import { loadProject } from "../load";
 import { buildManifest } from "../manifest";
-import { write } from "../output";
+import { cwd, write } from "../output";
 import { buildReport } from "../report";
 import { readResults } from "../results";
 import { snapshotPath } from "../snapshot";
@@ -42,7 +42,7 @@ export const registerReport = (program: Command) =>
     .option("--base <ref>", "the git ref to compare against", "origin/main")
     .option("-c, --config <path>", "the config file")
     .action(async (options: ReportOptions) => {
-      const project = await loadProject(process.cwd(), options);
+      const project = await loadProject(cwd(), options);
       const { root } = project.config;
       const { snapshots } = buildSnapshots(project);
       const ids = new Set(await changedIds(project, snapshots, options.base));

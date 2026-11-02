@@ -1,10 +1,16 @@
 import type { Command } from "commander";
-import pc from "picocolors";
 
 import { changedIds } from "../changes";
 import { loadProject } from "../load";
 import { buildManifest } from "../manifest";
-import { formatIssue, table, write, writeError } from "../output";
+import {
+  cwd,
+  formatIssue,
+  colors as pc,
+  table,
+  write,
+  writeError,
+} from "../output";
 import { buildSnapshots } from "../validate";
 
 interface ListOptions {
@@ -23,7 +29,7 @@ export const registerList = (program: Command) =>
     .option("--base <ref>", "the git ref to compare against", "HEAD")
     .option("-c, --config <path>", "the config file")
     .action(async (options: ListOptions) => {
-      const project = await loadProject(process.cwd(), options);
+      const project = await loadProject(cwd(), options);
       const { issues, snapshots } = buildSnapshots(project);
       let { definitions } = buildManifest(project.definitions, snapshots);
 

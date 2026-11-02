@@ -10,14 +10,37 @@ import { registerStudio } from "./commands/studio";
 import { registerTest } from "./commands/test";
 import { registerUsages } from "./commands/usages";
 import { BIN_NAME, DOCS_URL, VERSION } from "./meta";
+import { writeStderr, writeStdout } from "./output";
 
-export const createProgram = (): Command => {
+/**
+ * The CLI's commands. Errors throw instead of exiting, so `runCli` can map
+ * them to exit codes; with `json`, commander's own messages are left out.
+ */
+export const createProgram = (options: { json?: boolean } = {}): Command => {
+  // Subcommands inherit these, so they come before `command()` calls.
   const program = new Command(BIN_NAME)
+    .exitOverride()
+    .configureOutput({
+      outputError: (text, write) => {
+        if (!options.json) {
+          write(text);
+        }
+      },
+      writeErr: writeStderr,
+      writeOut: writeStdout,
+    })
     .description(
       "Catalog, snapshot, test, and evaluate the snippets and agent prompts in your product."
     )
     .version(VERSION)
-    .addHelpText("after", `\nDocs: ${DOCS_URL}`);
+    .addHelpText(
+      "after",
+      `
+Exit codes: 0 when everything is fine, 1 when a command found problems,
+2 when it couldn't run.
+
+Docs: ${DOCS_URL}`
+    );
 
   registerInit(program);
   registerList(program);

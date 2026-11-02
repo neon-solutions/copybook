@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 
 import { bundleAndImport } from "./bundle";
+import { CopybookError } from "./errors";
 
 export interface PlacementInfo {
   description?: string;
@@ -91,8 +92,20 @@ export const loadConfig = async (
 ): Promise<ResolvedConfig> => {
   const file = configPath ? path.resolve(cwd, configPath) : findConfig(cwd);
   if (!file || !existsSync(file)) {
-    throw new Error(
-      "No copybook.config.ts found. Run `copybook init` to create one."
+    throw new CopybookError(
+      "CONFIG_NOT_FOUND",
+      "No copybook.config.ts found. Run `copybook init` to create one.",
+      {
+        next: [
+          {
+            argv: ["init"],
+            code: "init",
+            command: "copybook init",
+            safe: false,
+            title: "Create copybook.config.ts",
+          },
+        ],
+      }
     );
   }
   const root = path.dirname(file);
@@ -103,7 +116,8 @@ export const loadConfig = async (
   });
   const config = loaded.default;
   if (!isConfig(config)) {
-    throw new Error(
+    throw new CopybookError(
+      "CONFIG_INVALID",
       `${path.relative(cwd, file)} must default-export defineConfig({ content: [...] }).`
     );
   }

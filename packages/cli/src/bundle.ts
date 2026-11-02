@@ -7,6 +7,8 @@ import { pathToFileURL } from "node:url";
 import { build } from "esbuild";
 import type { Plugin } from "esbuild";
 
+import { CopybookError } from "./errors";
+
 interface BundleOptions {
   /** The entry module's source. */
   contents: string;
@@ -44,12 +46,8 @@ const stubPlugin = (stubs: readonly string[]): Plugin => ({
   },
 });
 
-/**
- * Bundles TypeScript sources with esbuild, so tsconfig path aliases and
- * extensionless imports resolve, then imports the result. Dependencies stay
- * external and resolve from the project's node_modules.
- */
-export const bundleAndImport = async ({
+/** Dependencies stay external and resolve from the project's node_modules. */
+const bundleAndImportUnchecked = async ({
   contents,
   name,
   root,
@@ -89,4 +87,25 @@ export const bundleAndImport = async ({
   await mkdir(cacheDir, { recursive: true });
   await writeFile(file, output.contents);
   return (await import(pathToFileURL(file).href)) as Record<string, unknown>;
+};
+
+/**
+ * Bundles TypeScript sources with esbuild, so tsconfig path aliases and
+ * extensionless imports resolve, then imports the result. A syntax error or
+ * a throw in the project's code becomes a LOAD_FAILED error.
+ */
+export const bundleAndImport = async (
+  options: BundleOptions
+): Promise<Record<string, unknown>> => {
+  try {
+    return await bundleAndImportUnchecked(options);
+  } catch (error) {
+    if (error instanceof CopybookError) {
+      throw error;
+    }
+    throw new CopybookError(
+      "LOAD_FAILED",
+      `Couldn't load the ${options.name}: ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
 };

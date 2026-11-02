@@ -1,8 +1,8 @@
 import type { Command } from "commander";
-import pc from "picocolors";
 
+import { CopybookError } from "../errors";
 import { loadProject } from "../load";
-import { write, writeError } from "../output";
+import { colors as pc, cwd, write } from "../output";
 import { findUsages } from "../usages";
 import { buildSnapshots } from "../validate";
 
@@ -18,18 +18,17 @@ export const registerUsages = (program: Command) =>
     .option("--json", "print the report as JSON")
     .option("-c, --config <path>", "the config file")
     .action(async (options: UsagesOptions) => {
-      const project = await loadProject(process.cwd(), options);
+      const project = await loadProject(cwd(), options);
       const { snapshots } = buildSnapshots(project);
       const embeds = new Map(
         snapshots.map((snapshot) => [snapshot.id, snapshot.embeds])
       );
       const report = await findUsages(project, embeds);
       if (!report) {
-        writeError(
+        throw new CopybookError(
+          "USAGE_NOT_CONFIGURED",
           'Set usage: { include: ["src/**/*.tsx"] } in the config to scan your product code.'
         );
-        process.exitCode = 1;
-        return;
       }
       if (options.json) {
         write(JSON.stringify(report, null, 2));

@@ -1,11 +1,12 @@
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
 
+import { Option } from "commander";
 import type { Command } from "commander";
-import pc from "picocolors";
 
+import { CopybookError } from "../errors";
 import { loadProject } from "../load";
-import { write } from "../output";
+import { cwd, colors as pc, setExitCode, write } from "../output";
 import { TIERS } from "../test/define";
 import type { Tier } from "../test/define";
 import { formatResult, summarize, toJUnit } from "../test/reporters";
@@ -16,6 +17,7 @@ interface TestCommandOptions {
   changed?: boolean;
   concurrency?: string;
   config?: string;
+  json?: boolean;
   only?: string[];
   output?: string;
   reporter: "json" | "junit" | "pretty";
@@ -26,7 +28,8 @@ const parseTiers = (value: string): Tier[] => {
   const tiers = value.split(",").map((tier) => tier.trim());
   const unknown = tiers.filter((tier) => !TIERS.includes(tier as Tier));
   if (unknown.length > 0) {
-    throw new Error(
+    throw new CopybookError(
+      "INVALID_OPTION",
       `Unknown tier "${unknown.join(", ")}". Use ${TIERS.join(", ")}.`
     );
   }
@@ -45,7 +48,12 @@ export const registerTest = (program: Command) =>
     .option("--only <ids...>", "only these definition ids")
     .option("--changed", "only definitions whose output changed since --base")
     .option("--base <ref>", "the git ref to compare against", "HEAD")
-    .option("--reporter <reporter>", "pretty, json, or junit", "pretty")
+    .addOption(
+      new Option("--reporter <reporter>", "how to print results")
+        .choices(["pretty", "json", "junit"])
+        .default("pretty")
+    )
+    .option("--json", "print the report as JSON, like --reporter json")
     .option(
       "-o, --output <file>",
       "also write the json or junit report to a file"
@@ -54,8 +62,9 @@ export const registerTest = (program: Command) =>
     .option("-c, --config <path>", "the config file")
     .action(async (options: TestCommandOptions) => {
       const tiers = parseTiers(options.tier);
-      const project = await loadProject(process.cwd(), options);
-      const pretty = options.reporter === "pretty";
+      const reporter = options.json ? "json" : options.reporter;
+      const project = await loadProject(cwd(), options);
+      const pretty = reporter === "pretty";
       const { cases, report } = await runProjectTests(project, {
         base: options.base,
         ...(options.changed ? { changed: true } : {}),
@@ -70,15 +79,13 @@ export const registerTest = (program: Command) =>
       });
 
       const serialized =
-        options.reporter === "junit"
+        reporter === "junit"
           ? toJUnit(report)
           : JSON.stringify(report, null, 2);
       if (options.output) {
         await writeFile(
           path.resolve(options.output),
-          options.reporter === "junit"
-            ? serialized
-            : JSON.stringify(report, null, 2)
+          reporter === "junit" ? serialized : JSON.stringify(report, null, 2)
         );
       }
       if (pretty) {
@@ -89,6 +96,6 @@ export const registerTest = (program: Command) =>
         write(serialized);
       }
       if (report.results.some((result) => result.status === "fail")) {
-        process.exitCode = 1;
+        setExitCode(1);
       }
     });

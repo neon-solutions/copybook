@@ -1,9 +1,8 @@
 import path from "node:path";
 
 import type { Command } from "commander";
-import pc from "picocolors";
 
-import { write } from "../output";
+import { cwd, colors as pc, write } from "../output";
 import { startStudio } from "../studio/server";
 
 interface StudioCommandOptions {
@@ -27,7 +26,7 @@ export const registerStudio = (program: Command) =>
       const studio = await startStudio({
         ...(options.apiOnly ? { apiOnly: true } : {}),
         ...(options.config ? { config: options.config } : {}),
-        cwd: process.cwd(),
+        cwd: cwd(),
         host: options.host,
         port: Number(options.port),
         // The CLI bundle lives in dist/, next to dist/studio.

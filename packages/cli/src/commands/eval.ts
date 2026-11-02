@@ -4,15 +4,15 @@ import path from "node:path";
 import { promisify } from "node:util";
 
 import type { Command } from "commander";
-import pc from "picocolors";
 
 import { changedIds } from "../changes";
+import { CopybookError } from "../errors";
 import { appendHistory } from "../eval/history";
 import { formatEvalResult, summarizeEvals } from "../eval/reporters";
 import { runEvals } from "../eval/runner";
 import type { EvalTarget } from "../eval/runner";
 import { loadProject } from "../load";
-import { write, writeError } from "../output";
+import { cwd, env, colors as pc, setExitCode, write } from "../output";
 import { writeResults } from "../results";
 import { loadEvalSpecs } from "../test/load";
 import { buildSnapshots } from "../validate";
@@ -31,9 +31,9 @@ interface EvalCommandOptions {
   unsafeLocal?: boolean;
 }
 
-const gitSha = async (cwd: string) => {
+const gitSha = async (root: string) => {
   const result = await promisify(execFile)("git", ["rev-parse", "HEAD"], {
-    cwd,
+    cwd: root,
   }).catch(() => null);
   return result?.stdout.trim();
 };
@@ -63,12 +63,10 @@ export const registerEval = (program: Command) =>
     .option("--unsafe-local", "allow running outside CI")
     .option("-c, --config <path>", "the config file")
     .action(async (options: EvalCommandOptions) => {
-      if (process.env.CI !== "true" && !options.unsafeLocal) {
-        writeError(UNSAFE_MESSAGE);
-        process.exitCode = 1;
-        return;
+      if (env().CI !== "true" && !options.unsafeLocal) {
+        throw new CopybookError("EVAL_OUTSIDE_CI", UNSAFE_MESSAGE);
       }
-      const project = await loadProject(process.cwd(), options);
+      const project = await loadProject(cwd(), options);
       const specs = await loadEvalSpecs(project.config);
       const { snapshots } = buildSnapshots(project);
       const hashes = new Map(
@@ -139,6 +137,6 @@ export const registerEval = (program: Command) =>
         );
       }
       if (report.results.some((result) => result.status === "fail")) {
-        process.exitCode = 1;
+        setExitCode(1);
       }
     });
