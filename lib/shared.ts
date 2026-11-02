@@ -40,6 +40,13 @@ export const docsMcp = {
   url: `${siteConfig.url}/mcp`,
 } as const;
 
+/**
+ * Points search engines at the HTML page a Markdown copy comes from, so the
+ * copy isn't indexed alongside it. Agents still read the Markdown.
+ */
+export const canonicalLink = (path: string) =>
+  `<${siteConfig.url}${path}>; rel="canonical"`;
+
 export const docsRoute = "/docs";
 export const docsContentRoute = "/llms.mdx/docs";
 

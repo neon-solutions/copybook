@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { getPageMarkdownUrl } from "@/lib/shared";
+import { canonicalLink, getPageMarkdownUrl } from "@/lib/shared";
 import { docsLlms, source } from "@/lib/source";
 
 export const revalidate = false;
@@ -19,6 +19,7 @@ export const GET = async (
   return new Response(await docsLlms.page(page), {
     headers: {
       "Content-Type": "text/markdown",
+      Link: canonicalLink(page.url),
     },
   });
 };
