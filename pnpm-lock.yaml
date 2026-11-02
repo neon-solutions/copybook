@@ -279,6 +279,9 @@ importers:
       '@copybook/core':
         specifier: workspace:*
         version: link:../core
+      '@modelcontextprotocol/server':
+        specifier: ^2.4.0
+        version: 2.4.0
       commander:
         specifier: ^15.0.0
         version: 15.0.0
@@ -300,6 +303,9 @@ importers:
       tinyglobby:
         specifier: ^0.2.17
         version: 0.2.17
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
     devDependencies:
       '@arethetypeswrong/cli':
         specifier: ^0.18.5
@@ -307,6 +313,9 @@ importers:
       '@copybook/studio':
         specifier: workspace:*
         version: link:../studio
+      '@modelcontextprotocol/client':
+        specifier: ^2.4.0
+        version: 2.4.0
       '@types/node':
         specifier: ^24
         version: 24.19.2
@@ -997,6 +1006,10 @@ packages:
 
   '@mdx-js/mdx@3.1.1':
     resolution: {integrity: sha512-f6ZO2ifpwAQIpzGWaBQT2TXxPv6z3RBzQKpVftEWN78Vl/YweF1uwussDx8ECAXVtr3Rs89fKyG9YlzUs9DyGQ==}
+
+  '@modelcontextprotocol/client@2.4.0':
+    resolution: {integrity: sha512-LgrD2OphHuG12vfKFKz6SOnq7bKHQmhGJIAYdD+MZBn2npHEyry6uD8zvktodtl5CQM85MO0anUyD9JwmUmxww==}
+    engines: {node: '>=20'}
 
   '@modelcontextprotocol/core@2.4.0':
     resolution: {integrity: sha512-z8QBKqdfXLPzkLQuG4xp8hrVEMm1PZ1IgxMN2sMbJiFiAKOWXnAzogXn2W4aqIBlP1ea6U5yiqVquvUNM1Cj6Q==}
@@ -5402,6 +5415,16 @@ snapshots:
       vfile: 6.0.3
     transitivePeerDependencies:
       - supports-color
+
+  '@modelcontextprotocol/client@2.4.0':
+    dependencies:
+      '@modelcontextprotocol/core': 2.4.0
+      cross-spawn: 7.0.6
+      eventsource: 3.0.7
+      eventsource-parser: 3.1.1
+      jose: 6.2.12
+      pkce-challenge: 5.0.1
+      zod: 4.6.7
 
   '@modelcontextprotocol/core@2.4.0':
     dependencies:

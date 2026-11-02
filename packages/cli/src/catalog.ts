@@ -69,6 +69,17 @@ export const COMMAND_META = {
     ],
     json: true,
   },
+  mcp: {
+    agent: "safe",
+    effect: "serves",
+    examples: [
+      `${BIN_NAME} mcp`,
+      `claude mcp add copybook -- npx --no ${BIN_NAME} mcp`,
+    ],
+    json: false,
+    notes:
+      "Your agent's MCP client starts it over stdio. Its tools read, render, check, write snapshots, and run the safe tests; evals and the run tier stay in the CLI.",
+  },
   report: {
     agent: "safe",
     effect: "reads",

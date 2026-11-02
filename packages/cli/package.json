@@ -55,17 +55,20 @@
   },
   "dependencies": {
     "@copybook/core": "workspace:*",
+    "@modelcontextprotocol/server": "^2.4.0",
     "commander": "^15.0.0",
     "diff": "^9.0.0",
     "esbuild": "^0.28.2",
     "oxc-parser": "^0.155.0",
     "oxc-resolver": "^11.24.2",
     "picocolors": "^1.1.1",
-    "tinyglobby": "^0.2.17"
+    "tinyglobby": "^0.2.17",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",
     "@copybook/studio": "workspace:*",
+    "@modelcontextprotocol/client": "^2.4.0",
     "@types/node": "^24",
     "publint": "^0.3.25",
     "tsup": "^9.0.0",

@@ -5,6 +5,7 @@ import { registerCommands } from "./commands/commands";
 import { registerEval } from "./commands/eval";
 import { registerInit } from "./commands/init";
 import { registerList } from "./commands/list";
+import { registerMcp } from "./commands/mcp";
 import { registerReport } from "./commands/report";
 import { registerShow } from "./commands/show";
 import { registerSnapshot } from "./commands/snapshot";
@@ -59,6 +60,7 @@ Docs: ${DOCS_URL}`
   registerUsages(program);
   registerReport(program);
   registerStudio(program);
+  registerMcp(program);
   registerCommands(program);
 
   return program;
