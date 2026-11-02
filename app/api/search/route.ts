@@ -1,7 +1,3 @@
-import { createFromSource } from "fumadocs-core/search/server";
+import { searchServer } from "@/lib/search";
 
-import { source } from "@/lib/source";
-
-export const { GET } = createFromSource(source, {
-  language: "english",
-});
+export const { GET } = searchServer;

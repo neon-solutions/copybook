@@ -3,7 +3,7 @@ import { render, toText } from "@copybook/core";
 import { EMBEDS, ENTRIES } from "@/components/landing/studio-data";
 import type { StudioEntry } from "@/components/landing/studio-data";
 import { init, setupPrompt } from "@/content/definitions/get-started";
-import { githubUrl, siteConfig } from "@/lib/shared";
+import { docsMcp, githubUrl, siteConfig } from "@/lib/shared";
 
 /** The landing page copy, shared by the page and its Markdown version. */
 export const HOME = {
@@ -69,6 +69,16 @@ ${fence(
 \`npx copybook studio\` opens a local UI at http://127.0.0.1:4983 for browsing every definition, editing its params, and previewing the output. The Studio window on ${url} shows the Acme example project (\`examples/acme\` in the repository), with ${ENTRIES.length} definitions:
 
 ${ENTRIES.map(describeEntry).join("\n")}
+
+## Read the docs over MCP
+
+${docsMcp.url} is an MCP server with \`list_pages\`, \`get_page\`, and \`search\` tools for these docs. Add it to Claude Code with:
+
+${fence("bash", docsMcp.claude)}
+
+Or to any agent that reads an MCP JSON config:
+
+${fence("json", docsMcp.json)}
 
 ## Learn more
 

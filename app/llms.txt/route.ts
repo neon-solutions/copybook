@@ -1,4 +1,4 @@
-import { siteConfig } from "@/lib/shared";
+import { docsMcp, siteConfig } from "@/lib/shared";
 import { docsLlms } from "@/lib/source";
 
 export const revalidate = false;
@@ -20,6 +20,8 @@ export const GET = async () => {
 Start here: ${siteConfig.url}/index.md explains what Copybook is, how to set it up, and the prompt to give a coding agent.
 
 Every page in one file: ${siteConfig.url}/llms-full.txt
+
+Read, list, and search these docs over MCP: ${docsMcp.url}
 `;
 
   return new Response(

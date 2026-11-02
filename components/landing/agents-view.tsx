@@ -2,7 +2,7 @@ import { render } from "@copybook/core";
 
 import { AgentPrompt } from "@/components/copybook/agent-prompt";
 import { setupPrompt } from "@/content/definitions/get-started";
-import { siteConfig } from "@/lib/shared";
+import { docsMcp, siteConfig } from "@/lib/shared";
 
 const MARKDOWN = [
   { file: "index.md", what: "this page, for agents" },
@@ -26,6 +26,22 @@ export const AgentsView = () => (
     <section className="flex flex-col gap-3">
       <h4 className="eyebrow">Setup prompt</h4>
       <AgentPrompt rendered={render(setupPrompt)} title="Set up Copybook" />
+    </section>
+    <section className="flex flex-col gap-3">
+      <h4 className="eyebrow">Docs over MCP</h4>
+      <p className="text-muted-foreground text-sm">
+        <code className="text-foreground font-mono">{docsMcp.url}</code> lists,
+        reads, and searches every docs page. Add it to Claude Code:
+      </p>
+      <pre className="bg-muted text-foreground overflow-x-auto rounded-md p-3 font-mono text-xs">
+        {docsMcp.claude}
+      </pre>
+      <p className="text-muted-foreground text-sm">
+        Or to any agent that reads an MCP JSON config:
+      </p>
+      <pre className="bg-muted text-foreground overflow-x-auto rounded-md p-3 font-mono text-xs">
+        {docsMcp.json}
+      </pre>
     </section>
     <section className="flex flex-col gap-3">
       <h4 className="eyebrow">Docs as Markdown</h4>

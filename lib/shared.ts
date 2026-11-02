@@ -22,6 +22,17 @@ export const gitConfig = {
 
 export const githubUrl = `https://github.com/${gitConfig.user}/${gitConfig.repo}`;
 
+/** The docs MCP server, and how agents connect to it. */
+export const docsMcp = {
+  claude: `claude mcp add --transport http copybook-docs ${siteConfig.url}/mcp`,
+  json: JSON.stringify(
+    { mcpServers: { "copybook-docs": { url: `${siteConfig.url}/mcp` } } },
+    null,
+    2
+  ),
+  url: `${siteConfig.url}/mcp`,
+} as const;
+
 export const docsRoute = "/docs";
 export const docsContentRoute = "/llms.mdx/docs";
 
