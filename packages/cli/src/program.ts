@@ -9,14 +9,15 @@ import { registerSnapshot } from "./commands/snapshot";
 import { registerStudio } from "./commands/studio";
 import { registerTest } from "./commands/test";
 import { registerUsages } from "./commands/usages";
-import { BIN_NAME, VERSION } from "./meta";
+import { BIN_NAME, DOCS_URL, VERSION } from "./meta";
 
 export const createProgram = (): Command => {
   const program = new Command(BIN_NAME)
     .description(
       "Catalog, snapshot, test, and evaluate the snippets and agent prompts in your product."
     )
-    .version(VERSION);
+    .version(VERSION)
+    .addHelpText("after", `\nDocs: ${DOCS_URL}`);
 
   registerInit(program);
   registerList(program);

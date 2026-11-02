@@ -4,4 +4,8 @@ Define code snippets, commands, and agent prompts as typed, testable content, an
 
 > Copybook is at 0.x, so minor releases can include breaking changes. The [changelog](https://github.com/neon-solutions/copybook/blob/main/content/docs/changelog.mdx) lists them.
 
-See the [repository README](https://github.com/neon-solutions/copybook#readme).
+```bash
+npm i @copybook/core
+```
+
+The [docs](https://copybook.dev/docs) start with a [quick start](https://copybook.dev/docs/quick-start). The [API reference](https://copybook.dev/docs/reference/core) lists every export.

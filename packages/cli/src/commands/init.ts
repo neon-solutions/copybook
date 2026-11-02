@@ -7,7 +7,7 @@ import type { Command } from "commander";
 import pc from "picocolors";
 
 import { findConfig } from "../config";
-import { BIN_NAME } from "../meta";
+import { BIN_NAME, DOCS_URL } from "../meta";
 import { write, writeError } from "../output";
 
 type PackageManager = "bun" | "npm" | "pnpm" | "yarn";
@@ -88,5 +88,7 @@ Next steps:
   1. Move a snippet or prompt into a *.prompts.ts file with defineSnippet,
      defineCommand, or definePrompt.
   2. Run ${pc.bold(`${BIN_NAME} snapshot`)} and commit the snapshots.
-  3. Add ${pc.bold(`${BIN_NAME} check`)} to CI.`);
+  3. Add ${pc.bold(`${BIN_NAME} check`)} to CI.
+
+Docs: ${DOCS_URL}`);
     });
