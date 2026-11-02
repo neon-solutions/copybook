@@ -43,12 +43,20 @@ export const getStarted = definePrompt({
 | Registry components | shadcn components for agent prompts, code variants, and command tabs. |
 
 ```bash
+npx @copybook/cli init   # writes copybook.config.ts and installs both packages
+```
+
+Then, from your project:
+
+```bash
 npx copybook snapshot   # rendered snapshots; commit them
 npx copybook check      # CI: fail when a snapshot is stale
 npx copybook test       # parse, typecheck, and run snippets
 npx copybook eval       # give prompts to coding agents (CI only)
 npx copybook studio     # browse everything locally
 ```
+
+The [docs](https://copybook.dev/docs) cover the [quick start](https://copybook.dev/docs/quick-start), each concept, and the registry components.
 
 `examples/acme` models Neon's onboarding screens for a fictional "Acme DB", and every command above runs against it without an account.
 
