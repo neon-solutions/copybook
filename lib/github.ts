@@ -4,7 +4,7 @@ const REVALIDATE_SECONDS = 3600;
 
 /**
  * The repository's star count, cached for an hour. `null` when GitHub
- * doesn't answer, including while the repository is private.
+ * doesn't answer, for example when the API rate-limits the build.
  */
 export const getStargazersCount = async (): Promise<number | null> => {
   try {

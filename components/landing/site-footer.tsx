@@ -1,3 +1,4 @@
+import corePackage from "@copybook/core/package.json";
 import Link from "next/link";
 
 import { Container, Logo, MetaStrip } from "@/components/landing/primitives";
@@ -32,7 +33,13 @@ export const SiteFooter = () => (
       <MetaStrip
         items={[
           "MIT",
-          "Pre-release",
+          <Link
+            className="hover:text-foreground underline-offset-4 hover:underline"
+            href="/docs/changelog"
+            key="version"
+          >
+            v{corePackage.version}
+          </Link>,
           <Link
             className="hover:text-foreground underline-offset-4 hover:underline"
             href="/r/registry.json"

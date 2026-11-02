@@ -1,6 +1,6 @@
 # Copybook
 
-> The project is pre-release, and its APIs will change.
+> Copybook is at 0.x, so minor releases can include breaking changes. The [changelog](content/docs/changelog.mdx) lists them.
 
 Code snippets and agent prompts that live in product UIs, defined as code, tested, and tracked.
 
