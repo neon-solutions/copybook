@@ -11,7 +11,8 @@ export const RUNNERS: Record<PackageManager, string> = {
 };
 
 export const init = defineCommand({
-  description: "Adds @copybook/core and a copybook.config.ts.",
+  description:
+    "Installs @copybook/core and @copybook/cli, and writes copybook.config.ts.",
   id: "site.cli.init",
   params: {
     packageManager: p.enum(PACKAGE_MANAGERS).default("npm"),
@@ -26,8 +27,8 @@ export const setupPrompt = definePrompt({
   id: "site.home.setup-agent",
   placements: ["site/docs/components"],
   template: (t) => t`
-    Set up Copybook in this project.
-    1. Run ${t.cmd(init)}. It adds @copybook/core and a copybook.config.ts.
+    Set up Copybook in this project. Read https://copybook.dev/docs/quick-start.md first. Every docs page is listed at https://copybook.dev/llms.txt.
+    1. Run ${t.cmd(init)}. It installs @copybook/core and @copybook/cli, and writes copybook.config.ts.
     2. Find the code snippets, shell commands, and coding-agent prompts that the UI shows to users. Move each one into a definition with defineSnippet, defineCommand, or definePrompt. Give each a stable dotted id, typed params with example values, and the placements where it's shown.
     3. Render the definitions where the strings used to be, with the same props.
     4. Run ${t.cmd("npx copybook snapshot")}, then ${t.cmd("npx copybook check")}. Both must pass.

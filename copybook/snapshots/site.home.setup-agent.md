@@ -8,11 +8,11 @@ placements:
 params: {}
 embeds:
   - site.cli.init
-hash: sha256:e2ce1ed044e4db9d
+hash: sha256:50b72a3426badc3d
 ---
 
-Set up Copybook in this project.
-1. Run npx @copybook/cli init. It adds @copybook/core and a copybook.config.ts.
+Set up Copybook in this project. Read https://copybook.dev/docs/quick-start.md first. Every docs page is listed at https://copybook.dev/llms.txt.
+1. Run npx @copybook/cli init. It installs @copybook/core and @copybook/cli, and writes copybook.config.ts.
 2. Find the code snippets, shell commands, and coding-agent prompts that the UI shows to users. Move each one into a definition with defineSnippet, defineCommand, or definePrompt. Give each a stable dotted id, typed params with example values, and the placements where it's shown.
 3. Render the definitions where the strings used to be, with the same props.
 4. Run npx copybook snapshot, then npx copybook check. Both must pass.
