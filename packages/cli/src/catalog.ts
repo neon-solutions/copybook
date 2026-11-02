@@ -100,8 +100,10 @@ export const COMMAND_META = {
   studio: {
     agent: "ask",
     effect: "serves",
-    examples: [`${BIN_NAME} studio`],
-    json: false,
+    examples: [`${BIN_NAME} studio`, `${BIN_NAME} studio --json --port 0`],
+    json: true,
+    notes:
+      "It keeps running. With --json it prints its URLs as one line once it's listening; its API is described at /llms.txt.",
   },
   test: {
     agent: "safe",

@@ -1,10 +1,16 @@
 import type { Commit, RenderResult, Results, StudioManifest } from "./types";
 
+interface ApiError {
+  error?: { code: string; message: string };
+}
+
 const getJson = async <T>(url: string, init?: RequestInit): Promise<T> => {
   const response = await fetch(url, init);
-  const body = (await response.json()) as T & { error?: string };
+  const body = (await response.json()) as T & ApiError;
   if (!response.ok) {
-    throw new Error(body.error ?? `${response.status} ${response.statusText}`);
+    throw new Error(
+      body.error?.message ?? `${response.status} ${response.statusText}`
+    );
   }
   return body;
 };

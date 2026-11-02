@@ -40,6 +40,7 @@ export interface Entry {
 }
 
 export interface Issue {
+  code?: string;
   id?: string;
   level: "error" | "warning";
   message: string;
