@@ -1,0 +1,108 @@
+---
+title: Coding agents
+description: Let coding agents find, edit, snapshot, and test your definitions, through the CLI, MCP, and Studio.
+---
+
+Copybook is built to be driven by coding agents as much as by people. Every surface tells an agent what exists, what needs doing, and which command or tool does each step, and the rules about what an agent may do without asking are explicit.
+
+<Callout title="Version 0.2.0">
+  Everything on this page except the docs MCP server needs `@copybook/cli` 0.2.0
+  or later.
+</Callout>
+
+## Set up
+
+`copybook init` sets up coding agents along with the config. Run it in a new project with `npx @copybook/cli init`, or again in a project that already uses Copybook.
+
+| File | What it holds |
+| --- | --- |
+| `AGENTS.md` | A Copybook section between `<!-- copybook:start -->` and `<!-- copybook:end -->`. Codex, Cursor, and most other agents read this file. |
+| `CLAUDE.md` | The same section, only when the file exists and doesn't import `AGENTS.md`. |
+| `.agents/skills/copybook/SKILL.md`, `.claude/skills/copybook/SKILL.md` | The Copybook skill: when to use it, the workflow, and the rules. |
+| `.mcp.json` | The `copybook` MCP server, for Claude Code. |
+| `.cursor/mcp.json`, `.vscode/mcp.json` | The same server, when the project already uses Cursor or VS Code. |
+| `.gitignore` | `.copybook/`, where test and eval results go. |
+
+Running `init` again only changes what's out of date, and leaves your other MCP servers and the rest of `AGENTS.md` alone. `--dry-run` shows the plan, and `--no-agent` skips these files. Codex keeps MCP servers in its own config, so `init` prints the command to add it:
+
+```bash
+codex mcp add copybook -- npx --no copybook mcp
+```
+
+To add only the skill, run `npx skills add neon-solutions/copybook`.
+
+## Start with status
+
+```bash
+npx copybook status --json
+```
+
+`status` reports the config, the definitions, snapshot states, issues, and the latest test and eval results. Its `next` field lists what to do, in order:
+
+```json
+{
+  "argv": ["snapshot"],
+  "code": "write-snapshots",
+  "command": "copybook snapshot",
+  "ids": ["acme.cli.init"],
+  "safe": true,
+  "title": "Write the missing and changed snapshots, then review and commit them.",
+  "tool": "write_snapshots"
+}
+```
+
+`clean` is true when there's nothing to do, and `runner` says how to run the CLI in the project, such as `pnpm exec copybook`.
+
+## The CLI
+
+Every command except `report` takes `--json`, with the same `next` steps and an error envelope when it fails. Exit codes are 0 when everything is fine, 1 when a command found problems, and 2 when it couldn't run. See [JSON output and exit codes](/docs/reference/cli#json-output-and-exit-codes).
+
+The commands agents use most:
+
+```bash
+copybook list --grep "npm install"  # which definition renders this text?
+copybook show <id>                  # everything about one definition, as Markdown
+copybook snapshot                   # after editing definitions
+copybook check --json               # what's wrong, with diffs
+copybook test --json                # syntax and typecheck tests
+copybook commands --json            # every command and flag
+```
+
+## MCP
+
+`copybook mcp` serves the project over stdio. Its instructions tell the agent to start with `status`.
+
+| Tool | What it does |
+| --- | --- |
+| `status` | What needs doing, with the tool for each step. |
+| `find_definitions` | Searches ids, titles, placements, tags, and rendered output. Filters by kind, placement, unused, or changes since a ref. |
+| `get_definition` | One definition as Markdown, like `copybook show`. |
+| `render` | Renders with values, for every variant or one. |
+| `check` | Issues and snapshot diffs, like `copybook check`. |
+| `write_snapshots` | Writes the missing and changed snapshots. |
+| `prune_snapshots` | Deletes snapshots without a definition. Marked destructive. |
+| `run_tests` | The syntax and typecheck tests. |
+
+The server starts before `copybook init`, so its tools can say to run it, and follows file changes while it runs.
+
+## Studio
+
+`copybook studio` has an Agents view with the same next steps, a Run button for the safe ones, the commands to connect each agent, and every CLI command. Each definition has a Copy for agent button that copies it as Markdown.
+
+Agents can use Studio's API directly. `copybook studio --json --port 0` prints one line with its URLs, `/llms.txt` describes every endpoint, and `GET /api/status` is the place to start. See [Studio](/docs/guides/studio#api).
+
+## The docs
+
+These docs are written for agents too:
+
+- [/llms.txt](/llms.txt) lists every page, and [/llms-full.txt](/llms-full.txt) has all of them in one file.
+- Every page has a Markdown version at its URL plus `.md`, and requests that prefer `text/markdown` get it, the landing page included.
+- `https://copybook.dev/mcp` is an MCP server with `list_pages`, `get_page`, and `search` tools. Add it to Claude Code with `claude mcp add --transport http copybook-docs https://copybook.dev/mcp`.
+
+## What agents may do
+
+- **Without asking**: read everything, render, write snapshots, and run the syntax and typecheck tests, from the CLI, MCP, or Studio.
+- **Ask first**: `snapshot --prune` deletes files, `test --tier run` executes commands for real, and `init` installs packages.
+- **CI only**: `eval` gives prompts to agents with their permission prompts bypassed. See [Evals](/docs/guides/evals).
+
+Studio only takes writes from localhost: it rejects other hosts and cross-site requests, and it's read-only when it listens beyond `127.0.0.1`.

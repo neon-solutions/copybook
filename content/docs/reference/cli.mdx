@@ -1,113 +1,135 @@
 ---
 title: "@copybook/cli"
-description: Commands and flags.
+description: Commands, flags, JSON output, and exit codes.
 ---
 
 ```npm
 npm i -D @copybook/cli
 ```
 
-Every command finds `copybook.config.ts` by walking up from the current directory. Pass `-c, --config <path>` to use another file.
+Every command finds `copybook.config.ts` by walking up from the current directory. Pass `-c, --config <path>` to use another file. The flag tables on this page come from the CLI itself, and `copybook commands --json` prints the same catalog.
+
+<Callout title="Version 0.2.0">
+  `status`, `show`, `commands`, `mcp`, `--json` for every command, and exit code
+  2 arrived in 0.2.0.
+</Callout>
 
 ## `init`
 
-Creates `copybook.config.ts` and installs `@copybook/core` and `@copybook/cli` with your package manager, which it detects from your lockfile.
+Sets up Copybook in the current directory, and is safe to run again. It writes `copybook.config.ts` if there isn't one, installs `@copybook/core` and `@copybook/cli` with the package manager from your lockfile if `package.json` doesn't list them, and sets up coding agents: see [Coding agents](/docs/guides/agents#set-up).
 
-| Flag           | Description            |
-| -------------- | ---------------------- |
-| `--no-install` | Only write the config. |
+<CliOptions command="init" />
+
+## `status`
+
+Shows the config, the definitions, missing, changed, and orphaned snapshots, every issue, the latest test and eval results, and what to do next. It exits 0 once it runs; `clean` in the JSON says whether there's anything to do. Agents start here.
+
+<CliOptions command="status" />
 
 ## `list`
 
-Lists every definition with its kind, variant count, and placements.
+Lists every definition with its kind, variant count, and placements. `--grep` also matches the rendered output, so it finds the definition behind text you see in the UI.
 
-| Flag | Description |
-| --- | --- |
-| `--json` | Print the manifest as JSON. |
-| `--changed` | Only definitions whose rendered output changed since `--base`. |
-| `--base <ref>` | The git ref to compare against. Defaults to `HEAD`. |
+<CliOptions command="list" />
+
+## `show`
+
+Prints one definition as Markdown: its source, placements, the files that render it, embeds and embedders, params, the output of every variant, test and eval results, snapshot history, and next steps. Old ids resolve through aliases, and unknown ids fail with the closest matches.
+
+```bash
+copybook show acme.cli.init
+copybook show acme.cli.init --text --values '{"projectId":"proj-123"}'
+```
+
+<CliOptions command="show" />
 
 ## `snapshot`
 
 Writes a rendered snapshot of every definition. It only touches files whose content changed.
 
-| Flag      | Description                                           |
-| --------- | ----------------------------------------------------- |
-| `--prune` | Delete snapshots of definitions that no longer exist. |
+<CliOptions command="snapshot" />
 
 ## `check`
 
-Validates definitions and compares snapshots. It exits with status 1 on any error. See [Snapshots](/docs/concepts/snapshots#check-in-ci).
+Validates definitions and compares snapshots. It exits with 1 on any error. See [Snapshots](/docs/concepts/snapshots#check-in-ci).
 
-| Flag | Description |
-| --- | --- |
-| `--base <ref>` | Also warn about ids removed since this ref without an alias. |
+<CliOptions command="check" />
 
 ## `test`
 
 Parses, typechecks, and runs commands and snippets. See [Testing](/docs/guides/testing).
 
-| Flag | Description |
-| --- | --- |
-| `-t, --tier <tiers>` | Comma-separated tiers: `syntax`, `typecheck`, and `run`. Defaults to `syntax,typecheck`. |
-| `--only <ids...>` | Only these definition ids. |
-| `--changed` | Only definitions whose rendered output changed since `--base`. |
-| `--base <ref>` | The git ref to compare against. Defaults to `HEAD`. |
-| `--reporter <reporter>` | `pretty`, `json`, or `junit`. Defaults to `pretty`. |
-| `-o, --output <file>` | Also write the JSON or JUnit report to a file. |
-| `--concurrency <n>` | How many cases run at once. |
+<CliOptions command="test" />
 
 ## `eval`
 
 Gives prompts to coding agents and checks what they did. It refuses to run outside CI unless you pass `--unsafe-local`. See [Evals](/docs/guides/evals).
 
-| Flag | Description |
-| --- | --- |
-| `--only <ids...>` | Only these prompt ids. |
-| `--agent <names...>` | Only these agents. |
-| `--trials <n>` | Override each eval's trial count. |
-| `--budget-usd <amount>` | Stop starting trials after spending this much. |
-| `--changed` | Only prompts whose rendered output changed since `--base`. |
-| `--base <ref>` | The git ref to compare against. Defaults to `HEAD`. |
-| `--history-dir <dir>` | Append results to `<dir>/<id>.jsonl`, and skip prompts already evaluated. |
-| `--force` | Re-run prompts that the history says are unchanged. |
-| `--json` | Print the report as JSON. |
-| `--unsafe-local` | Allow running outside CI. Agents get full permissions in a directory that isn't isolated from your machine. |
+<CliOptions command="eval" />
 
 ## `usages`
 
 Shows which product files import each definition. Set `usage.include` in the config. Definitions embedded in a rendered one count as used.
 
-| Flag     | Description               |
-| -------- | ------------------------- |
-| `--json` | Print the report as JSON. |
+<CliOptions command="usages" />
 
 ## `report`
 
 Prints a Markdown summary of changed definitions for pull request comments. See [CI](/docs/guides/ci#pull-request-comments).
 
-| Flag           | Description                                                |
-| -------------- | ---------------------------------------------------------- |
-| `--base <ref>` | The git ref to compare against. Defaults to `origin/main`. |
+<CliOptions command="report" />
 
 ## `studio`
 
-Starts the local Studio UI. See [Studio](/docs/guides/studio).
+Starts the local Studio UI and its API. See [Studio](/docs/guides/studio).
 
-| Flag                | Description                                |
-| ------------------- | ------------------------------------------ |
-| `-p, --port <port>` | The port to listen on. Defaults to `4983`. |
-| `--host <host>`     | The host to bind. Defaults to `127.0.0.1`. |
-| `--api-only`        | Serve only the JSON API.                   |
+<CliOptions command="studio" />
+
+## `mcp`
+
+Serves the project to coding agents over MCP, on stdio. Your agent's MCP client starts it; see [Coding agents](/docs/guides/agents#mcp).
+
+<CliOptions command="mcp" />
+
+## `commands`
+
+Lists every command, with its flags and whether agents can run it without asking.
+
+<CliOptions command="commands" />
+
+## JSON output and exit codes
+
+Every command except `report` takes `--json`. The output is one JSON object on stdout with `schemaVersion: 1`, `ok`, and `next`: the steps to take, each with a `title`, the CLI `argv` and `command`, the MCP `tool`, the affected `ids`, and `safe`, which says whether an agent can take it without asking.
+
+When a command fails, `--json` prints an error envelope instead, and the message goes to stderr without it:
+
+```json
+{
+  "error": {
+    "code": "CONFIG_NOT_FOUND",
+    "message": "No copybook.config.ts found."
+  },
+  "next": [{ "argv": ["init"], "code": "init", "command": "copybook init" }],
+  "ok": false,
+  "schemaVersion": 1
+}
+```
+
+| Exit code | Meaning |
+| --- | --- |
+| `0` | Everything is fine. |
+| `1` | The command ran and found problems: errors from `check`, stale snapshots, or failing tests and evals. |
+| `2` | The command couldn't run: a usage error, no config, content that fails to load, an unknown id or bad values, or `eval` outside CI. |
+
+Colors are off when stdout isn't a terminal, with `--json`, and with `NO_COLOR`. `FORCE_COLOR` turns them on.
 
 ## Programmatic API
 
-The package also exports the building blocks the commands use: `loadProject`, `buildSnapshots`, `buildManifest`, `compareSnapshots`, `writeSnapshots`, `changedIds`, and `fileHistory`.
+The package also exports the building blocks the commands use: `runCli`, `loadAnalysis`, `checkIssues`, `findDefinition`, `searchDefinitions`, `buildStatus`, `definitionDetail`, `buildCatalog`, `loadProject`, `buildSnapshots`, `buildManifest`, `compareSnapshots`, `writeSnapshots`, `changedIds`, and `fileHistory`.
 
 ```ts
-import { buildManifest, buildSnapshots, loadProject } from "@copybook/cli";
+import { buildStatus, loadAnalysis, runCli } from "@copybook/cli";
 
-const project = await loadProject(process.cwd());
-const { snapshots } = buildSnapshots(project);
-const manifest = buildManifest(project.definitions, snapshots);
+const status = await buildStatus(await loadAnalysis(process.cwd()));
+const exitCode = await runCli(["check", "--json"]);
 ```

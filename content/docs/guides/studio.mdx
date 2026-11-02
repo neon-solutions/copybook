@@ -17,14 +17,38 @@ For every definition, Studio shows:
 - **Embeds and used-by**: which commands a prompt embeds, and which prompts embed a command. Follow the links to trace a change.
 - **History**: the commits that touched its snapshot, with authors and dates.
 - **Snapshot status**: up to date, out of date, or missing.
+- **Tests and evals**: the latest results from `copybook test` and `copybook eval`.
+- **Agents**: what to do next, with a Run button for writing snapshots and the safe tests, how to connect a coding agent over MCP, and every CLI command. Each definition also has a Copy for agent button that copies it as Markdown.
 
-| Flag                | Description                                            |
-| ------------------- | ------------------------------------------------------ |
-| `-p, --port <port>` | The port. Defaults to `4983`.                          |
-| `--host <host>`     | The host to bind. Defaults to `127.0.0.1`.             |
-| `--api-only`        | Serve only the JSON API, for developing Studio itself. |
+<CliOptions command="studio" />
+
+## API
+
+Studio's UI runs on a JSON API that agents and scripts can use too. `copybook studio --json --port 0` picks a free port and prints one line with `url`, `api`, and `llms` once it's listening. `/llms.txt` describes every endpoint, and `/` serves the same guide to requests that prefer Markdown.
+
+| Endpoint | What it returns |
+| --- | --- |
+| `GET /api` | Every endpoint, as JSON. |
+| `GET /api/status` | What needs doing, like `copybook status --json`. |
+| `GET /api/manifest` | Every definition, with its snapshot state, embedders, and rendering files. |
+| `GET /api/definitions/{id}` | One definition, like `copybook show <id> --json`. Add `.md` for Markdown. |
+| `POST /api/render` | A definition rendered with `{ id, values?, variant? }`. |
+| `POST /api/snapshot` | Writes the missing and changed snapshots. `{ prune: true }` also deletes orphans. |
+| `POST /api/test` | Starts the syntax and typecheck tests and answers 202 with a `runId`. |
+| `GET /api/history?id={id}` | The commits that changed a definition's snapshot. |
+| `GET /api/results` | The latest test and eval reports. |
+| `GET /api/commands` | Every CLI command and flag. |
+| `GET /api/events` | Server-sent events: `change`, `error`, `test`, `test-done`, and `test-error`. |
+
+Test runs happen in the background: follow `/api/events`, or poll `/api/results` until `test.runId` matches. A second run while one is going answers 409. The run tier and evals stay in the CLI.
+
+Errors are `{ "error": { "code", "message" }, "next": [...] }`, with 400 for bad input, 404 for unknown ids (with suggestions), 405 for the wrong method, 413 for bodies over 1 MB, 415 for POSTs that aren't JSON, and 422 for values a definition rejects.
 
 <Callout title="Studio runs your code">
   Like `snapshot` and `check`, Studio imports your content files to render them.
   It binds to `127.0.0.1` by default. Don't expose it on a shared network.
 </Callout>
+
+## Security
+
+Studio answers only requests for `localhost`, `127.0.0.1`, or `[::1]`, on any port, which blocks DNS rebinding and keeps the Vite dev proxy working. POSTs must be `Content-Type: application/json`, which forces a CORS preflight that Studio never answers, and must come from a localhost page or a local tool. With `--host` set to another address, Studio warns and turns read-only: snapshot and test requests answer 403.

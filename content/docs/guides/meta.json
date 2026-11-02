@@ -1,4 +1,4 @@
 {
   "title": "Guides",
-  "pages": ["modeling-a-console", "studio", "testing", "evals", "ci"]
+  "pages": ["agents", "modeling-a-console", "studio", "testing", "evals", "ci"]
 }

@@ -9,6 +9,7 @@ import {
   setupPrompt,
 } from "@/content/definitions/get-started";
 import { addComponent } from "@/content/definitions/registry";
+import { optionsMarkdown } from "@/lib/catalog";
 
 import { docsRoute, registryUrl, siteConfig } from "./shared";
 
@@ -33,6 +34,7 @@ export const source = loader({
 const INSTALL_COMMAND = /<InstallCommand item="[^"]+" \/>/gu;
 const DEMO = /^<[A-Z]\w*Demo \/>$/gmu;
 const CALLOUT = /<Callout[^>]*>[\s\S]*?<\/Callout>/gu;
+const CLI_OPTIONS = /<CliOptions command="[^"]+" \/>/gu;
 const CALLOUT_END = "</Callout>";
 
 const fence = (lang: string, body: string) => `\`\`\`${lang}\n${body}\n\`\`\``;
@@ -80,6 +82,10 @@ const toAgentMarkdown = (markdown: string, url: string) =>
       return fence("bash", toText(render(addComponent, { item, registryUrl })));
     })
     .replaceAll(CALLOUT, calloutToQuote)
+    .replaceAll(CLI_OPTIONS, (tag) => {
+      const [, command = ""] = tag.split('"');
+      return optionsMarkdown(command);
+    })
     .replaceAll(DEMO, (tag) => {
       const name = tag.slice(1, tag.indexOf(" "));
       return (

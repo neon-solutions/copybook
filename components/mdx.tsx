@@ -2,6 +2,7 @@ import defaultMdxComponents from "fumadocs-ui/mdx";
 import type { MDXComponents } from "mdx/types";
 
 import { AgentPromptDemo } from "@/components/docs/agent-prompt-demo";
+import { CliOptions } from "@/components/docs/cli-options";
 import { ConnectDialogDemo } from "@/components/docs/connect-dialog-demo";
 import { GetStartedDemo } from "@/components/docs/get-started-demo";
 import { InstallCommand } from "@/components/docs/install-command";
@@ -11,6 +12,7 @@ export const getMDXComponents = (components?: MDXComponents) =>
   ({
     ...defaultMdxComponents,
     AgentPromptDemo,
+    CliOptions,
     ConnectDialogDemo,
     GetStartedDemo,
     InstallCommand,
