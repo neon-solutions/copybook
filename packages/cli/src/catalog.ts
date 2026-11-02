@@ -57,8 +57,14 @@ export const COMMAND_META = {
   init: {
     agent: "ask",
     effect: "writes-files",
-    examples: [`${BIN_NAME} init`, `${BIN_NAME} init --no-install`],
+    examples: [
+      `${BIN_NAME} init`,
+      `${BIN_NAME} init --dry-run`,
+      `${BIN_NAME} init --no-install --no-agent`,
+    ],
     json: true,
+    notes:
+      "Writes copybook.config.ts, an AGENTS.md section, the Copybook skill, MCP configs, and a .gitignore entry, and installs the packages. Safe to run again; --dry-run shows what would change.",
   },
   list: {
     agent: "safe",

@@ -34,6 +34,12 @@ export { buildSnapshots } from "./validate";
 export type { Issue, IssueCode } from "./validate";
 export { readResults, RESULTS_DIR } from "./results";
 export { buildStatus } from "./status";
+export { renderAgentsBlock, upsertBlock } from "./agents/agents-md";
+export { mcpServerEntry, mergeMcpConfig } from "./agents/mcp-config";
+export type { McpServerEntry } from "./agents/mcp-config";
+export { applyAgentSetup, codexCommand, planAgentSetup } from "./agents/setup";
+export type { FileChange } from "./agents/setup";
+export { renderSkill } from "./agents/skill";
 export { buildCatalog, COMMAND_META } from "./catalog";
 export type {
   AgentPolicy,

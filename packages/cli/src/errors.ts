@@ -1,7 +1,6 @@
 import type { NextAction } from "./next-actions";
 
 export type ErrorCode =
-  | "CONFIG_EXISTS"
   | "CONFIG_INVALID"
   | "CONFIG_NOT_FOUND"
   | "DUPLICATE_ID"
