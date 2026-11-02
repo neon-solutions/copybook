@@ -1,14 +1,16 @@
-import { ArrowRightIcon, GithubLogoIcon } from "@phosphor-icons/react/dist/ssr";
+import { render, toText } from "@copybook/core";
+import { ArrowRightIcon } from "@phosphor-icons/react/dist/ssr";
 import type { ReactNode } from "react";
 
+import { CopyPromptButton } from "@/components/landing/copy-prompt-button";
 import {
   Container,
   LinkButton,
   MetaStrip,
 } from "@/components/landing/primitives";
 import { NeonAurora } from "@/components/neon-aurora/neon-aurora";
+import { setupPrompt } from "@/content/definitions/get-started";
 import { HOME } from "@/lib/home";
-import { githubUrl } from "@/lib/shared";
 
 /** The copy rises in, staggered, while the aurora comes alive. */
 export const Hero = ({ window }: { window?: ReactNode }) => (
@@ -42,10 +44,7 @@ export const Hero = ({ window }: { window?: ReactNode }) => (
           Get started
           <ArrowRightIcon aria-hidden="true" />
         </LinkButton>
-        <LinkButton external href={githubUrl} size="lg" variant="outline">
-          <GithubLogoIcon aria-hidden="true" weight="fill" />
-          View on GitHub
-        </LinkButton>
+        <CopyPromptButton prompt={toText(render(setupPrompt))} />
       </div>
       <div className="hero-enter hero-delay-650 mt-5">
         <MetaStrip items={[...HOME.meta]} />

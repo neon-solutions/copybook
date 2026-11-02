@@ -31,7 +31,7 @@ export const Logo = () => (
   </span>
 );
 
-const linkButtonVariants = cva(
+export const linkButtonVariants = cva(
   "focus-visible:ring-ring/50 inline-flex shrink-0 items-center justify-center gap-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors outline-none focus-visible:ring-2 [&_svg]:size-4 [&_svg]:shrink-0",
   {
     defaultVariants: { size: "default", variant: "primary" },

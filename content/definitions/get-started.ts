@@ -25,7 +25,7 @@ export const init = defineCommand({
 
 export const setupPrompt = definePrompt({
   id: "site.home.setup-agent",
-  placements: ["site/docs/components"],
+  placements: ["site/home", "site/docs/components"],
   template: (t) => t`
     Set up Copybook in this project. Read https://copybook.dev/docs/quick-start.md first. Every docs page is listed at https://copybook.dev/llms.txt.
     1. Run ${t.cmd(init)}. It installs @copybook/core and @copybook/cli, and writes copybook.config.ts.
