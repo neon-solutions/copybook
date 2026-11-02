@@ -1,4 +1,5 @@
 import { commandsMarkdown } from "@/lib/catalog";
+import { projectMcp } from "@/lib/home";
 import { docsMcp, siteConfig } from "@/lib/shared";
 import { docsLlms } from "@/lib/source";
 
@@ -23,6 +24,10 @@ Start here: ${siteConfig.url}/index.md explains what Copybook is, how to set it 
 Every page in one file: ${siteConfig.url}/llms-full.txt
 
 Read, list, and search these docs over MCP: ${docsMcp.url}
+
+## Coding agents
+
+\`copybook init\` sets up coding agents: an \`AGENTS.md\` section, the Copybook skill, and the \`copybook\` MCP server in \`.mcp.json\` (\`npx --no copybook mcp\`, with tools ${projectMcp.tools.join(", ")}). Guide: ${siteConfig.url}/docs/guides/agents.md
 
 ## CLI commands
 

@@ -2,6 +2,7 @@ import { render } from "@copybook/core";
 
 import { AgentPrompt } from "@/components/copybook/agent-prompt";
 import { setupPrompt } from "@/content/definitions/get-started";
+import { projectMcp } from "@/lib/home";
 import { docsMcp, siteConfig } from "@/lib/shared";
 
 const MARKDOWN = [
@@ -26,6 +27,21 @@ export const AgentsView = () => (
     <section className="flex flex-col gap-3">
       <h4 className="eyebrow">Setup prompt</h4>
       <AgentPrompt rendered={render(setupPrompt)} title="Set up Copybook" />
+    </section>
+    <section className="flex flex-col gap-3">
+      <h4 className="eyebrow">Connect your coding agent</h4>
+      <p className="text-muted-foreground text-sm">
+        <code className="text-foreground font-mono">copybook init</code> adds an
+        AGENTS.md section, the Copybook skill, and this MCP server to your
+        project. Its tools find, read, render, check, snapshot, and test your
+        definitions. To add it yourself:
+      </p>
+      <pre className="bg-muted text-foreground overflow-x-auto rounded-md p-3 font-mono text-xs">
+        {`${projectMcp.claude}\n${projectMcp.codex}`}
+      </pre>
+      <pre className="bg-muted text-foreground overflow-x-auto rounded-md p-3 font-mono text-xs">
+        {projectMcp.json}
+      </pre>
     </section>
     <section className="flex flex-col gap-3">
       <h4 className="eyebrow">Docs over MCP</h4>

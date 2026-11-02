@@ -15,6 +15,31 @@ export const HOME = {
   title: "Your users copy it. Copybook proves it works.",
 } as const;
 
+/** The project's own MCP server, as \`copybook init\` registers it with npm. */
+export const projectMcp = {
+  claude: "claude mcp add copybook -- npx --no copybook mcp",
+  codex: "codex mcp add copybook -- npx --no copybook mcp",
+  json: JSON.stringify(
+    {
+      mcpServers: {
+        copybook: { args: ["--no", "copybook", "mcp"], command: "npx" },
+      },
+    },
+    null,
+    2
+  ),
+  tools: [
+    "status",
+    "find_definitions",
+    "get_definition",
+    "render",
+    "check",
+    "write_snapshots",
+    "prune_snapshots",
+    "run_tests",
+  ],
+} as const;
+
 const fence = (lang: string, body: string) => `\`\`\`${lang}\n${body}\n\`\`\``;
 
 const describeEntry = ({ definition, source }: StudioEntry) => {
@@ -61,6 +86,18 @@ ${commandsMarkdown()}
 \`npx copybook studio\` opens a local UI at http://127.0.0.1:4983 for browsing every definition, editing its params, and previewing the output. The Studio window on ${url} shows the Acme example project (\`examples/acme\` in the repository), with ${ENTRIES.length} definitions:
 
 ${ENTRIES.map(describeEntry).join("\n")}
+
+## Connect a coding agent
+
+\`copybook init\` writes everything an agent needs: a Copybook section in \`AGENTS.md\`, the Copybook skill in \`.agents/skills/copybook\`, and the \`copybook\` MCP server in \`.mcp.json\`. The server runs in your project with \`npx --no copybook mcp\`, and its tools are ${projectMcp.tools.map((tool) => `\`${tool}\``).join(", ")}. To add it yourself:
+
+${fence("bash", `${projectMcp.claude}\n${projectMcp.codex}`)}
+
+Or in any MCP JSON config, such as \`.cursor/mcp.json\`:
+
+${fence("json", projectMcp.json)}
+
+The full guide: ${siteConfig.url}/docs/guides/agents.md
 
 ## Read the docs over MCP
 
