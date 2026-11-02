@@ -34,7 +34,8 @@ export const metadata: Metadata = {
     default: siteConfig.name,
     template: `%s | ${siteConfig.name}`,
   },
-  twitter: { card: "summary" },
+  // X falls back to og:image, so the OG images serve it too.
+  twitter: { card: "summary_large_image" },
 };
 
 const RootLayout = ({ children }: Readonly<{ children: ReactNode }>) => (
