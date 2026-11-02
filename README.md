@@ -1,3 +1,8 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="public/brand/copybook-mark-dark.svg" />
+  <img alt="" height="48" src="public/brand/copybook-mark.svg" width="48" />
+</picture>
+
 # Copybook
 
 > Copybook is at 0.x, so minor releases can include breaking changes. The [changelog](content/docs/changelog.mdx) lists them.

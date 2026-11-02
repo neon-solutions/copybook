@@ -3,6 +3,7 @@
 import { useId, useState } from "react";
 import type { ReactNode } from "react";
 
+import { CopybookMark } from "@/components/copybook-mark";
 import { AgentPrompt } from "@/components/copybook/agent-prompt";
 import { CodeVariants } from "@/components/copybook/code-variants";
 import {
@@ -438,9 +439,12 @@ export const StudioWindow = ({
         <span aria-hidden="true" className="w-12" />
       </div>
       <div className="border-border flex items-center justify-between gap-4 border-b px-4 py-3">
-        <p className="text-foreground text-sm font-semibold">
-          Copybook Studio{" "}
-          <span className="text-muted-foreground font-normal">acme</span>
+        <p className="text-foreground flex items-center gap-2 text-sm font-semibold">
+          <CopybookMark className="size-4" />
+          <span>
+            Copybook Studio{" "}
+            <span className="text-muted-foreground font-normal">acme</span>
+          </span>
         </p>
         <p className="text-muted-foreground text-xs">
           {ENTRIES.length} definitions

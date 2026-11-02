@@ -1,3 +1,5 @@
+import { CopybookMark } from "@/components/copybook-mark";
+
 import { AgentsView } from "./agents-view";
 import { DefinitionView } from "./definition-view";
 import { useManifest } from "./manifest-store";
@@ -30,10 +32,13 @@ export const App = () => {
   return (
     <div className="grid h-svh grid-rows-[auto_1fr]">
       <header className="flex items-center justify-between gap-4 border-b px-4 py-3">
-        <p className="font-heading font-semibold">
-          Copybook Studio{" "}
-          <span className="text-muted-foreground font-normal">
-            · {manifest.name}
+        <p className="font-heading flex items-center gap-2 font-semibold">
+          <CopybookMark className="size-4.5" />
+          <span>
+            Copybook Studio{" "}
+            <span className="text-muted-foreground font-normal">
+              · {manifest.name}
+            </span>
           </span>
         </p>
         <p aria-live="polite" className="text-muted-foreground text-xs">

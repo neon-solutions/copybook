@@ -1,9 +1,9 @@
-import { ChatCenteredTextIcon } from "@phosphor-icons/react/dist/ssr";
 import { cva } from "class-variance-authority";
 import type { VariantProps } from "class-variance-authority";
 import Link from "next/link";
 import type { ComponentProps, ReactNode } from "react";
 
+import { CopybookMark } from "@/components/copybook-mark";
 import { cn } from "@/lib/utils";
 
 export const Container = ({
@@ -21,12 +21,7 @@ export const Container = ({
 /** The Copybook mark: the one place Neon green appears outside the aurora. */
 export const Logo = () => (
   <span className="flex shrink-0 items-center gap-2 whitespace-nowrap">
-    <span
-      aria-hidden="true"
-      className="bg-brand-neon inline-flex size-6 items-center justify-center rounded-md text-black"
-    >
-      <ChatCenteredTextIcon className="size-4" weight="fill" />
-    </span>
+    <CopybookMark className="text-foreground size-5" />
     <span className="text-foreground text-nav font-medium">Copybook</span>
   </span>
 );
