@@ -5,6 +5,7 @@ description: What changed in each release.
 
 ## Unreleased
 
+- **`@copybook/cli`**: loading the same project from two processes at once, such as Studio and `check`, no longer fails now and then with "must default-export defineConfig". The bundle cache is written atomically.
 - **`@copybook/cli`**: exit codes now say what happened: 0 when everything is fine, 1 when a command found problems, and 2 when it couldn't run (no config, a bad option, content that fails to load, or `eval` outside CI). Scripts that check for a non-zero code are unaffected.
 - **`@copybook/cli`**: with `--json`, a failure prints `{ ok: false, error: { code, message }, next }` on stdout, and errors without `--json` end with the next step to run.
 - **`@copybook/cli`**: `copybook status` shows the config, the definitions, snapshot states, issues, the latest test and eval results, and what to do next. `status --json` is where agents start, and `copybook --help` says so.

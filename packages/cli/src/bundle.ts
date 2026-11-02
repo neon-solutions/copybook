@@ -1,6 +1,6 @@
-import { createHash } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import { existsSync } from "node:fs";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
@@ -84,8 +84,14 @@ const bundleAndImportUnchecked = async ({
   const hash = createHash("sha256").update(output.contents).digest("hex");
   const cacheDir = path.join(root, "node_modules", ".cache", "copybook");
   const file = path.join(cacheDir, `${name}-${hash.slice(0, 12)}.mjs`);
-  await mkdir(cacheDir, { recursive: true });
-  await writeFile(file, output.contents);
+  // Another process may load the same project at once, so the file only
+  // appears complete: write it next to the target, then rename it over.
+  if (!existsSync(file)) {
+    await mkdir(cacheDir, { recursive: true });
+    const partial = `${file}.${process.pid}-${randomBytes(4).toString("hex")}`;
+    await writeFile(partial, output.contents);
+    await rename(partial, file);
+  }
   return (await import(pathToFileURL(file).href)) as Record<string, unknown>;
 };
 
