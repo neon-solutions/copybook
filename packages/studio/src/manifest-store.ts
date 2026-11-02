@@ -1,10 +1,12 @@
 import { useSyncExternalStore } from "react";
 
 import { fetchManifest, subscribe } from "./api";
-import type { StudioManifest } from "./types";
+import type { StudioManifest, TestDone } from "./types";
 
 interface ManifestState {
   error?: string;
+  /** The last test run started from Studio. */
+  lastTest?: TestDone;
   manifest?: StudioManifest;
 }
 
@@ -21,7 +23,7 @@ const emit = (next: ManifestState) => {
 
 const refresh = async () => {
   try {
-    emit({ manifest: await fetchManifest() });
+    emit({ ...state, error: undefined, manifest: await fetchManifest() });
   } catch (error) {
     emit({
       ...state,
@@ -34,9 +36,11 @@ const subscribeManifest = (listener: () => void) => {
   listeners.add(listener);
   if (listeners.size === 1) {
     refresh();
-    stopEvents = subscribe(refresh, (message) =>
-      emit({ ...state, error: message })
-    );
+    stopEvents = subscribe({
+      onChange: refresh,
+      onError: (message) => emit({ ...state, error: message }),
+      onTestDone: (done) => emit({ ...state, lastTest: done }),
+    });
   }
   return () => {
     listeners.delete(listener);

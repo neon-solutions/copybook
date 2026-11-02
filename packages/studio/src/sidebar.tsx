@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 
 import { SnapshotDot } from "./snapshot-badge";
 import type { Entry } from "./types";
-import { hrefFor } from "./use-hash-route";
+import { AGENTS_HREF, hrefFor } from "./use-hash-route";
 
 const GROUPS = [
   { kind: "prompt", label: "Prompts" },
@@ -24,11 +24,13 @@ const matches = (entry: Entry, query: string) => {
 };
 
 interface SidebarProps {
+  /** Whether the Agents view is open. */
+  agents: boolean;
   entries: readonly Entry[];
   selected?: string;
 }
 
-export const Sidebar = ({ entries, selected }: SidebarProps) => {
+export const Sidebar = ({ agents, entries, selected }: SidebarProps) => {
   const searchId = useId();
   const [query, setQuery] = useState("");
   const visible = entries.filter((entry) => matches(entry, query));
@@ -38,6 +40,13 @@ export const Sidebar = ({ entries, selected }: SidebarProps) => {
       aria-label="Definitions"
       className="flex min-h-0 flex-col gap-4 border-r p-4"
     >
+      <a
+        aria-current={agents ? "page" : undefined}
+        className="hover:bg-muted aria-[current=page]:bg-muted border px-2 py-1.5 text-sm font-medium"
+        href={AGENTS_HREF}
+      >
+        Agents: what to do next
+      </a>
       <div className="flex flex-col gap-1.5">
         <Label htmlFor={searchId}>Search</Label>
         <Input

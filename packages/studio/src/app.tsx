@@ -1,11 +1,12 @@
+import { AgentsView } from "./agents-view";
 import { DefinitionView } from "./definition-view";
 import { useManifest } from "./manifest-store";
 import { Sidebar } from "./sidebar";
 import { useHashRoute } from "./use-hash-route";
 
 export const App = () => {
-  const { error, manifest } = useManifest();
-  const selectedId = useHashRoute();
+  const { error, lastTest, manifest } = useManifest();
+  const route = useHashRoute();
 
   if (!manifest) {
     return (
@@ -15,10 +16,16 @@ export const App = () => {
     );
   }
 
-  const selected =
-    manifest.definitions.find((entry) => entry.id === selectedId) ??
-    manifest.definitions[0];
+  const agents = route.view === "agents";
+  const selectedId = route.view === "definition" ? route.id : undefined;
+  const selected = agents
+    ? undefined
+    : (manifest.definitions.find((entry) => entry.id === selectedId) ??
+      manifest.definitions[0]);
   const errors = manifest.issues.filter((issue) => issue.level === "error");
+  const warnings = manifest.issues.filter((issue) => issue.level === "warning");
+  // Results change after a run started here, without a reload.
+  const version = `${manifest.loadedAt}|${lastTest?.runId ?? ""}`;
 
   return (
     <div className="grid h-svh grid-rows-[auto_1fr]">
@@ -29,13 +36,17 @@ export const App = () => {
             · {manifest.name}
           </span>
         </p>
-        <p className="text-muted-foreground text-xs">
+        <p aria-live="polite" className="text-muted-foreground text-xs">
           {manifest.definitions.length} definitions
           {errors.length > 0 ? ` · ${errors.length} issues` : ""}
         </p>
       </header>
       <div className="grid min-h-0 grid-cols-[18rem_1fr]">
-        <Sidebar entries={manifest.definitions} selected={selected?.id} />
+        <Sidebar
+          agents={agents}
+          entries={manifest.definitions}
+          selected={selected?.id}
+        />
         <main className="min-h-0 overflow-y-auto">
           {error ? (
             <p className="border-destructive/50 text-destructive border-b px-6 py-2 text-sm">
@@ -51,13 +62,27 @@ export const App = () => {
               ))}
             </ul>
           ) : null}
+          {warnings.length > 0 ? (
+            <ul className="text-muted-foreground border-b px-6 py-2 text-sm">
+              {warnings.map((issue) => (
+                <li key={`${issue.id}-${issue.message}`}>
+                  Warning: {issue.id ? <code>{issue.id}</code> : null}{" "}
+                  {issue.message}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          {agents ? (
+            <AgentsView version={version} {...(lastTest ? { lastTest } : {})} />
+          ) : null}
           {selected ? (
             <DefinitionView
               entry={selected}
               key={selected.id}
-              loadedAt={manifest.loadedAt}
+              loadedAt={version}
             />
-          ) : (
+          ) : null}
+          {agents || selected ? null : (
             <p className="text-muted-foreground p-6 text-sm">
               No definitions found. Check the content globs in your config.
             </p>

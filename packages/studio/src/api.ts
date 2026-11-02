@@ -1,4 +1,12 @@
-import type { Commit, RenderResult, Results, StudioManifest } from "./types";
+import type {
+  CommandCatalog,
+  Commit,
+  RenderResult,
+  Results,
+  StatusReport,
+  StudioManifest,
+  TestDone,
+} from "./types";
 
 interface ApiError {
   error?: { code: string; message: string };
@@ -38,16 +46,69 @@ export const renderDefinition = (
     method: "POST",
   });
 
-/** Calls `onChange` whenever the CLI reloads content. */
-export const subscribe = (
-  onChange: () => void,
-  onError: (message: string) => void
-) => {
+const postJson = <T>(url: string, body: unknown) =>
+  getJson<T>(url, {
+    body: JSON.stringify(body),
+    headers: { "Content-Type": "application/json" },
+    method: "POST",
+  });
+
+/** `version` changes on every reload, so the status stays current. */
+export const fetchStatus = (version: string) =>
+  getJson<StatusReport>(`api/status?v=${encodeURIComponent(version)}`);
+
+export const fetchCommands = () => getJson<CommandCatalog>("api/commands");
+
+/** A definition as Markdown, for "Copy for agent". */
+export const fetchDefinitionMarkdown = async (id: string) => {
+  const response = await fetch(`api/definitions/${encodeURIComponent(id)}.md`);
+  if (!response.ok) {
+    throw new Error(`${response.status} ${response.statusText}`);
+  }
+  return response.text();
+};
+
+export const writeSnapshots = () =>
+  postJson<{ written: { added: string[]; updated: string[] } }>(
+    "api/snapshot",
+    {}
+  );
+
+/** Starts the syntax and typecheck tests; `test-done` follows. */
+export const startTests = (ids?: readonly string[]) =>
+  postJson<{ runId: string }>("api/test", ids ? { ids } : {});
+
+interface Handlers {
+  onChange: () => void;
+  onError: (message: string) => void;
+  onTestDone: (done: TestDone) => void;
+}
+
+const dataOf = <T>(event: Event) =>
+  event instanceof MessageEvent
+    ? (JSON.parse(String(event.data)) as T)
+    : undefined;
+
+/** Follows the CLI's events: reloads, reload errors, and test runs. */
+export const subscribe = ({ onChange, onError, onTestDone }: Handlers) => {
   const source = new EventSource("api/events");
   source.addEventListener("change", onChange);
   source.addEventListener("error", (event) => {
-    if (event instanceof MessageEvent) {
-      onError((JSON.parse(String(event.data)) as { message: string }).message);
+    const data = dataOf<{ message: string }>(event);
+    if (data) {
+      onError(data.message);
+    }
+  });
+  source.addEventListener("test-error", (event) => {
+    const data = dataOf<{ message: string }>(event);
+    if (data) {
+      onError(data.message);
+    }
+  });
+  source.addEventListener("test-done", (event) => {
+    const data = dataOf<TestDone>(event);
+    if (data) {
+      onTestDone(data);
     }
   });
   return () => source.close();

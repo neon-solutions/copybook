@@ -1,5 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
+import { Button } from "@/components/ui/button";
+
+import { fetchDefinitionMarkdown } from "./api";
 import { History } from "./history";
 import { initialValues, ParamsForm, toParamValues } from "./params-form";
 import { Preview } from "./preview";
@@ -41,6 +44,42 @@ const IdLinks = ({ empty, ids }: { empty: string; ids: readonly string[] }) =>
     </ul>
   );
 
+const COPY_LABELS = {
+  copied: "Copied",
+  failed: "Couldn't copy",
+  idle: "Copy for agent",
+} as const;
+
+const RESET_AFTER_MS = 2000;
+
+/** Copies the definition as Markdown, to hand to a coding agent. */
+const CopyForAgent = ({ id }: { id: string }) => {
+  const [state, setState] = useState<keyof typeof COPY_LABELS>("idle");
+
+  useEffect(() => {
+    if (state === "idle") {
+      return;
+    }
+    const timeout = setTimeout(() => setState("idle"), RESET_AFTER_MS);
+    return () => clearTimeout(timeout);
+  }, [state]);
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(await fetchDefinitionMarkdown(id));
+      setState("copied");
+    } catch {
+      setState("failed");
+    }
+  };
+
+  return (
+    <Button onClick={copy} size="xs" variant="outline">
+      <span aria-live="polite">{COPY_LABELS[state]}</span>
+    </Button>
+  );
+};
+
 interface DefinitionViewProps {
   entry: Entry;
   loadedAt: string;
@@ -72,6 +111,7 @@ export const DefinitionView = ({ entry, loadedAt }: DefinitionViewProps) => {
           {entry.aliases.length > 0 ? (
             <span>Was: {entry.aliases.join(", ")}</span>
           ) : null}
+          <CopyForAgent id={entry.id} />
         </div>
       </header>
 

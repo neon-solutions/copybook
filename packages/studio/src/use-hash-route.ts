@@ -2,22 +2,40 @@ import { useEffect, useState } from "react";
 
 const PREFIX = "#/";
 
-const read = () =>
-  window.location.hash.startsWith(PREFIX)
-    ? decodeURIComponent(window.location.hash.slice(PREFIX.length))
-    : undefined;
+/** The hash of the Agents view. Definitions use `#/<id>`. */
+export const AGENTS_HREF = "#agents";
 
-/** The selected definition id, kept in the URL hash so links work. */
+export type Route = { view: "agents" } | { id?: string; view: "definition" };
+
+const read = (): Route => {
+  const { hash } = window.location;
+  if (hash === AGENTS_HREF) {
+    return { view: "agents" };
+  }
+  if (!hash.startsWith(PREFIX)) {
+    return { view: "definition" };
+  }
+  try {
+    return {
+      id: decodeURIComponent(hash.slice(PREFIX.length)),
+      view: "definition",
+    };
+  } catch {
+    return { view: "definition" };
+  }
+};
+
+/** The selected view or definition, kept in the URL hash so links work. */
 export const useHashRoute = () => {
-  const [id, setId] = useState(read);
+  const [route, setRoute] = useState(read);
 
   useEffect(() => {
-    const onChange = () => setId(read());
+    const onChange = () => setRoute(read());
     window.addEventListener("hashchange", onChange);
     return () => window.removeEventListener("hashchange", onChange);
   }, []);
 
-  return id;
+  return route;
 };
 
 export const hrefFor = (id: string) => `${PREFIX}${encodeURIComponent(id)}`;
