@@ -42,6 +42,7 @@ The repository root is a private Next.js application. Only packages under `packa
 - `@copybook/core` must stay dependency-free and must not import `node:*` modules.
 - Render functions must be pure. The same params must always produce the same output.
 - Add tests next to the code you change (`packages/*/test`).
+- Docs pages need a title of at most 60 characters with " | Copybook", and a description of 70 to 160 characters, for search results. When the sidebar title or the page's description doesn't fit, set `metaTitle` or `metaDescription` in its frontmatter. CI checks every page with `pnpm check:seo` against a production build; locally, run `pnpm build && pnpm start --port 3100`, then `pnpm check:seo http://localhost:3100`.
 - Don't commit secrets. Tests and evals that need real credentials read them from the environment.
 
 ## Releasing

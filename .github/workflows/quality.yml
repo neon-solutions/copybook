@@ -48,3 +48,11 @@ jobs:
         run: pnpm test:content
       - name: Build site
         run: pnpm build
+      - name: Check titles, descriptions, and OG images
+        run: |
+          pnpm start --port 3100 &
+          for _ in $(seq 30); do
+            curl --fail --silent --output /dev/null http://localhost:3100/robots.txt && break
+            sleep 1
+          done
+          pnpm check:seo http://localhost:3100
