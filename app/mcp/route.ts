@@ -6,7 +6,7 @@ import { searchServer } from "@/lib/search";
 import { siteConfig } from "@/lib/shared";
 import { docsLlms, source } from "@/lib/source";
 
-const INSTRUCTIONS = `The Copybook docs (${siteConfig.url}/docs). Copybook defines the code snippets and coding-agent prompts in a product as typed, tested, versioned content. Use list_pages to see every page, get_page with a page URL such as /docs/quick-start to read it as Markdown, and search to find pages by keyword.`;
+const INSTRUCTIONS = `The Copybook docs (${siteConfig.url}/docs). ${siteConfig.metaDescription} Use list_pages to see every page, get_page with a page URL such as /docs/quick-start to read it as Markdown, and search to find pages by keyword.`;
 
 /** A stateless MCP server for the docs: list, read, and search pages. */
 const handler = createMcpHandler(() => {

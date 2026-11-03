@@ -34,7 +34,11 @@ export const Hero = ({ window }: { window?: ReactNode }) => (
         className="hero-enter hero-delay-250 text-display tracking-display text-foreground mt-5 max-w-4xl font-normal text-balance"
         id="top-title"
       >
-        {HOME.title}
+        {HOME.headline.map((line) => (
+          <span className="block" key={line}>
+            {line}
+          </span>
+        ))}
       </h1>
       <p className="hero-enter hero-delay-400 text-body-lg text-muted-foreground mt-6 max-w-xl text-pretty">
         {HOME.description}

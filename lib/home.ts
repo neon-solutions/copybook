@@ -6,14 +6,60 @@ import { init, setupPrompt } from "@/content/definitions/get-started";
 import { commandsMarkdown } from "@/lib/catalog";
 import { docsMcp, githubUrl, siteConfig } from "@/lib/shared";
 
+/** The headline, one line per sentence on the page and its images. */
+const HEADLINE = ["Snippets that run.", "Agent prompts that work."] as const;
+
 /** The landing page copy, shared by the page and its Markdown version. */
 export const HOME = {
   description:
-    "Copybook turns the code snippets and coding-agent prompts in your UI into typed, versioned definitions. It tests every example, measures prompts against real agents, and tracks where each one is shown and when it changed.",
-  eyebrow: "Open-source toolkit for in-product snippets and agent prompts",
+    "Snippets and prompts in your UI break quietly when an SDK, a CLI, or an agent changes. Copybook keeps each one as typed code in your repo, tests snippets on every pull request, runs prompts through real coding agents, and puts every change in review.",
+  eyebrow: "Open-source toolkit for the code and prompts your users copy",
+  headline: HEADLINE,
   meta: ["MIT", "TypeScript", "shadcn registry", "git is the only storage"],
-  title: "Your users copy it. Copybook proves it works.",
+  title: HEADLINE.join(" "),
 } as const;
+
+/**
+ * The problems Copybook fixes, in a team's own words, for the Markdown
+ * version. Every fix names a shipped feature and the docs page for it.
+ */
+const PROBLEMS = [
+  {
+    docs: "/docs/guides/testing",
+    fix: "`copybook test` parses, typechecks, and runs every snippet and command you show, on each pull request or only for what it changed.",
+    pain: "A user told us the snippet was broken.",
+  },
+  {
+    docs: "/docs/concepts/templates",
+    fix: "Define each command once and embed it with `t.cmd()`. Change it, and every prompt and snippet that embeds it changes in the same diff.",
+    pain: "The CLI renamed a flag, and half our dialogs still use the old one.",
+  },
+  {
+    docs: "/docs/guides/evals",
+    fix: "`copybook eval` runs each prompt through Claude Code or Codex in a sandbox, several times, and checks the commands the agent ran and the files it left against a pass rate.",
+    pain: "The setup prompt worked with last month's agent.",
+  },
+  {
+    docs: "/docs/concepts/definitions",
+    fix: "Each definition declares where it's shown, `copybook usages` finds the product files that render it, and Studio lists the whole catalog.",
+    pain: "Nobody knows which screens show this snippet.",
+  },
+  {
+    docs: "/docs/concepts/snapshots",
+    fix: "Every definition renders to a Markdown snapshot committed next to your code, so `git log` is its history, `copybook check` fails CI when one is stale, and `copybook report` comments the rendered diff on pull requests.",
+    pain: "When did this prompt change, and who reviewed it?",
+  },
+  {
+    docs: "/docs/concepts/variants",
+    fix: "Params are typed and have example values, snippets have a variant per framework, and the registry components render them with tabs and copy buttons.",
+    pain: "Every snippet needs the user's project id, framework, and package manager.",
+  },
+  {
+    docs: "/docs/guides/agents",
+    fix: "`copybook init` gives coding agents an AGENTS.md section, the Copybook skill, and an MCP server, and `copybook status --json` tells them what to do next.",
+    pain: "Our coding agent edits those strings without knowing the rules.",
+  },
+] as const;
 
 /** The project's own MCP server, as \`copybook init\` registers it with npm. */
 export const projectMcp = {
@@ -61,7 +107,13 @@ export const homeMarkdown = () => {
 
 > ${siteConfig.description}
 
+**${HOME.title}**
+
 ${HOME.description}
+
+## What it fixes
+
+${PROBLEMS.map(({ docs, fix, pain }) => `- "${pain}" ${fix} Docs: ${url}${docs}.md`).join("\n")}
 
 ## Set it up with a coding agent
 

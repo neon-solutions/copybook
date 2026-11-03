@@ -14,7 +14,6 @@ const COLORS = {
 } as const;
 
 const MONO = "Geist Mono";
-const SENTENCE_BREAK = /(?<=\.)\s+/u;
 const TRAILING_PUNCTUATION = /[\s,.;:]+$/u;
 
 /** Cuts at a word boundary, so a long description still fits two lines. */
@@ -118,8 +117,8 @@ export const OgHomeCard = ({ size }: { size?: ImageSize }) => (
           marginTop: 24,
         }}
       >
-        {HOME.title.split(SENTENCE_BREAK).map((sentence) => (
-          <div key={sentence}>{sentence}</div>
+        {HOME.headline.map((line) => (
+          <div key={line}>{line}</div>
         ))}
       </div>
       <div

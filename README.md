@@ -7,7 +7,7 @@
 
 > Copybook is at 0.x, so minor releases can include breaking changes. The [changelog](content/docs/changelog.mdx) lists them.
 
-Code snippets and agent prompts that live in product UIs, defined as code, tested, and tracked. Docs and examples are at [copybook.dev](https://copybook.dev).
+Define, test, and track the code snippets and agent prompts your users copy. Docs and examples are at [copybook.dev](https://copybook.dev).
 
 Developer tools now ship a lot of copy-paste content: "Connect" dialogs with snippets in five languages, model pages with per-framework examples, and "paste this into your coding agent" prompts. That content usually lives as strings scattered across components, so nobody can easily answer:
 
