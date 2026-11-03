@@ -6,26 +6,35 @@ metaDescription: "What changed in each release of @copybook/core and @copybook/c
 
 ## Unreleased
 
-- **`@copybook/cli`**: loading the same project from two processes at once, such as Studio and `check`, no longer fails now and then with "must default-export defineConfig". The bundle cache is written atomically.
-- **`@copybook/cli`**: exit codes now say what happened: 0 when everything is fine, 1 when a command found problems, and 2 when it couldn't run (no config, a bad option, content that fails to load, or `eval` outside CI). Scripts that check for a non-zero code are unaffected.
-- **`@copybook/cli`**: with `--json`, a failure prints `{ ok: false, error: { code, message }, next }` on stdout, and errors without `--json` end with the next step to run.
-- **`@copybook/cli`**: `copybook init` sets up coding agents too. It adds a Copybook section to `AGENTS.md` (and to `CLAUDE.md` when that doesn't import `AGENTS.md`), writes the Copybook skill to `.agents/skills/copybook` and `.claude/skills/copybook`, registers the MCP server in `.mcp.json` (and `.cursor/mcp.json` or `.vscode/mcp.json` when those exist), ignores `.copybook/`, and prints the Codex command. `--no-agent` skips it, and `--dry-run` shows what would change.
-- **`@copybook/cli`**: `copybook init` is safe to run again. An existing config is kept, packages already in `package.json` aren't installed again, and agent files only change between their markers or keys.
-- **`@copybook/cli`**: `copybook mcp` serves the project to coding agents over MCP, on stdio. Its tools are `status`, `find_definitions`, `get_definition`, `render`, `check`, `write_snapshots`, `prune_snapshots`, and `run_tests` (syntax and typecheck), each annotated as read-only or writing, and its instructions tell the agent where to start. It starts before `copybook init`, keeps stdout for the protocol, follows file changes, and exits when the client closes stdin.
-- **`@copybook/cli`**: `copybook status` shows the config, the definitions, snapshot states, issues, the latest test and eval results, and what to do next. `status --json` is where agents start, and `copybook --help` says so.
-- **`@copybook/cli`**: `copybook show <id>` prints one definition as Markdown: where it's declared and rendered, what it embeds and what embeds it, its params, its output for every variant, its latest test and eval results, and its snapshot history. `--values` renders with your own values, `--text` prints just the output, and `--json` everything. Old ids resolve through aliases, and typos get suggestions.
-- **`@copybook/cli`**: `copybook commands --json` describes every command and flag, with what each one does to the project and whether an agent can run it without asking. The same catalog ships as `@copybook/cli/catalog.json`.
-- **`@copybook/cli`**: Studio's API is for agents too. `GET /api` lists every endpoint, `/llms.txt` explains them, and `/` serves that guide to requests that prefer Markdown. New endpoints: `/api/status`, `/api/commands`, `/api/definitions/{id}`, and `/api/definitions/{id}.md`. Errors are `{ error: { code, message }, next }`, with 400, 404 (with suggestions), 405, 413, 415, and 422 instead of 500. `studio --json` prints its URLs as one line once it's listening.
-- **`@copybook/cli`**: Studio has an Agents view: what to do next, with a Run button for writing snapshots and the safe tests, the commands to connect Claude Code, Codex, or any MCP client, and every CLI command with whether agents can run it. Each definition has a Copy for agent button that copies it as Markdown, and warnings show next to errors.
-- **`@copybook/cli`**: Studio can write snapshots (`POST /api/snapshot`) and run the syntax and typecheck tests (`POST /api/test`). Tests run in the background: the request answers 202 with a `runId`, results stream as `test` and `test-done` events, and a second run waits with 409. The run tier and evals stay in the CLI, and both writes are off when Studio listens beyond localhost.
-- **`@copybook/cli`**: Studio rejects requests for hosts other than localhost, which blocks DNS rebinding, and POSTs that aren't JSON or come from another site. It warns when `--host` exposes it to other machines.
-- **`@copybook/cli`**: Studio no longer reloads when tests write their results, and reloads run one at a time, so an older load can't replace a newer one.
-- **`@copybook/cli`**: every command except `report` takes `--json`. The output has `schemaVersion`, `ok`, and `next`: the steps to take, each with its command, MCP tool, affected ids, and whether an agent can take it without asking. `check --json` includes the snapshot diffs.
-- **`@copybook/cli`**: `list --grep <text>` finds the definitions whose id, title, placements, tags, or rendered output contain the text. `list --json` adds each definition's snapshot state, embedders, and rendering files, plus the validation issues.
-- **`@copybook/cli`**: `test` and `eval` warn about `--only` ids that match nothing, and human output ends with the next steps.
-- **`@copybook/cli`**: `test --json` is short for `--reporter json`, and `--reporter` rejects unknown values instead of falling back to JSON.
-- **`@copybook/cli`**: colors follow the output. They're off when stdout isn't a terminal, even when `CI` is set, and with `--json` or `NO_COLOR`.
-- **`@copybook/cli`**: `runCli`, `CopybookError`, and the project analysis behind `check` (`analyzeProject`, `checkIssues`, `findDefinition`, `searchDefinitions`) are exported. Every `Issue` has a `code`.
+Copybook is now built for coding agents: every surface tells an agent what exists, what needs doing, and which command or tool does each step. See [Coding agents](/docs/guides/agents).
+
+**Breaking changes**, all in `@copybook/cli`:
+
+- A command that couldn't run now exits with 2 instead of 1: no config, a bad option, content that fails to load, an unknown id or bad values, or `eval` outside CI. Commands that ran and found problems still exit with 1, so scripts that check for a non-zero code are unaffected.
+- `copybook init` no longer fails when `copybook.config.ts` exists. It keeps the config, only changes what's out of date, and sets up coding agents unless you pass `--no-agent`.
+- Studio's API errors are `{ error: { code, message }, next }` instead of `{ error }`, with 400, 404, 405, 413, 415, and 422 instead of 500. POSTs must send `Content-Type: application/json`, and while Studio listens on localhost, requests must be for a localhost host.
+- `--reporter` rejects values other than `pretty`, `json`, and `junit` instead of falling back to JSON.
+
+**New in `@copybook/cli`:**
+
+- `copybook status` shows the config, the definitions, snapshot states, issues, the latest test and eval results, and what to do next. `status --json` is where agents start, and `copybook --help` says so.
+- `copybook show <id>` prints one definition as Markdown: where it's declared and rendered, what it embeds and what embeds it, its params, its output for every variant, its latest test and eval results, and its snapshot history. `--values` renders with your own values, `--text` prints just the output, and `--json` everything. Old ids resolve through aliases, and typos get suggestions.
+- `list --grep <text>` finds the definitions whose id, title, placements, tags, or rendered output contain the text. `list --json` adds each definition's snapshot state, embedders, and rendering files, plus the validation issues.
+- Every command except `report` takes `--json`. The output has `schemaVersion`, `ok`, and `next`: the steps to take, each with its command, MCP tool, affected ids, and whether an agent can take it without asking. `check --json` includes the snapshot diffs. When a command fails, `--json` prints `{ ok: false, error: { code, message }, next }`, and without `--json` the error ends with the next step to run.
+- `copybook commands --json` describes every command and flag, with what each one does to the project and whether an agent can run it without asking. The same catalog ships as `@copybook/cli/catalog.json`.
+- `copybook mcp` serves the project to coding agents over MCP, on stdio. Its tools are `status`, `find_definitions`, `get_definition`, `render`, `check`, `write_snapshots`, `prune_snapshots`, and `run_tests` (syntax and typecheck), each annotated as read-only or writing, and its instructions tell the agent where to start. It starts before `copybook init`, keeps stdout for the protocol, follows file changes, and exits when the client closes stdin.
+- `copybook init` sets up coding agents. It adds a Copybook section to `AGENTS.md` (and to `CLAUDE.md` when that doesn't import `AGENTS.md`), writes the Copybook skill to `.agents/skills/copybook` and `.claude/skills/copybook`, registers the MCP server in `.mcp.json` (and `.cursor/mcp.json` or `.vscode/mcp.json` when those exist), ignores `.copybook/`, and prints the Codex command. Packages already in `package.json` aren't installed again, agent files only change between their markers or keys, and `--dry-run` shows what would change. The same skill installs with `npx skills add neon-solutions/copybook`.
+- Studio has an Agents view: what to do next, with a Run button for writing snapshots and the safe tests, the commands to connect Claude Code, Codex, or any MCP client, and every CLI command with whether agents can run it. Each definition has a Copy for agent button that copies it as Markdown, and warnings show next to errors.
+- Studio's API is for agents too. `GET /api` lists every endpoint, `/llms.txt` explains them, and `/` serves that guide to requests that prefer Markdown. New endpoints: `/api/status`, `/api/commands`, `/api/definitions/{id}`, and `/api/definitions/{id}.md`. `studio --json` prints its URLs as one line once it's listening.
+- Studio can write snapshots (`POST /api/snapshot`) and run the syntax and typecheck tests (`POST /api/test`). Tests run in the background: the request answers 202 with a `runId`, results stream as `test` and `test-done` events, and a second run waits with 409. The run tier and evals stay in the CLI, both writes are off when Studio listens beyond localhost, and it warns when `--host` exposes it to other machines.
+- `test --json` is short for `--reporter json`. `test` and `eval` warn about `--only` ids that match nothing, and their human output ends with the next steps.
+- Colors follow the output. They're off when stdout isn't a terminal, even when `CI` is set, and with `--json` or `NO_COLOR`.
+- `runCli`, `CopybookError`, the project analysis behind `check` (`analyzeProject`, `checkIssues`, `findDefinition`, `searchDefinitions`), `buildStatus`, `definitionDetail`, and `buildCatalog` are exported. Every `Issue` has a `code`.
+
+**Fixes in `@copybook/cli`:**
+
+- Loading the same project from two processes at once, such as Studio and `check`, no longer fails now and then with "must default-export defineConfig". The bundle cache is written atomically.
+- Studio no longer reloads when tests write their results, and reloads run one at a time, so an older load can't replace a newer one.
 
 ## 0.1.1
 
