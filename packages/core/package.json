@@ -4,10 +4,14 @@
   "description": "Define code snippets, commands, and agent prompts as typed, testable content.",
   "keywords": [
     "agent",
+    "agent-prompts",
     "code-snippets",
+    "coding-agents",
     "devrel",
     "llm",
-    "prompts"
+    "prompts",
+    "templates",
+    "typescript"
   ],
   "homepage": "https://copybook.dev",
   "bugs": {

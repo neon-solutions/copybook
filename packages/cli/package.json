@@ -4,11 +4,16 @@
   "description": "Catalog, snapshot, test, and evaluate the snippets and agent prompts in your product.",
   "keywords": [
     "agent",
+    "agent-prompts",
     "cli",
     "code-snippets",
+    "coding-agents",
     "devrel",
     "evals",
-    "prompts"
+    "llm-evals",
+    "mcp",
+    "prompts",
+    "snapshot-testing"
   ],
   "homepage": "https://copybook.dev",
   "bugs": {
