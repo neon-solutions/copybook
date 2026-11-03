@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { GitHubLink } from "@/components/landing/github-link";
-import { Logo } from "@/components/landing/primitives";
+import { LinkButton, Logo } from "@/components/landing/primitives";
 
 export const SiteNav = () => (
   <header className="fixed inset-x-0 top-4 z-40 px-4">
@@ -12,7 +12,12 @@ export const SiteNav = () => (
       <Link aria-label="Copybook home" className="rounded-sm" href="/">
         <Logo />
       </Link>
-      <GitHubLink />
+      <div className="flex items-center gap-1">
+        <LinkButton href="/docs" variant="ghost">
+          Docs
+        </LinkButton>
+        <GitHubLink />
+      </div>
     </nav>
   </header>
 );
