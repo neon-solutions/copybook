@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 import { OgAurora } from "@/components/og/og-aurora";
-import type { AuroraLayout } from "@/components/og/og-aurora";
+import type { AuroraLayout, ImageSize } from "@/components/og/og-aurora";
 import { HOME } from "@/lib/home";
 
 /** The landing page's dark theme. */
@@ -66,10 +66,12 @@ const Frame = ({
   children,
   layout,
   seed,
+  size,
 }: {
   children: ReactNode;
   layout: AuroraLayout;
   seed: string;
+  size?: ImageSize;
 }) => (
   <div
     style={{
@@ -84,14 +86,14 @@ const Frame = ({
       width: "100%",
     }}
   >
-    <OgAurora layout={layout} seed={seed} />
+    <OgAurora layout={layout} seed={seed} size={size} />
     {children}
   </div>
 );
 
 /** The landing page's hero: eyebrow, headline, and meta strip, centered. */
-export const OgHomeCard = () => (
-  <Frame layout="center" seed="/">
+export const OgHomeCard = ({ size }: { size?: ImageSize }) => (
+  <Frame layout="center" seed="/" size={size}>
     <div
       style={{
         alignItems: "center",

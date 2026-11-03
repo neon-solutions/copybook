@@ -24,5 +24,7 @@ const fonts = Promise.all([
   { data: geistMono, name: "Geist Mono", weight: 400 as const },
 ]);
 
-export const renderOgImage = async (element: ReactElement) =>
-  new ImageResponse(element, { ...ogImageSize, fonts: await fonts });
+export const renderOgImage = async (
+  element: ReactElement,
+  size: { height: number; width: number } = ogImageSize
+) => new ImageResponse(element, { ...size, fonts: await fonts });

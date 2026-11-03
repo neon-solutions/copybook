@@ -14,9 +14,13 @@ const DEEP: Rgb = [14, 95, 69];
 const PRIMARY: Rgb = [0, 229, 153];
 const ACCENT: Rgb = [59, 130, 246];
 
+export interface ImageSize {
+  height: number;
+  width: number;
+}
+
 const COLUMNS = 110;
 const ROWS = 5;
-const PERIOD = ogImageSize.width / COLUMNS;
 const BAR_WIDTH = 3;
 /** Share of blocks that are lit. */
 const DENSITY = 0.34;
@@ -49,20 +53,16 @@ const barColor = (column: number, row: number) => {
 
 export type AuroraLayout = "center" | "start";
 
-/** How lit the field is at a point: clear around the copy, bright at the edges. */
+/**
+ * How lit the field is at a point, from 0 to 1 across the image each way:
+ * clear around the copy, bright at the edges.
+ */
 const MASKS: Record<AuroraLayout, (x: number, y: number) => number> = {
   // The hero's mask: an ellipse cleared around centered copy.
   center: (x, y) =>
-    smoothstep(
-      0.7,
-      1,
-      Math.hypot(
-        (x - ogImageSize.width / 2) / 660,
-        (y - ogImageSize.height / 2) / 300
-      )
-    ),
+    smoothstep(0.7, 1, Math.hypot((x - 0.5) / 0.55, (y - 0.5) / 0.476)),
   // Copy on the left, so the bars gather on the right.
-  start: (x) => smoothstep(0.6, 0.94, x / ogImageSize.width),
+  start: (x) => smoothstep(0.6, 0.94, x),
 };
 
 interface Bar {
@@ -82,8 +82,9 @@ const seedFrom = (text: string) => {
   return seed;
 };
 
-const layoutBars = (seed: number, layout: AuroraLayout) => {
+const layoutBars = (seed: number, layout: AuroraLayout, size: ImageSize) => {
   const mask = MASKS[layout];
+  const period = size.width / COLUMNS;
   const bars: Bar[] = [];
 
   /** A bar centered at `center`, `half` tall each way, in fractions of the height. */
@@ -93,19 +94,19 @@ const layoutBars = (seed: number, layout: AuroraLayout) => {
     center: number,
     half: number
   ) => {
-    const left = column * PERIOD + (PERIOD - BAR_WIDTH) / 2;
+    const left = column * period + (period - BAR_WIDTH) / 2;
     const breath = 0.55 + 0.45 * hash(column + seed, row);
-    const alpha = breath * mask(left, center * ogImageSize.height);
+    const alpha = breath * mask(left / size.width, center);
     if (alpha < MIN_ALPHA) {
       return;
     }
     const [red, green, blue] = barColor(column + seed, row);
     bars.push({
       color: `rgba(${red}, ${green}, ${blue}, ${alpha.toFixed(2)})`,
-      height: half * 2 * ogImageSize.height,
+      height: half * 2 * size.height,
       key: `${row}-${column}-${bars.length}`,
       left,
-      top: (center - half) * ogImageSize.height,
+      top: (center - half) * size.height,
     });
   };
 
@@ -142,9 +143,11 @@ const layoutBars = (seed: number, layout: AuroraLayout) => {
 export const OgAurora = ({
   layout,
   seed,
+  size = ogImageSize,
 }: {
   layout: AuroraLayout;
   seed: string;
+  size?: ImageSize;
 }) => (
   <div
     style={{
@@ -156,7 +159,7 @@ export const OgAurora = ({
       width: "100%",
     }}
   >
-    {layoutBars(seedFrom(seed), layout).map((bar) => (
+    {layoutBars(seedFrom(seed), layout, size).map((bar) => (
       <div
         key={bar.key}
         style={{
