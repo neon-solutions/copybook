@@ -1,4 +1,6 @@
 import { COLLECTION, DEFINITION } from "./brand";
+import { parseMarkdown } from "./markdown";
+import { fragment } from "./nodes";
 import type { ParamsShape, TemplateValues } from "./params";
 import type {
   Collection,
@@ -53,21 +55,35 @@ export const defineCommand = <S extends ParamsShape = Record<never, never>>(
   });
 };
 
-interface PromptInput<S extends ParamsShape> extends DefinitionMeta {
-  params?: S;
-  template: TemplateFn<S>;
-}
+type PromptInput<S extends ParamsShape> = DefinitionMeta &
+  (
+    | { markdown?: never; params?: S; template: TemplateFn<S> }
+    | {
+        /** The prompt as Markdown, rendered exactly as written. */
+        markdown: string;
+        params?: never;
+        template?: never;
+      }
+  );
 
-/** A prompt that users paste into a coding agent. */
+/**
+ * A prompt that users paste into a coding agent. Give it a `template`, or
+ * its `markdown` text.
+ */
 export const definePrompt = <S extends ParamsShape = Record<never, never>>(
   input: PromptInput<S>
 ): PromptDefinition<S> => {
   assertId(input.id);
+  const { markdown, template } = input;
   return Object.freeze({
     ...input,
     [DEFINITION]: true as const,
     kind: "prompt" as const,
     params: input.params ?? ({} as S),
+    template:
+      markdown === undefined
+        ? (template as TemplateFn<S>)
+        : () => fragment(parseMarkdown(markdown)),
   });
 };
 

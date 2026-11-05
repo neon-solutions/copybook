@@ -113,7 +113,7 @@ const walk = (
           {
             ...inner,
             ...lang,
-            text: `\`\`\`${node.lang ?? ""}\n`,
+            text: `\`\`\`${node.lang ?? ""}${node.meta ? ` ${node.meta}` : ""}\n`,
             type: "fence",
           },
           lineIndent

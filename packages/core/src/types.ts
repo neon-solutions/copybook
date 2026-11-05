@@ -134,6 +134,8 @@ export interface SnippetDefinition<S extends ParamsShape = ParamsShape>
 export interface PromptDefinition<S extends ParamsShape = ParamsShape>
   extends DefinitionMeta, Branded {
   readonly kind: "prompt";
+  /** The Markdown source, for prompts defined with `markdown`. */
+  readonly markdown?: string;
   readonly params: S;
   template(t: Template, values: TemplateValues<S>): TemplateResult;
 }

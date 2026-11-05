@@ -28,6 +28,8 @@ export interface CodeNode {
   /** The snippet definition's id, if it came from one. */
   id?: string;
   lang?: string;
+  /** The rest of a Markdown fence's info string, such as `title="db.ts"`. */
+  meta?: string;
   type: "code";
   variant?: string;
 }
