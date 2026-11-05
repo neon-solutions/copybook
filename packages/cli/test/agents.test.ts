@@ -30,6 +30,18 @@ describe(upsertBlock, () => {
   });
 });
 
+describe(renderAgentsBlock, () => {
+  it("names the project's config file", () => {
+    expect(block).toContain("configured in `copybook.config.ts`.");
+    expect(
+      renderAgentsBlock({
+        configFile: "copybook.config.mjs",
+        runner: "npx copybook",
+      })
+    ).toContain("configured in `copybook.config.mjs`.");
+  });
+});
+
 describe(mergeMcpConfig, () => {
   const entry = { args: ["--no", "copybook", "mcp"], command: "npx" };
 

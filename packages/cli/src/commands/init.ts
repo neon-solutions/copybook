@@ -137,17 +137,20 @@ export const registerInit = (program: Command) =>
       };
 
       const existing = findConfig(root);
+      const hasConfig =
+        existing !== undefined && path.dirname(existing) === root;
+      const configFile = hasConfig
+        ? path.basename(existing)
+        : "copybook.config.ts";
       const files: FileChange[] = [
-        existing !== undefined && path.dirname(existing) === root
-          ? { action: "unchanged", path: path.basename(existing) }
-          : {
-              action: "create",
-              content: CONFIG_TEMPLATE,
-              path: "copybook.config.ts",
-            },
+        hasConfig
+          ? { action: "unchanged", path: configFile }
+          : { action: "create", content: CONFIG_TEMPLATE, path: configFile },
       ];
       if (options.agent !== false) {
-        files.push(...(await planAgentSetup(root, { manager, platform })));
+        files.push(
+          ...(await planAgentSetup(root, { configFile, manager, platform }))
+        );
       }
       if (!dryRun) {
         await applyAgentSetup(root, files);

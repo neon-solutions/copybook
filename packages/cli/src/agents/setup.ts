@@ -76,7 +76,12 @@ const isIgnored = (gitignore: string | undefined) =>
  */
 export const planAgentSetup = async (
   root: string,
-  options: { manager: PackageManager; platform: NodeJS.Platform }
+  options: {
+    /** The config's file name, such as `copybook.config.mjs`. */
+    configFile?: string;
+    manager: PackageManager;
+    platform: NodeJS.Platform;
+  }
 ): Promise<FileChange[]> => {
   const at = (file: string) => path.join(root, file);
   const contents = new Map(
@@ -85,7 +90,10 @@ export const planAgentSetup = async (
     )
   );
   const runner = RUNNERS[options.manager];
-  const block = renderAgentsBlock({ runner });
+  const block = renderAgentsBlock({
+    runner,
+    ...(options.configFile ? { configFile: options.configFile } : {}),
+  });
   const skill = renderSkill({ runner });
   const entry = mcpServerEntry(options);
   const agents = contents.get("AGENTS.md");
