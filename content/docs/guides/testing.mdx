@@ -36,7 +36,7 @@ defineSnippet({
 });
 ```
 
-Prompts don't have a `verify` option. Their embedded definitions are tested on their own, and literal commands such as `t.cmd("npm run build")` get a syntax check. To check that a prompt works, use [evals](/docs/guides/evals).
+Prompts don't have a `verify` option. Their embedded definitions are tested on their own, and literal commands such as `t.cmd("npm run build")` and literal `bash`, `sh`, `shell`, and `zsh` code blocks, including fences in [Markdown prompts](/docs/guides/markdown-prompts), get a syntax check. To check that a prompt works, use [evals](/docs/guides/evals).
 
 Secrets never reach the syntax and typecheck tiers. They get stand-in values like `copybook_test_token`.
 

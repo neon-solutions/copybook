@@ -11,7 +11,7 @@ metaDescription: "The @copybook/core API: defineCommand, defineSnippet, definePr
 | --- | --- |
 | `defineCommand(input)` | A shell command. `verify` defaults to `"syntax"`. |
 | `defineSnippet(input)` | A code block, either single (`lang` + `template` or `code`) or with `dimensions` and `variants`. |
-| `definePrompt(input)` | Text for a coding agent. |
+| `definePrompt(input)` | Text for a coding agent, from a `template` or from `markdown` text, which renders exactly as written. |
 | `defineCollection({ idPrefix, items, key, build })` | Definitions generated from data, with ids `<idPrefix>.<key>`. |
 | `skip(reason)` | A `verify` value that never runs the definition. |
 | `isDefinition(value)`, `isCollection(value)`, `isFragment(value)` | Type guards based on the brands. A fragment is what a `t` template returns. |
@@ -63,6 +63,7 @@ type Node =
       type: "code";
       id?: string;
       lang?: string;
+      meta?: string; // the rest of a Markdown fence's info string
       variant?: string;
       children: Node[];
     }

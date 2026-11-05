@@ -1,4 +1,12 @@
 {
   "title": "Guides",
-  "pages": ["agents", "modeling-a-console", "studio", "testing", "evals", "ci"]
+  "pages": [
+    "agents",
+    "modeling-a-console",
+    "markdown-prompts",
+    "studio",
+    "testing",
+    "evals",
+    "ci"
+  ]
 }

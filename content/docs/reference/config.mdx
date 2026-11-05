@@ -24,13 +24,14 @@ export default defineConfig({
 
 | Option | Description |
 | --- | --- |
-| `content` | Globs of files that export definitions, relative to the config file. Required. |
+| `content` | Globs of files that export definitions, relative to the config file. Required unless you set `markdown`. |
+| `markdown` | Directories of Markdown files, each one a prompt. See [Markdown sources](#markdown-sources). |
 | `verify` | Globs of files that export `defineTest`, `defineFixture`, and `defineEval` specs. Your product never imports these. |
 | `exclude` | Globs to leave out. `node_modules`, `dist`, and `.next` are always excluded. |
 | `tsconfig` | Used to resolve path aliases such as `@/`. Defaults to `tsconfig.json`. |
 | `stubs` | Modules to replace with empty ones while loading content, such as `server-only`. CSS imports are always stubbed. |
 | `snapshots.dir` | Where snapshots are written. Defaults to `copybook/snapshots`. |
-| `usage.include`, `usage.exclude` | Product files to scan for imports of definitions, for `usages`, `check`, `report`, and Studio. |
+| `usage.include`, `usage.exclude` | Product files to scan for imports of definitions and for the URLs of Markdown prompts, for `usages`, `check`, `report`, and Studio. Markdown and MDX files are scanned for URLs only. |
 | `placements` | Known placements, each with an optional `route` and `description`. When you set this, `check` fails on placements that aren't listed. |
 
 ## How content loads
@@ -40,3 +41,19 @@ The CLI bundles your content files with esbuild, so tsconfig path aliases and ex
 Only **exported** definitions are found, including ones inside exported arrays, objects, and collections. A definition that's only embedded in another one still appears in that definition's snapshot, but it doesn't get a snapshot of its own.
 
 Keep content files free of imports that only work inside your app, such as React components or database clients, or list those modules in `stubs`.
+
+## Markdown sources
+
+Each entry in `markdown` turns a directory of Markdown files into prompts. The [Markdown prompts](/docs/guides/markdown-prompts) guide walks through it.
+
+| Option | Description |
+| --- | --- |
+| `dir` | The directory, relative to the config file. Required. |
+| `idPrefix` | Ids are `<idPrefix>.<path in dir>`, without the extension and with `/` as `.`. Required. |
+| `include`, `exclude` | Globs inside `dir`. `include` defaults to `**/*.md`. |
+| `url` | The URL path your product serves `dir` at, such as `/prompts`. Files that contain `<url>/<path in dir>` count as usages. |
+| `frontmatter` | `keep` (default): frontmatter is part of the prompt, and only `title` and `description` are read. `strip`: it holds the metadata and isn't part of the prompt. |
+| `owners`, `placements`, `tags` | Applied to every file in `dir`. |
+| `meta` | `title`, `description`, `owners`, `placements`, `tags`, and `aliases` for single files, keyed by their path in `dir`. |
+
+Each Markdown file is its own snapshot, so nothing is written to `snapshots.dir` for it.

@@ -1,0 +1,101 @@
+---
+title: Markdown prompts
+description: Keep prompts as Markdown files your docs serve, and get the catalog, history, tests, and evals.
+metaTitle: "Markdown prompts: files as Copybook definitions"
+metaDescription: "Turn a folder of Markdown prompts into Copybook definitions without changing a byte: ids from paths, usages found by URL, each file its own snapshot."
+---
+
+Docs sites often keep agent prompts as plain Markdown files: a writer edits them, the site serves them at a URL such as `/prompts/nextjs.md`, and a "Copy prompt" button copies the file as is. A `markdown` source makes every file in a folder a prompt definition, so you get the catalog, history, pull request reports, tests, and evals with no change to the files.
+
+```ts title="copybook.config.ts"
+import { defineConfig } from "@copybook/cli";
+
+export default defineConfig({
+  markdown: [
+    {
+      dir: "public/prompts",
+      idPrefix: "site.prompts",
+      url: "/prompts",
+      owners: ["docs"],
+    },
+  ],
+  usage: { include: ["content/**/*.{md,mdx}", "src/**/*.{ts,tsx}"] },
+});
+```
+
+`content` is optional when you set `markdown`, and you can use both.
+
+## Ids and titles
+
+A file's id is `<idPrefix>.<path in dir>`, without the extension and with `/` as `.`:
+
+| File                               | Id                            |
+| ---------------------------------- | ----------------------------- |
+| `public/prompts/nextjs.md`         | `site.prompts.nextjs`         |
+| `public/prompts/guides/connect.md` | `site.prompts.guides.connect` |
+
+Ids always come from paths, so a file name must be lowercase letters, digits, and `.`, `-`, or `_`. The title is the frontmatter `title`, or else the first `# ` heading.
+
+Renaming a file changes its id, and usually a public URL that agents fetch. `copybook check --base origin/main` fails on it until you keep the old id as an alias:
+
+```ts title="copybook.config.ts"
+markdown: [
+  {
+    dir: "public/prompts",
+    idPrefix: "site.prompts",
+    meta: { "nextjs.md": { aliases: ["site.prompts.nextjs-prompt"] } },
+  },
+],
+```
+
+## Metadata
+
+`owners`, `placements`, and `tags` on the source apply to every file in it. `meta` sets `title`, `description`, `owners`, `placements`, `tags`, and `aliases` for single files, keyed by their path in `dir`, and wins over everything else.
+
+What frontmatter means depends on `frontmatter`:
+
+| Value | Frontmatter |
+| --- | --- |
+| `keep` (default) | Part of the prompt, because your site serves and copies the file as is. Only `title` and `description` are read. |
+| `strip` | The prompt's metadata: `title`, `description`, `owners`, `placements`, `tags`, and `aliases`. It isn't part of the prompt, and neither are the blank lines after it. |
+
+## Where each prompt is shown
+
+Pages point at a Markdown prompt by URL, not by importing it. With `url` set, every `usage.include` file that contains the URL counts as a usage, whether it's MDX, Markdown, or code:
+
+```mdx title="content/docs/guides/nextjs.mdx"
+<CopyPrompt src="/prompts/nextjs.md" />
+```
+
+```ts title="src/agent-setup-button.tsx"
+const PROMPT = "Fetch https://acme.dev/prompts/agent-setup.md and follow it.";
+```
+
+`copybook usages`, `show`, `report`, and Studio list those files, and a prompt that no file mentions is reported as unused.
+
+## Each file is its own snapshot
+
+A Markdown prompt renders to exactly its own text, so the file is its snapshot. `copybook snapshot` doesn't write a copy, and `check` never asks you to update one: edit the file and commit it. History, `report` diffs, and `list --changed` read the file's own git history.
+
+Code fences become `code` nodes in the rendered tree, with the language as `lang` and the rest of the info string, such as `title="lib/db.ts"`, as `meta`. `toSegments` marks the fences and the code inside them, and `copybook test` knows which blocks are shell. The rendered text is still the file's text, byte for byte.
+
+## Tests and evals
+
+`copybook test` syntax-checks every `bash`, `sh`, `shell`, and `zsh` block in a Markdown prompt. A placeholder such as `<project-name>` fails the check, because a shell would read it as a redirect.
+
+[Evals](/docs/guides/evals) work like they do for any prompt. A Markdown prompt has no export to import, so pass its id to `defineEval` in a file your `verify` globs match:
+
+```ts title="verify/nextjs.verify.ts"
+import { defineEval, fileExists } from "@copybook/cli";
+
+export const nextjsEval = defineEval("site.prompts.nextjs", {
+  agents: ["claude-code"],
+  assert: [fileExists("lib/db.ts")],
+});
+```
+
+<Callout title="Static only, for now">
+  Markdown prompts don't have params yet. For a prompt with values such as a
+  project id, use [`definePrompt`](/docs/concepts/definitions) with a template,
+  or pass the Markdown text to `definePrompt({ id, markdown })`.
+</Callout>

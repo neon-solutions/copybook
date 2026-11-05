@@ -4,6 +4,30 @@ description: What changed in each release.
 metaDescription: "What changed in each release of @copybook/core and @copybook/cli: new commands and flags, fixes, and the breaking changes a 0.x minor release can bring."
 ---
 
+## Unreleased
+
+Prompts can be plain Markdown files, such as the ones a docs site serves at `/prompts/*.md`, with no change to the files. See [Markdown prompts](/docs/guides/markdown-prompts).
+
+**Breaking changes**, in `@copybook/cli`:
+
+- `copybook test` syntax-checks the literal `bash`, `sh`, `shell`, and `zsh` code blocks in prompts, such as `t.code("bash", ...)`, like it checks literal commands. A prompt with a broken or placeholder-filled shell block now fails `test`.
+
+**New in `@copybook/core`:**
+
+- `definePrompt({ id, markdown })` defines a prompt from Markdown text, which renders exactly as written. Fenced code blocks become `code` nodes, with the rest of the info string, such as `title="db.ts"`, in the new `meta` field.
+
+**New in `@copybook/cli`:**
+
+- `markdown` in the config turns a directory of Markdown files into prompts, with ids from their paths. Frontmatter stays part of the prompt unless you set `frontmatter: "strip"`, and `meta` sets metadata for single files. `content` is optional when `markdown` is set.
+- Each Markdown file is its own snapshot. `snapshot` doesn't write a copy, `check` never reports one stale, and history, `report` diffs, `list --changed`, and `check --base` read the file's own git changes. Renaming a file without an alias is reported like any removed id.
+- With a source's `url` set, usage scanning finds a Markdown prompt in any `usage.include` file that contains its URL, Markdown and MDX included. Only JS and TS files are parsed for imports.
+- `defineEval` takes a prompt's id as well as the prompt, and `eval` warns about a spec whose id isn't a prompt instead of skipping it.
+- `status --json` lists the Markdown directories in `config.markdown`, and `show`, the MCP server, and Studio show a Markdown prompt's file as its source.
+
+**Fixes in `@copybook/cli`:**
+
+- `check --base`, `report`, and `list --changed` no longer fail with "outside repository" when the project's path goes through a symlink.
+
 ## 0.2.0
 
 Released November 3, 2026.
