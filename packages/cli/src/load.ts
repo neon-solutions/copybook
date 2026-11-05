@@ -8,14 +8,32 @@ import { bundleAndImport } from "./bundle";
 import { loadConfig } from "./config";
 import type { ResolvedConfig } from "./config";
 import { CopybookError } from "./errors";
+import { loadMarkdown } from "./markdown";
 
 export interface LoadedDefinition {
   definition: Definition;
-  /** The export that holds it, such as `connect` or `models[gpt-5-mini]`. */
+  /**
+   * The export that holds it, such as `connect` or `models[gpt-5-mini]`.
+   * Empty for a Markdown file.
+   */
   exportName: string;
   /** Relative to the config root, with forward slashes. */
   file: string;
+  /** Set for a Markdown file, which is its own snapshot. */
+  markdown?: {
+    /** The file's raw text. */
+    text: string;
+    /** Where the product serves it, such as `/prompts/setup.md`. */
+    url?: string;
+  };
 }
+
+/** Where a definition is declared: `file#export`, or just the file. */
+export const sourceLabel = ({
+  exportName,
+  file,
+}: Pick<LoadedDefinition, "exportName" | "file">) =>
+  exportName === "" ? file : `${file}#${exportName}`;
 
 export interface Project {
   config: ResolvedConfig;
@@ -56,56 +74,66 @@ const definitionsIn = (
 };
 
 /**
+ * Merges definitions from every source, sorted by id. Two definitions with
+ * one id are an error.
+ */
+export const mergeDefinitions = (
+  ...lists: readonly (readonly LoadedDefinition[])[]
+): LoadedDefinition[] => {
+  const byId = new Map<string, LoadedDefinition>();
+  for (const loaded of lists.flat()) {
+    const existing = byId.get(loaded.definition.id);
+    if (existing) {
+      throw new CopybookError(
+        "DUPLICATE_ID",
+        `Duplicate id "${loaded.definition.id}" in ${sourceLabel(existing)} and ${sourceLabel(loaded)}.`
+      );
+    }
+    byId.set(loaded.definition.id, loaded);
+  }
+  return [...byId.values()].toSorted((a, b) =>
+    a.definition.id.localeCompare(b.definition.id)
+  );
+};
+
+/**
  * Collects definitions from loaded modules. The same definition exported
  * twice counts once; two definitions with one id are an error.
  */
 export const collectDefinitions = (
   modules: Readonly<Record<string, Record<string, unknown>>>
 ): LoadedDefinition[] => {
-  const byId = new Map<string, LoadedDefinition>();
+  const found: LoadedDefinition[] = [];
   const seen = new Set<Definition>();
 
   for (const [file, namespace] of Object.entries(modules)) {
     for (const [name, value] of Object.entries(namespace)) {
-      for (const found of definitionsIn(name, value)) {
-        if (seen.has(found.definition)) {
-          continue;
+      for (const item of definitionsIn(name, value)) {
+        if (!seen.has(item.definition)) {
+          seen.add(item.definition);
+          found.push({ ...item, file });
         }
-        seen.add(found.definition);
-        const existing = byId.get(found.definition.id);
-        if (existing) {
-          throw new CopybookError(
-            "DUPLICATE_ID",
-            `Duplicate id "${found.definition.id}" in ${existing.file}#${existing.exportName} and ${file}#${found.exportName}.`
-          );
-        }
-        byId.set(found.definition.id, { ...found, file });
       }
     }
   }
 
-  return [...byId.values()].toSorted((a, b) =>
-    a.definition.id.localeCompare(b.definition.id)
-  );
+  return mergeDefinitions(found);
 };
 
 export const findContentFiles = async (config: ResolvedConfig) => {
-  const files = await glob(config.content, {
+  const files = await glob(config.content ?? [], {
     cwd: config.root,
     ignore: [...DEFAULT_EXCLUDE, ...(config.exclude ?? [])],
   });
   return files.toSorted();
 };
 
-/** Loads the config and every definition its `content` globs export. */
-export const loadProject = async (
-  cwd: string,
-  options: { config?: string } = {}
-): Promise<Project> => {
-  const config = await loadConfig(cwd, options.config);
+const loadModules = async (
+  config: ResolvedConfig
+): Promise<LoadedDefinition[]> => {
   const files = await findContentFiles(config);
   if (files.length === 0) {
-    return { config, definitions: [] };
+    return [];
   }
 
   const imports = files.map(
@@ -123,6 +151,31 @@ export const loadProject = async (
     ...(config.tsconfig ? { tsconfig: config.tsconfig } : {}),
   });
 
-  const modules = loaded.modules as Record<string, Record<string, unknown>>;
-  return { config, definitions: collectDefinitions(modules) };
+  return collectDefinitions(
+    loaded.modules as Record<string, Record<string, unknown>>
+  );
+};
+
+/**
+ * Loads the config, every definition its `content` globs export, and every
+ * file its `markdown` sources match.
+ */
+export const loadProject = async (
+  cwd: string,
+  options: { config?: string } = {}
+): Promise<Project> => {
+  const config = await loadConfig(cwd, options.config);
+  const [modules, markdown] = await Promise.all([
+    loadModules(config),
+    loadMarkdown(config, DEFAULT_EXCLUDE),
+  ]);
+  const files = markdown.map(
+    ({ definition, file, text, url }): LoadedDefinition => ({
+      definition,
+      exportName: "",
+      file,
+      markdown: url === undefined ? { text } : { text, url },
+    })
+  );
+  return { config, definitions: mergeDefinitions(modules, files) };
 };

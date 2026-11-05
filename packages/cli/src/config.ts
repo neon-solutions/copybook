@@ -10,11 +10,60 @@ export interface PlacementInfo {
   route?: string;
 }
 
+/** Metadata for a Markdown prompt. */
+export interface MarkdownMeta {
+  aliases?: string[];
+  description?: string;
+  owners?: string[];
+  placements?: string[];
+  tags?: string[];
+  title?: string;
+}
+
+/** A directory of Markdown files, each one a prompt. */
+export interface MarkdownSource {
+  /** The directory, relative to the config file. */
+  dir: string;
+  /** Globs inside `dir` to leave out. */
+  exclude?: string[];
+  /**
+   * `keep` (the default): frontmatter is part of the prompt, and only its
+   * `title` and `description` are read. `strip`: frontmatter holds the
+   * prompt's metadata and isn't part of the prompt.
+   */
+  frontmatter?: "keep" | "strip";
+  /**
+   * Ids are `<idPrefix>.<path in dir>`, without the extension and with
+   * `/` as `.`: `setup/agent.md` is `<idPrefix>.setup.agent`.
+   */
+  idPrefix: string;
+  /** Globs inside `dir`. Defaults to `**\/*.md`. */
+  include?: string[];
+  /** Metadata for single files, keyed by their path in `dir`. */
+  meta?: Record<string, MarkdownMeta>;
+  /** Owners of every prompt in `dir`. */
+  owners?: string[];
+  /** Placements of every prompt in `dir`. */
+  placements?: string[];
+  /** Tags of every prompt in `dir`. */
+  tags?: string[];
+  /**
+   * The URL path your product serves `dir` at, such as `/prompts`. Usage
+   * scanning looks for `<url>/<path in dir>` in `usage.include` files.
+   */
+  url?: string;
+}
+
 export interface Config {
-  /** Globs of files that export definitions, relative to the config file. */
-  content: string[];
+  /**
+   * Globs of files that export definitions, relative to the config file.
+   * Required unless `markdown` is set.
+   */
+  content?: string[];
   /** Globs to leave out, even when `content` matches them. */
   exclude?: string[];
+  /** Directories of Markdown prompts. Each file is its own snapshot. */
+  markdown?: MarkdownSource[];
   /**
    * Known placements. When set, `check` fails on definitions that declare
    * a placement that isn't listed.
@@ -83,10 +132,22 @@ export const findConfig = (cwd: string): string | undefined => {
   }
 };
 
-const isConfig = (value: unknown): value is Config =>
+const isMarkdownSource = (value: unknown): value is MarkdownSource =>
   typeof value === "object" &&
   value !== null &&
-  Array.isArray((value as Config).content);
+  typeof (value as MarkdownSource).dir === "string" &&
+  typeof (value as MarkdownSource).idPrefix === "string";
+
+const isConfig = (value: unknown): value is Config => {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+  const { content, markdown } = value as Config;
+  const hasContent = Array.isArray(content);
+  const hasMarkdown = Array.isArray(markdown);
+  const markdownValid = !hasMarkdown || markdown.every(isMarkdownSource);
+  return (hasContent || hasMarkdown) && markdownValid;
+};
 
 export const loadConfig = async (
   cwd: string,
@@ -120,7 +181,7 @@ export const loadConfig = async (
   if (!isConfig(config)) {
     throw new CopybookError(
       "CONFIG_INVALID",
-      `${path.relative(cwd, file)} must default-export defineConfig({ content: [...] }).`
+      `${path.relative(cwd, file)} must default-export defineConfig({ content: [...] }) or defineConfig({ markdown: [{ dir, idPrefix }] }).`
     );
   }
   return {

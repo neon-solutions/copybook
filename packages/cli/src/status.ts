@@ -24,6 +24,8 @@ export interface StatusReport {
   config: {
     content: string[];
     file: string;
+    /** The directories of Markdown prompts. */
+    markdown: string[];
     /** Declared placement names, or null when any placement is allowed. */
     placements: string[] | null;
     snapshotsDir: string;
@@ -80,8 +82,9 @@ export const buildStatus = async (
   return {
     clean: next.length === 0,
     config: {
-      content: config.content,
+      content: config.content ?? [],
       file: relative(config.file),
+      markdown: config.markdown?.map((source) => source.dir) ?? [],
       placements: config.placements ? Object.keys(config.placements) : null,
       snapshotsDir: relative(config.snapshotsDir),
       usage: config.usage?.include ?? null,
