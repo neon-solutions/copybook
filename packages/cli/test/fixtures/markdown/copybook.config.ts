@@ -12,4 +12,5 @@ export default defineConfig({
     { dir: "notes", frontmatter: "strip", idPrefix: "fixture.notes" },
   ],
   placements: { "docs/notes": {}, "docs/setup": {} },
+  usage: { include: ["app/**/*.{mdx,tsx}"] },
 });

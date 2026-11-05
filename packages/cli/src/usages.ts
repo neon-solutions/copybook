@@ -37,6 +37,42 @@ const reachable = (
 
 const EXTENSIONS = [".ts", ".tsx", ".mts", ".js", ".jsx", ".mjs"];
 const BASE_EXPORT = /^[^.[]+/u;
+const REGEXP_SPECIAL = /[.*+?^${}()|[\]\\]/gu;
+/** A URL that continues past a match, such as `a.md` inside `a.mdx`, isn't a match. */
+const PATH_CHAR = /[\w./-]/u;
+
+/**
+ * A matcher for the URLs Markdown prompts are served at, such as
+ * `/prompts/setup.md`, or nothing when no prompt has a URL.
+ */
+const urlMatcher = (project: Project) => {
+  const byUrl = new Map<string, string>();
+  for (const { definition, markdown } of project.definitions) {
+    if (markdown?.url) {
+      byUrl.set(markdown.url, definition.id);
+    }
+  }
+  if (byUrl.size === 0) {
+    return;
+  }
+  // Longest first, so a URL never stops a longer one from matching.
+  const pattern = [...byUrl.keys()]
+    .toSorted((a, b) => b.length - a.length)
+    .map((url) => url.replaceAll(REGEXP_SPECIAL, String.raw`\$&`))
+    .join("|");
+  const regexp = new RegExp(pattern, "gu");
+  return (source: string): string[] => {
+    const ids: string[] = [];
+    for (const match of source.matchAll(regexp)) {
+      const next = source[match.index + match[0].length] ?? "";
+      const id = byUrl.get(match[0]);
+      if (id && !PATH_CHAR.test(next)) {
+        ids.push(id);
+      }
+    }
+    return ids;
+  };
+};
 
 /** content file → export name → the ids it holds. */
 const indexExports = (project: Project) => {
@@ -65,7 +101,9 @@ const importedIds = (
 /**
  * Finds which product files import each definition, by parsing the files the
  * config's `usage.include` globs match and resolving their imports with the
- * project's tsconfig paths. Type-only imports don't count.
+ * project's tsconfig paths. Type-only imports don't count. Markdown prompts
+ * with a `url` are used by every file that contains their URL, Markdown and
+ * MDX included.
  */
 export const findUsages = async (
   project: Project,
@@ -94,11 +132,23 @@ export const findUsages = async (
   });
 
   const usages = new Map<string, Set<string>>();
+  const record = (id: string, file: string) => {
+    const relative = path.relative(config.root, file).split(path.sep).join("/");
+    usages.set(id, (usages.get(id) ?? new Set()).add(relative));
+  };
+  const urlsIn = urlMatcher(project);
   const sources = await Promise.all(
     files.map((file) => readFile(file, "utf-8"))
   );
   for (const [index, file] of files.entries()) {
-    const { module } = parseSync(file, sources[index] ?? "");
+    const source = sources[index] ?? "";
+    for (const id of urlsIn?.(source) ?? []) {
+      record(id, file);
+    }
+    if (!EXTENSIONS.includes(path.extname(file))) {
+      continue;
+    }
+    const { module } = parseSync(file, source);
     for (const statement of module.staticImports) {
       const target = resolver.resolveFileSync(
         file,
@@ -114,11 +164,7 @@ export const findUsages = async (
         }
         const kind = String(entry.importName.kind);
         for (const id of importedIds(byName, kind, entry.importName.name)) {
-          const relative = path
-            .relative(config.root, file)
-            .split(path.sep)
-            .join("/");
-          usages.set(id, (usages.get(id) ?? new Set()).add(relative));
+          record(id, file);
         }
       }
     }

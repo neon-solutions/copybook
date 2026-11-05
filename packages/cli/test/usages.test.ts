@@ -23,3 +23,20 @@ describe(findUsages, () => {
     });
   });
 });
+
+describe("usages of Markdown prompts", () => {
+  it("finds prompts by URL in Markdown, MDX, and code", async () => {
+    const project = await loadProject(
+      path.join(import.meta.dirname, "fixtures/markdown")
+    );
+    const report = await findUsages(project);
+
+    expect(report).toStrictEqual({
+      unused: ["fixture.notes.release"],
+      usages: {
+        "fixture.prompts.guides.connect": ["app/docs/connect.mdx"],
+        "fixture.prompts.setup": ["app/setup-button.tsx"],
+      },
+    });
+  });
+});
