@@ -1,6 +1,7 @@
 import { listVariants } from "@copybook/core";
 import type { Verify } from "@copybook/core";
 
+import { sourceLabel } from "./load";
 import type { LoadedDefinition } from "./load";
 import type { Snapshot } from "./snapshot";
 
@@ -54,6 +55,10 @@ const variantsOf = (
     ...(variant.verify ? { verify: variant.verify } : {}),
   }));
 };
+
+/** Where an entry is declared: `file#export`, or just the file for Markdown. */
+export const entrySource = ({ source }: Pick<ManifestEntry, "source">) =>
+  sourceLabel({ exportName: source.export, file: source.file });
 
 /** A JSON description of every definition, for tools and Studio. */
 export const buildManifest = (

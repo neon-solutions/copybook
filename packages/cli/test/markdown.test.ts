@@ -5,6 +5,8 @@ import path from "node:path";
 import { renderExample, toText } from "@copybook/core";
 import { describe, expect, it } from "vitest";
 
+import { loadAnalysis } from "../src/analysis";
+import { definitionDetail, definitionMarkdown } from "../src/detail";
 import { loadProject } from "../src/load";
 
 const fixture = path.join(import.meta.dirname, "fixtures/markdown");
@@ -159,6 +161,16 @@ describe("Markdown sources", () => {
 
     await expect(loadProject(root)).rejects.toThrow(
       'Duplicate id "site.a" in defs.mjs#dupe and p/a.md.'
+    );
+  });
+
+  it("shows the file as the source and the snapshot", async () => {
+    const analysis = await loadAnalysis(fixture);
+    const detail = await definitionDetail(analysis, "fixture.prompts.setup");
+
+    expect(detail.snapshotFile).toBe("prompts/setup.md");
+    expect(definitionMarkdown(detail)).toContain(
+      "- Source: `prompts/setup.md`\n"
     );
   });
 });

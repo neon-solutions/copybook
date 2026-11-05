@@ -7,6 +7,7 @@ import type { Analysis, DefinitionEntry } from "./analysis";
 import { CopybookError } from "./errors";
 import { fileHistory } from "./git";
 import type { Commit } from "./git";
+import { entrySource } from "./manifest";
 import { nextActions } from "./next-actions";
 import type { NextAction } from "./next-actions";
 import type { Results } from "./results";
@@ -203,7 +204,7 @@ export const definitionMarkdown = (detail: DefinitionDetail) => {
     ...(entry.title ? [entry.title, ""] : []),
     ...(entry.description ? [entry.description, ""] : []),
     ...(detail.requested ? [`Renamed from \`${detail.requested}\`.`, ""] : []),
-    `- Source: \`${entry.source.file}#${entry.source.export}\``,
+    `- Source: \`${entrySource(entry)}\``,
     `- Placements: ${list(entry.placements, "none declared")}`,
     `- Rendered in: ${list(entry.renderedIn, "no scanned file")}`,
     `- Embeds: ${list(entry.embeds, "nothing")}`,

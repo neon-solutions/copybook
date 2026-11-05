@@ -105,7 +105,9 @@ export const DefinitionView = ({ entry, loadedAt }: DefinitionViewProps) => {
           <SnapshotBadge state={entry.snapshot} />
           <span>
             <code>
-              {entry.source.file}#{entry.source.export}
+              {entry.source.export === ""
+                ? entry.source.file
+                : `${entry.source.file}#${entry.source.export}`}
             </code>
           </span>
           {entry.aliases.length > 0 ? (

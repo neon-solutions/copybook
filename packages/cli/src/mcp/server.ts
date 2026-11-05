@@ -7,6 +7,7 @@ import { changedIds } from "../changes";
 import { definitionMarkdown, renderOutputs } from "../detail";
 import { snapshotPatch } from "../diff";
 import { errorEnvelope } from "../errors";
+import { entrySource } from "../manifest";
 import { VERSION } from "../meta";
 import { nextActions } from "../next-actions";
 import type { Issue } from "../validate";
@@ -46,7 +47,7 @@ const summarize = (entry: DefinitionEntry) => ({
   placements: entry.placements,
   renderedIn: entry.renderedIn,
   snapshot: entry.snapshot,
-  source: `${entry.source.file}#${entry.source.export}`,
+  source: entrySource(entry),
   ...(entry.title ? { title: entry.title } : {}),
   usedBy: entry.usedBy,
 });
