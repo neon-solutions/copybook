@@ -174,12 +174,13 @@ export interface EvalSpec {
 
 /** Evaluates a prompt by giving it to coding agents and checking what they did. */
 export const defineEval = <S extends ParamsShape, V = undefined>(
-  prompt: PromptDefinition<S>,
+  /** The prompt, or its id, such as a Markdown prompt's `site.prompts.setup`. */
+  prompt: PromptDefinition<S> | string,
   options: NoInfer<EvalOptions<S, V>> & { fixture?: Fixture<V> }
 ): EvalSpec =>
   Object.freeze({
     [EVAL]: true as const,
-    id: prompt.id,
+    id: typeof prompt === "string" ? prompt : prompt.id,
     options: options as EvalOptions<ParamsShape, unknown>,
   });
 

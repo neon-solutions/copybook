@@ -85,9 +85,21 @@ export const registerEval = (program: Command) =>
         ? new Set(await changedIds(project, snapshots, options.base))
         : undefined;
       const only = options.only ? new Set(options.only) : undefined;
-      const warnings = (options.only ?? [])
-        .filter((id) => !specs.some((spec) => spec.id === id))
-        .map((id) => `No eval for "${id}".`);
+      const prompts = new Set(
+        project.definitions
+          .filter(({ definition }) => definition.kind === "prompt")
+          .map(({ definition }) => definition.id)
+      );
+      const warnings = [
+        ...(options.only ?? [])
+          .filter((id) => !specs.some((spec) => spec.id === id))
+          .map((id) => `No eval for "${id}".`),
+        ...specs
+          .filter((spec) => !prompts.has(spec.id))
+          .map(
+            (spec) => `The eval for "${spec.id}" has no prompt with that id.`
+          ),
+      ];
 
       const targets: EvalTarget[] = specs.flatMap((spec) => {
         const loaded = project.definitions.find(

@@ -182,3 +182,14 @@ describe(runEvals, () => {
     ).toStrictEqual([true, false]);
   });
 });
+
+describe(defineEval, () => {
+  it("takes a prompt or its id, for prompts without an export", () => {
+    expect(defineEval(prompt, { agents: ["literal"], assert: [] }).id).toBe(
+      prompt.id
+    );
+    expect(
+      defineEval("site.prompts.setup", { agents: ["literal"], assert: [] }).id
+    ).toBe("site.prompts.setup");
+  });
+});
