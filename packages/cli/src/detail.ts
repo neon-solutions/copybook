@@ -10,7 +10,7 @@ import type { Commit } from "./git";
 import { nextActions } from "./next-actions";
 import type { NextAction } from "./next-actions";
 import type { Results } from "./results";
-import { snapshotPath } from "./snapshot";
+import { snapshotFile } from "./snapshot";
 
 const HISTORY_LIMIT = 5;
 
@@ -135,7 +135,7 @@ export const definitionDetail = async (
   const found = requireDefinition(analysis, id);
   const { entry } = found;
   const { config } = analysis.project;
-  const file = snapshotPath(config, entry.id);
+  const file = snapshotFile(config, analysis.snapshots, entry.id);
   const [issues, history] = await Promise.all([
     checkIssues(analysis),
     fileHistory(config.root, file, HISTORY_LIMIT),

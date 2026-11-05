@@ -40,7 +40,12 @@ export interface Project {
   definitions: LoadedDefinition[];
 }
 
-const DEFAULT_EXCLUDE = ["**/node_modules/**", "**/dist/**", "**/.next/**"];
+/** Always left out of `content` and `markdown`. */
+export const DEFAULT_EXCLUDE = [
+  "**/node_modules/**",
+  "**/dist/**",
+  "**/.next/**",
+];
 
 /** Finds definitions in an export, one level into arrays and objects. */
 const definitionsIn = (

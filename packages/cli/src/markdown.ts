@@ -4,6 +4,7 @@ import path from "node:path";
 
 import { definePrompt } from "@copybook/core";
 import type { PromptDefinition } from "@copybook/core";
+import picomatch from "picomatch";
 import { glob } from "tinyglobby";
 import { parse } from "yaml";
 
@@ -43,6 +44,18 @@ export const markdownId = (source: MarkdownSource, fileInDir: string) => {
 /** A source's directory, absolute. */
 export const markdownDir = (config: ResolvedConfig, source: MarkdownSource) =>
   path.resolve(config.root, source.dir);
+
+/** Whether a path in a source's `dir` is one of its prompts. */
+export const matchesSource = (
+  source: MarkdownSource,
+  ignore: readonly string[]
+): ((fileInDir: string) => boolean) => {
+  const included = picomatch(source.include ?? DEFAULT_INCLUDE, { dot: true });
+  const excluded = picomatch([...ignore, ...(source.exclude ?? [])], {
+    dot: true,
+  });
+  return (fileInDir) => included(fileInDir) && !excluded(fileInDir);
+};
 
 interface Frontmatter {
   body: string;

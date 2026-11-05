@@ -23,6 +23,11 @@ export interface Snapshot {
   /** A hash of the rendered output, ignoring metadata. */
   hash: string;
   id: string;
+  /**
+   * Set for a Markdown file, which is its own snapshot: `path` is the file
+   * itself, and it's never compared, written, or pruned.
+   */
+  inSource?: true;
   /** Absolute path of the snapshot file. */
   path: string;
 }
@@ -75,14 +80,33 @@ const renderBody = (
 export const snapshotPath = (config: ResolvedConfig, id: string) =>
   path.join(config.snapshotsDir, `${id}${SNAPSHOT_EXTENSION}`);
 
+/** The snapshot file of an id: its Markdown source, or its file under `snapshotsDir`. */
+export const snapshotFile = (
+  config: ResolvedConfig,
+  snapshots: readonly Snapshot[],
+  id: string
+) =>
+  snapshots.find((snapshot) => snapshot.id === id)?.path ??
+  snapshotPath(config, id);
+
 /** Renders a definition with its examples into a reviewable Markdown file. */
 export const createSnapshot = (
   config: ResolvedConfig,
-  { definition, exportName, file }: LoadedDefinition
+  { definition, exportName, file, markdown }: LoadedDefinition
 ): Snapshot => {
   const { body, trees } = renderBody(definition);
   const embeds = [...new Set(trees.flatMap((tree) => collectEmbeds(tree)))];
   const hash = createHash("sha256").update(body).digest("hex").slice(0, 16);
+  if (markdown) {
+    return {
+      content: markdown.text,
+      embeds,
+      hash,
+      id: definition.id,
+      inSource: true,
+      path: path.resolve(config.root, file),
+    };
+  }
   const params = Object.fromEntries(
     Object.entries(definition.params).map(([name, param]) => [
       name,
@@ -138,18 +162,20 @@ export const compareSnapshots = async (
   snapshots: readonly Snapshot[]
 ): Promise<SnapshotStatus> => {
   const status: SnapshotStatus = { changed: [], missing: [], orphaned: [] };
-  const ids = new Set(snapshots.map((snapshot) => snapshot.id));
+  // Markdown files are their own snapshots, so only the rest are compared.
+  const written = snapshots.filter((snapshot) => !snapshot.inSource);
+  const ids = new Set(written.map((snapshot) => snapshot.id));
 
   const [contents, onDisk] = await Promise.all([
     Promise.all(
-      snapshots.map((snapshot) =>
+      written.map((snapshot) =>
         existsSync(snapshot.path) ? readFile(snapshot.path, "utf-8") : undefined
       )
     ),
     listSnapshotIds(config),
   ]);
 
-  for (const [index, snapshot] of snapshots.entries()) {
+  for (const [index, snapshot] of written.entries()) {
     const current = contents[index];
     if (current === undefined) {
       status.missing.push(snapshot.id);
@@ -165,7 +191,10 @@ export const compareSnapshots = async (
   return status;
 };
 
-/** Writes changed and missing snapshots, and optionally deletes orphans. */
+/**
+ * Writes changed and missing snapshots, and optionally deletes orphans. It
+ * never writes a Markdown file, which is its own snapshot.
+ */
 export const writeSnapshots = async (
   config: ResolvedConfig,
   snapshots: readonly Snapshot[],
@@ -179,7 +208,7 @@ export const writeSnapshots = async (
   await mkdir(config.snapshotsDir, { recursive: true });
   await Promise.all([
     ...snapshots
-      .filter((snapshot) => toWrite.has(snapshot.id))
+      .filter((snapshot) => !snapshot.inSource && toWrite.has(snapshot.id))
       .map((snapshot) => writeFile(snapshot.path, snapshot.content)),
     ...(options.prune
       ? status.orphaned.map((id) => rm(snapshotPath(config, id)))

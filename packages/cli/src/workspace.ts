@@ -16,7 +16,7 @@ import { loadProject } from "./load";
 import type { Project } from "./load";
 import { readResults } from "./results";
 import type { Results } from "./results";
-import { writeSnapshots, snapshotPath } from "./snapshot";
+import { snapshotFile, writeSnapshots } from "./snapshot";
 import { buildStatus } from "./status";
 import type { StatusReport } from "./status";
 import { runProjectTests } from "./test/run-project";
@@ -154,7 +154,7 @@ export const openWorkspace = async (
       const { entry } = requireDefinition(latest, id);
       return fileHistory(
         latest.project.config.root,
-        snapshotPath(latest.project.config, entry.id)
+        snapshotFile(latest.project.config, latest.snapshots, entry.id)
       );
     },
     onChange: (listener) => {

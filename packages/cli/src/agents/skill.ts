@@ -24,7 +24,7 @@ Run \`${runner} status --json\`, or call the \`status\` tool of the \`copybook\`
 1. Find the definition behind text in the UI: \`${runner} list --grep "<text>"\`, or the \`find_definitions\` tool.
 2. Read it: \`${runner} show <id>\`, or \`get_definition\`. It shows the source file, params, every variant's output, tests, and history.
 3. Edit the definition in its source file. Keep ids stable. When you rename one, keep the old id in \`aliases\`.
-4. Write the snapshots: \`${runner} snapshot\`, or \`write_snapshots\`. Review the diff under \`copybook/snapshots/\` and commit it with the code.
+4. Write the snapshots: \`${runner} snapshot\`, or \`write_snapshots\`. Review the diff under \`copybook/snapshots/\` and commit it with the code. A Markdown prompt from the config's \`markdown\` sources is its own snapshot, so after editing one there's nothing to write.
 5. Verify: \`${runner} check\` and \`${runner} test\`, or the \`check\` and \`run_tests\` tools. Both must pass.
 
 ## Rules

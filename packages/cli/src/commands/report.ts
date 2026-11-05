@@ -9,7 +9,7 @@ import { buildManifest } from "../manifest";
 import { cwd, write } from "../output";
 import { buildReport } from "../report";
 import { readResults } from "../results";
-import { snapshotPath } from "../snapshot";
+import { snapshotFile } from "../snapshot";
 import { findUsages } from "../usages";
 import { buildSnapshots } from "../validate";
 
@@ -62,7 +62,7 @@ export const registerReport = (program: Command) =>
             await snapshotDiff(
               root,
               options.base,
-              snapshotPath(project.config, entry.id)
+              snapshotFile(project.config, snapshots, entry.id)
             ),
           ])
         ),
