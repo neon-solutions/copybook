@@ -1,5 +1,5 @@
-import { collectCommands, renderExample } from "@copybook/core";
-import type { Definition, Verify } from "@copybook/core";
+import { collectCommands, renderExample, toText } from "@copybook/core";
+import type { Definition, Node, Rendered, Verify } from "@copybook/core";
 
 import type { LoadedDefinition } from "../load";
 import { TIERS } from "./define";
@@ -7,6 +7,8 @@ import type { TestSpec, Tier } from "./define";
 import type { TestCase } from "./types";
 
 const RANK: Record<Tier, number> = { run: 2, syntax: 0, typecheck: 1 };
+/** Shell code blocks in prompts get a syntax check. */
+const PROMPT_SHELLS = new Set(["bash", "sh", "shell", "zsh"]);
 const TYPECHECKABLE = new Set(["javascript", "js", "mjs", "ts", "typescript"]);
 const RUNNABLE = new Set([
   "bash",
@@ -70,7 +72,43 @@ const commandCases = (
   }));
 };
 
-/** Literal commands in a prompt, such as `t.cmd("npm run build")`, get a syntax check. */
+interface ShellBlock {
+  lang: string;
+  text: string;
+}
+
+/**
+ * Literal shell code blocks in a rendered tree, such as a fenced `bash`
+ * block in a Markdown prompt. Embedded snippets are tested on their own.
+ */
+const shellBlocks = (rendered: Rendered): ShellBlock[] => {
+  const blocks: ShellBlock[] = [];
+  const visit = (nodes: readonly Node[]) => {
+    for (const node of nodes) {
+      if (node.type === "code") {
+        const lang = node.lang?.toLowerCase() ?? "";
+        if (node.id === undefined && PROMPT_SHELLS.has(lang)) {
+          blocks.push({
+            lang,
+            text: toText(
+              { id: "", kind: "snippet", nodes: node.children },
+              { format: "plain" }
+            ),
+          });
+        }
+      } else if (node.type === "include") {
+        visit(node.children);
+      }
+    }
+  };
+  visit(rendered.nodes);
+  return blocks;
+};
+
+/**
+ * Literal commands in a prompt, such as `t.cmd("npm run build")`, and its
+ * literal shell code blocks get a syntax check.
+ */
 const promptCases = (
   definition: Definition,
   requested: readonly Tier[]
@@ -78,8 +116,8 @@ const promptCases = (
   if (!requested.includes("syntax")) {
     return [];
   }
-  const commands = collectCommands(renderExample(definition));
-  return commands.flatMap((command, index) =>
+  const rendered = renderExample(definition);
+  const commands = collectCommands(rendered).flatMap((command, index) =>
     command.id
       ? []
       : [
@@ -93,6 +131,15 @@ const promptCases = (
           },
         ]
   );
+  const blocks = shellBlocks(rendered).map((block, index) => ({
+    definition,
+    id: definition.id,
+    label: `code block ${index + 1}`,
+    lang: block.lang,
+    text: block.text,
+    tier: "syntax" as const,
+  }));
+  return [...commands, ...blocks];
 };
 
 /** Decides which tiers each definition and variant gets. */

@@ -6,13 +6,16 @@ export interface TestCase {
   definition: Definition;
   deps?: Deps;
   id: string;
-  /** For example `framework=python`, or `cmd 2` for a literal command in a prompt. */
+  /**
+   * For example `framework=python`, or `cmd 2` and `code block 1` for a
+   * literal command and shell code block in a prompt.
+   */
   label?: string;
   lang?: string;
   /** Set to skip the case, with the reason. */
   skip?: string;
   spec?: TestSpec;
-  /** A literal command embedded in a prompt, tested by text. */
+  /** A literal command or shell code block in a prompt, tested by text. */
   text?: string;
   tier: Tier;
   /** The snippet variant key. */

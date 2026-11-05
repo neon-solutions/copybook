@@ -85,6 +85,40 @@ describe(buildPlan, () => {
       { label: "cmd 1", text: "npm run build", tier: "syntax" },
     ]);
   });
+
+  it("syntax-checks literal shell code blocks in prompts", () => {
+    const fromTemplate = definePrompt({
+      id: "plan.template",
+      template: (t) => t`
+        Run:
+        ${t.code("bash", "npm install\nnpm run build")}
+        Then add ${t.code("ts", "export const a = 1;")}
+      `,
+    });
+    const fromMarkdown = definePrompt({
+      id: "plan.markdown",
+      markdown: "1. Install:\n\n    ```sh\n    acme init\n    ```\n",
+    });
+
+    expect(
+      buildPlan([loaded(fromTemplate), loaded(fromMarkdown)], [])
+    ).toMatchObject([
+      {
+        id: "plan.template",
+        label: "code block 1",
+        lang: "bash",
+        text: "npm install\nnpm run build",
+        tier: "syntax",
+      },
+      {
+        id: "plan.markdown",
+        label: "code block 1",
+        lang: "sh",
+        text: "acme init",
+        tier: "syntax",
+      },
+    ]);
+  });
 });
 
 describe(checkSyntax, () => {
