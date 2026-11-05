@@ -1,4 +1,5 @@
 import { execFile } from "node:child_process";
+import { realpath } from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
 
@@ -13,6 +14,21 @@ const git = async (cwd: string, args: string[]) => {
 };
 
 /**
+ * The real path of `target`, resolving symlinks in its existing ancestors,
+ * because git reports real paths. `target` itself may not exist yet.
+ */
+const realPath = async (target: string): Promise<string> => {
+  try {
+    return await realpath(target);
+  } catch {
+    const parent = path.dirname(target);
+    return parent === target
+      ? target
+      : path.join(await realPath(parent), path.basename(target));
+  }
+};
+
+/**
  * Files under `dir` that differ from `base`, including uncommitted and
  * untracked ones. Paths are absolute.
  */
@@ -23,7 +39,7 @@ export const changedFiles = async (
 ): Promise<string[]> => {
   const toplevel = await git(cwd, ["rev-parse", "--show-toplevel"]);
   const root = toplevel.trim();
-  const relative = path.relative(root, dir) || ".";
+  const relative = path.relative(root, await realPath(dir)) || ".";
   const [diff, untracked] = await Promise.all([
     git(root, ["diff", "--name-only", base, "--", relative]),
     git(root, ["ls-files", "--others", "--exclude-standard", "--", relative]),
