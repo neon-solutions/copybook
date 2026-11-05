@@ -15,6 +15,7 @@ Prompts can be plain Markdown files, such as the ones a docs site serves at `/pr
 **New in `@copybook/core`:**
 
 - `definePrompt({ id, markdown })` defines a prompt from Markdown text, which renders exactly as written. Fenced code blocks become `code` nodes, with the rest of the info string, such as `title="db.ts"`, in the new `meta` field.
+- CommonJS code can `require("@copybook/core")` on Node.js 20.19+ and 22.12+, which load ES modules from `require`. Before, the package's exports only matched `import`, so `require` failed with `ERR_PACKAGE_PATH_NOT_EXPORTED`.
 
 **New in `@copybook/cli`:**
 
