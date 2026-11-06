@@ -1,6 +1,7 @@
 import { COLLECTION, DEFINITION } from "./brand";
 import { parseMarkdown } from "./markdown";
 import { fragment } from "./nodes";
+import type { Node } from "./nodes";
 import type { ParamsShape, TemplateValues } from "./params";
 import type {
   Collection,
@@ -55,6 +56,14 @@ export const defineCommand = <S extends ParamsShape = Record<never, never>>(
   });
 };
 
+/** A deep copy of a rendered tree's nodes. */
+const copyNodes = (nodes: readonly Node[]): Node[] =>
+  nodes.map((node) =>
+    "children" in node
+      ? { ...node, children: copyNodes(node.children) }
+      : { ...node }
+  );
+
 type PromptInput<S extends ParamsShape> = DefinitionMeta &
   (
     | { markdown?: never; params?: S; template: TemplateFn<S> }
@@ -75,15 +84,17 @@ export const definePrompt = <S extends ParamsShape = Record<never, never>>(
 ): PromptDefinition<S> => {
   assertId(input.id);
   const { markdown, template } = input;
+  // Parsed once. Each render gets its own copy, so callers can't share nodes.
+  const nodes = markdown === undefined ? undefined : parseMarkdown(markdown);
   return Object.freeze({
     ...input,
     [DEFINITION]: true as const,
     kind: "prompt" as const,
     params: input.params ?? ({} as S),
     template:
-      markdown === undefined
+      nodes === undefined
         ? (template as TemplateFn<S>)
-        : () => fragment(parseMarkdown(markdown)),
+        : () => fragment(copyNodes(nodes)),
   });
 };
 

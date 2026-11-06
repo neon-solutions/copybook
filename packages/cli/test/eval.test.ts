@@ -17,6 +17,7 @@ import {
 } from "../src/eval/define";
 import { runEvals } from "../src/eval/runner";
 import type { EvalRunOptions, EvalTarget } from "../src/eval/runner";
+import { selectEvalTargets } from "../src/eval/select";
 
 const init = defineCommand({
   id: "eval.init",
@@ -191,5 +192,47 @@ describe(defineEval, () => {
     expect(
       defineEval("site.prompts.setup", { agents: ["literal"], assert: [] }).id
     ).toBe("site.prompts.setup");
+  });
+});
+
+describe(selectEvalTargets, () => {
+  const command = defineCommand({
+    id: "select.cmd",
+    template: (t) => t`acme init`,
+  });
+  const setup = definePrompt({ id: "select.prompt", markdown: "Set up.\n" });
+  const loaded = [command, setup].map((definition) => ({
+    definition,
+    exportName: "",
+    file: "x.ts",
+  }));
+  const specs = [
+    defineEval("select.cmd", { agents: ["literal"], assert: [] }),
+    defineEval("select.prompt", { agents: ["literal"], assert: [] }),
+  ];
+
+  it("evaluates prompts only, and warns about the rest", () => {
+    const { targets, warnings } = selectEvalTargets(loaded, specs, {
+      hashes: new Map([["select.prompt", "hash-1"]]),
+    });
+
+    expect(targets.map((selected) => selected.spec.id)).toStrictEqual([
+      "select.prompt",
+    ]);
+    expect(targets[0]?.contentHash).toBe("hash-1");
+    expect(warnings).toStrictEqual([
+      'The eval for "select.cmd" has no prompt with that id, so it\'s skipped.',
+    ]);
+  });
+
+  it("keeps only --only and --changed ids", () => {
+    const { targets, warnings } = selectEvalTargets(loaded, specs, {
+      changed: new Set(["select.cmd"]),
+      hashes: new Map(),
+      only: new Set(["select.prompt", "select.missing"]),
+    });
+
+    expect(targets).toStrictEqual([]);
+    expect(warnings).toContain('No eval for "select.missing".');
   });
 });

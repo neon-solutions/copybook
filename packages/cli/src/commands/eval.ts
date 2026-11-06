@@ -10,7 +10,7 @@ import { CopybookError } from "../errors";
 import { appendHistory } from "../eval/history";
 import { formatEvalResult, summarizeEvals } from "../eval/reporters";
 import { runEvals } from "../eval/runner";
-import type { EvalTarget } from "../eval/runner";
+import { selectEvalTargets } from "../eval/select";
 import { loadProject } from "../load";
 import { formatNextActions, nextActions } from "../next-actions";
 import {
@@ -84,40 +84,15 @@ export const registerEval = (program: Command) =>
       const changed = options.changed
         ? new Set(await changedIds(project, snapshots, options.base))
         : undefined;
-      const only = options.only ? new Set(options.only) : undefined;
-      const prompts = new Set(
-        project.definitions
-          .filter(({ definition }) => definition.kind === "prompt")
-          .map(({ definition }) => definition.id)
-      );
-      const warnings = [
-        ...(options.only ?? [])
-          .filter((id) => !specs.some((spec) => spec.id === id))
-          .map((id) => `No eval for "${id}".`),
-        ...specs
-          .filter((spec) => !prompts.has(spec.id))
-          .map(
-            (spec) => `The eval for "${spec.id}" has no prompt with that id.`
-          ),
-      ];
-
-      const targets: EvalTarget[] = specs.flatMap((spec) => {
-        const loaded = project.definitions.find(
-          ({ definition }) => definition.id === spec.id
-        );
-        const selected =
-          (!only || only.has(spec.id)) && (!changed || changed.has(spec.id));
-        if (!loaded || !selected) {
-          return [];
+      const { targets, warnings } = selectEvalTargets(
+        project.definitions,
+        specs,
+        {
+          hashes,
+          ...(changed ? { changed } : {}),
+          ...(options.only ? { only: new Set(options.only) } : {}),
         }
-        return [
-          {
-            contentHash: hashes.get(spec.id) ?? "",
-            definition: loaded.definition,
-            spec,
-          },
-        ];
-      });
+      );
 
       const runId = randomBytes(4).toString("hex");
       const historyDir = options.historyDir
