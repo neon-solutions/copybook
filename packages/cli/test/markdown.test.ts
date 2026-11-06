@@ -8,6 +8,7 @@ import { describe, expect, it } from "vitest";
 import { loadAnalysis } from "../src/analysis";
 import { definitionDetail, definitionMarkdown } from "../src/detail";
 import { loadProject } from "../src/load";
+import { matchesSource } from "../src/markdown";
 
 const fixture = path.join(import.meta.dirname, "fixtures/markdown");
 
@@ -172,5 +173,75 @@ describe("Markdown sources", () => {
     expect(definitionMarkdown(detail)).toContain(
       "- Source: `prompts/setup.md`\n"
     );
+  });
+});
+
+const STRIP_CONFIG =
+  'export default { markdown: [{ dir: "p", frontmatter: "strip", idPrefix: "site" }] };';
+const KEEP_CONFIG =
+  'export default { markdown: [{ dir: "p", idPrefix: "site" }] };';
+
+const onlyDefinition = async (
+  config: string,
+  files: Readonly<Record<string, string>>
+) => {
+  const project = await loadProject(await tempProject(config, files));
+  const [loaded] = project.definitions;
+  return loaded;
+};
+
+describe("Markdown edge cases", () => {
+  it("doesn't end frontmatter at a line that ends in ---", async () => {
+    const loaded = await onlyDefinition(STRIP_CONFIG, {
+      "p/a.md":
+        "---\ndescription: Pros --- and cons---\ntags: [one]\n---\nBody.\n",
+    });
+
+    expect(loaded?.definition).toMatchObject({
+      description: "Pros --- and cons---",
+      tags: ["one"],
+    });
+    expect(loaded && toText(renderExample(loaded.definition))).toBe("Body.\n");
+  });
+
+  it("strips empty and CRLF frontmatter", async () => {
+    const empty = await onlyDefinition(STRIP_CONFIG, {
+      "p/a.md": "---\n---\nBody.\n",
+    });
+    const crlf = await onlyDefinition(STRIP_CONFIG, {
+      "p/a.md": "---\r\ntitle: Setup\r\n---\r\nBody.\r\n",
+    });
+
+    expect(empty && toText(renderExample(empty.definition))).toBe("Body.\n");
+    expect(crlf?.definition.title).toBe("Setup");
+    expect(crlf && toText(renderExample(crlf.definition))).toBe("Body.\r\n");
+  });
+
+  it("finds the title outside nested fences and in CRLF files", async () => {
+    const nested = await onlyDefinition(KEEP_CONFIG, {
+      "p/a.md": "````md\n```\n# Code line\n````\n\n# Real title\n",
+    });
+    const crlf = await onlyDefinition(KEEP_CONFIG, {
+      "p/a.md": "# Windows title\r\n\r\nBody.\r\n",
+    });
+
+    expect(nested?.definition.title).toBe("Real title");
+    expect(crlf?.definition.title).toBe("Windows title");
+  });
+
+  it("keeps the whole name of a file without an extension", async () => {
+    const loaded = await onlyDefinition(
+      'export default { markdown: [{ dir: "p", idPrefix: "site", include: ["**/*"] }] };',
+      { "p/guides/readme": "Read me.\n" }
+    );
+
+    expect(loaded?.definition.id).toBe("site.guides.readme");
+  });
+
+  it("skips dotfiles, like the loader", () => {
+    const isPrompt = matchesSource({ dir: "p", idPrefix: "site" }, []);
+
+    expect(isPrompt("guides/setup.md")).toBeTruthy();
+    expect(isPrompt(".drafts/wip.md")).toBeFalsy();
   });
 });

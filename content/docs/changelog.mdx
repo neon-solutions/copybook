@@ -9,6 +9,10 @@ metaDescription: "What changed in each release of @copybook/core and @copybook/c
 **Fixes in `@copybook/cli`:**
 
 - `copybook init` names the project's config file in the `AGENTS.md` section, such as `copybook.config.mjs`. It used to say `copybook.config.ts` for every project.
+- With `frontmatter: "strip"`, a YAML line that ends in `---`, such as `description: Pros and cons---`, no longer ends the frontmatter early. Before, the rest of the frontmatter leaked into the prompt and its later fields were lost.
+- A Markdown prompt's title skips `# ` lines inside nested code fences, and is found in files with Windows line endings.
+- Change detection skips dotfiles in a Markdown directory, like loading does, so `.drafts/wip.md` is no longer reported as a removed prompt.
+- A Markdown file without an extension, matched by a custom `include`, keeps its whole name in its id.
 
 ## 0.3.0
 

@@ -12,10 +12,14 @@ import type { MarkdownMeta, MarkdownSource, ResolvedConfig } from "./config";
 import { CopybookError } from "./errors";
 
 const DEFAULT_INCLUDE = ["**/*.md"];
-const FRONTMATTER = /^---\r?\n(?<yaml>[\s\S]*?)\r?\n?---[ \t]*(?:\r?\n|$)/u;
+// The closing `---` must start a line, so YAML such as `title: a---` can't end it.
+const FRONTMATTER =
+  /^---[ \t]*\r?\n(?<yaml>(?:[\s\S]*?\r?\n)?)---[ \t]*(?:\r?\n|$)/u;
 const LEADING_NEWLINES = /^(?:\r?\n)+/u;
 const HEADING = /^#[ \t]+(?<title>.+?)(?:[ \t]+#+)?[ \t]*$/u;
-const FENCE = /^[ \t]*(?:```|~~~)/u;
+// A backtick fence can't have backticks after it on its line.
+const FENCE_OPEN = /^[ \t]*(?<fence>`{3,}(?=[^`]*$)|~{3,})/u;
+const FENCE_CLOSE = /^[ \t]*(?<fence>`{3,}|~{3,})[ \t]*$/u;
 const TRAILING_SLASHES = /\/+$/u;
 const LIST_FIELDS = ["aliases", "owners", "placements", "tags"] as const;
 
@@ -37,7 +41,9 @@ const errorMessage = (error: unknown) =>
 
 /** The id of a file in a source, from its path in `dir`. */
 export const markdownId = (source: MarkdownSource, fileInDir: string) => {
-  const stem = fileInDir.slice(0, -path.extname(fileInDir).length);
+  const extension = path.extname(fileInDir);
+  const stem =
+    extension === "" ? fileInDir : fileInDir.slice(0, -extension.length);
   return `${source.idPrefix}.${stem.split("/").join(".")}`;
 };
 
@@ -50,10 +56,9 @@ export const matchesSource = (
   source: MarkdownSource,
   ignore: readonly string[]
 ): ((fileInDir: string) => boolean) => {
-  const included = picomatch(source.include ?? DEFAULT_INCLUDE, { dot: true });
-  const excluded = picomatch([...ignore, ...(source.exclude ?? [])], {
-    dot: true,
-  });
+  // Like the loader's glob, which skips dotfiles.
+  const included = picomatch(source.include ?? DEFAULT_INCLUDE);
+  const excluded = picomatch([...ignore, ...(source.exclude ?? [])]);
   return (fileInDir) => included(fileInDir) && !excluded(fileInDir);
 };
 
@@ -87,17 +92,28 @@ const splitFrontmatter = (text: string, strict: boolean): Frontmatter => {
   }
 };
 
-/** The first `# ` heading outside code fences. */
+/** Whether `line` closes a fence that `open` started. */
+const closesFence = (open: string, line: string) => {
+  const fence = FENCE_CLOSE.exec(line)?.groups?.fence ?? "";
+  return fence[0] === open[0] && fence.length >= open.length;
+};
+
+/**
+ * The first `# ` heading outside code fences. A fence closes only with the
+ * same character, at least as long, like in Markdown.
+ */
 const firstHeading = (markdown: string) => {
-  let inFence = false;
-  for (const line of markdown.split("\n")) {
-    if (FENCE.test(line)) {
-      inFence = !inFence;
-    } else if (!inFence) {
-      const title = HEADING.exec(line)?.groups?.title;
-      if (title) {
-        return title;
-      }
+  let open: string | undefined;
+  for (const raw of markdown.split("\n")) {
+    const line = raw.endsWith("\r") ? raw.slice(0, -1) : raw;
+    if (open !== undefined) {
+      open = closesFence(open, line) ? undefined : open;
+      continue;
+    }
+    open = FENCE_OPEN.exec(line)?.groups?.fence;
+    const title = open ? undefined : HEADING.exec(line)?.groups?.title;
+    if (title) {
+      return title;
     }
   }
 };
