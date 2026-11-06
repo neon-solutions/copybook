@@ -81,7 +81,7 @@ Code fences become `code` nodes in the rendered tree, with the language as `lang
 
 ## Tests and evals
 
-`copybook test` syntax-checks every `bash`, `sh`, `shell`, and `zsh` block in a Markdown prompt. A placeholder such as `<project-name>` fails the check, because a shell would read it as a redirect.
+`copybook test` syntax-checks every `bash`, `sh`, `shell`, and `zsh` block in a Markdown prompt. A placeholder for the agent to fill in, such as `<project-name>`, counts as a plain word, so only real syntax errors fail. Files with Windows line endings are checked too.
 
 [Evals](/docs/guides/evals) work like they do for any prompt. A Markdown prompt has no export to import, so pass its id to `defineEval` in a file your `verify` globs match:
 

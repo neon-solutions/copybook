@@ -1,4 +1,4 @@
-import { collectCommands, renderExample, toText } from "@copybook/core";
+import { definePrompt, renderExample, toText } from "@copybook/core";
 import type { Definition, Node, Rendered, Verify } from "@copybook/core";
 
 import type { LoadedDefinition } from "../load";
@@ -9,6 +9,11 @@ import type { TestCase } from "./types";
 const RANK: Record<Tier, number> = { run: 2, syntax: 0, typecheck: 1 };
 /** Shell code blocks in prompts get a syntax check. */
 const PROMPT_SHELLS = new Set(["bash", "sh", "shell", "zsh"]);
+/**
+ * A placeholder such as `<project-name>` that a prompt asks the agent to
+ * fill in. A shell reads it as a redirect, so the check sees a word instead.
+ */
+const PLACEHOLDER = /<(?<name>[A-Za-z][\w-]*)>/gu;
 const TYPECHECKABLE = new Set(["javascript", "js", "mjs", "ts", "typescript"]);
 const RUNNABLE = new Set([
   "bash",
@@ -72,74 +77,93 @@ const commandCases = (
   }));
 };
 
-interface ShellBlock {
+interface PromptCheck {
+  kind: "cmd" | "code block";
   lang: string;
   text: string;
 }
 
+const plainText = (nodes: readonly Node[]) =>
+  toText({ id: "", kind: "snippet", nodes: [...nodes] }, { format: "plain" });
+
 /**
- * Literal shell code blocks in a rendered tree, such as a fenced `bash`
- * block in a Markdown prompt. Embedded snippets are tested on their own.
+ * The literal commands and shell code blocks a prompt shows, once each.
+ * Embedded definitions, and included ones the project loads, get their own
+ * cases. A command inside a shell block is checked with the block.
  */
-const shellBlocks = (rendered: Rendered): ShellBlock[] => {
-  const blocks: ShellBlock[] = [];
+const promptChecks = (
+  rendered: Rendered,
+  loaded: ReadonlySet<string>
+): PromptCheck[] => {
+  const checks: PromptCheck[] = [];
+  const seen = new Set<string>();
+  const add = (check: PromptCheck) => {
+    const key = `${check.lang}\n${check.text}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      checks.push(check);
+    }
+  };
   const visit = (nodes: readonly Node[]) => {
     for (const node of nodes) {
-      if (node.type === "code") {
+      if (node.type === "command" && node.id === undefined) {
+        add({ kind: "cmd", lang: "bash", text: plainText(node.children) });
+      } else if (node.type === "code" && node.id === undefined) {
         const lang = node.lang?.toLowerCase() ?? "";
-        if (node.id === undefined && PROMPT_SHELLS.has(lang)) {
-          blocks.push({
-            lang,
-            text: toText(
-              { id: "", kind: "snippet", nodes: node.children },
-              { format: "plain" }
-            ),
-          });
+        if (PROMPT_SHELLS.has(lang)) {
+          add({ kind: "code block", lang, text: plainText(node.children) });
+        } else {
+          visit(node.children);
         }
-      } else if (node.type === "include") {
+      } else if (node.type === "include" && !loaded.has(node.id)) {
         visit(node.children);
       }
     }
   };
   visit(rendered.nodes);
-  return blocks;
+  return checks;
 };
 
 /**
+ * A prompt rendered for checks. A Markdown prompt with Windows line endings
+ * keeps its fences as text, so its checks come from the same text with
+ * `\n` line endings.
+ */
+const renderForChecks = (definition: Definition) =>
+  definition.kind === "prompt" && definition.markdown?.includes("\r\n")
+    ? renderExample(
+        definePrompt({
+          id: definition.id,
+          markdown: definition.markdown.replaceAll("\r\n", "\n"),
+        })
+      )
+    : renderExample(definition);
+
+/**
  * Literal commands in a prompt, such as `t.cmd("npm run build")`, and its
- * literal shell code blocks get a syntax check.
+ * literal shell code blocks get a syntax check, with placeholders such as
+ * `<agent>` read as plain words.
  */
 const promptCases = (
   definition: Definition,
-  requested: readonly Tier[]
+  requested: readonly Tier[],
+  loaded: ReadonlySet<string>
 ): TestCase[] => {
   if (!requested.includes("syntax")) {
     return [];
   }
-  const rendered = renderExample(definition);
-  const commands = collectCommands(rendered).flatMap((command, index) =>
-    command.id
-      ? []
-      : [
-          {
-            definition,
-            id: definition.id,
-            label: `cmd ${index + 1}`,
-            lang: "bash",
-            text: command.text,
-            tier: "syntax" as const,
-          },
-        ]
-  );
-  const blocks = shellBlocks(rendered).map((block, index) => ({
-    definition,
-    id: definition.id,
-    label: `code block ${index + 1}`,
-    lang: block.lang,
-    text: block.text,
-    tier: "syntax" as const,
-  }));
-  return [...commands, ...blocks];
+  const counts = { cmd: 0, "code block": 0 };
+  return promptChecks(renderForChecks(definition), loaded).map((check) => {
+    counts[check.kind] += 1;
+    return {
+      definition,
+      id: definition.id,
+      label: `${check.kind} ${counts[check.kind]}`,
+      lang: check.lang,
+      text: check.text.replaceAll(PLACEHOLDER, "$<name>"),
+      tier: "syntax" as const,
+    };
+  });
 };
 
 /** Decides which tiers each definition and variant gets. */
@@ -149,6 +173,7 @@ export const buildPlan = (
   requested: readonly Tier[] = TIERS
 ): TestCase[] => {
   const specsById = new Map(specs.map((spec) => [spec.id, spec]));
+  const loaded = new Set(definitions.map(({ definition }) => definition.id));
   const cases: TestCase[] = [];
 
   for (const { definition } of definitions) {
@@ -157,7 +182,7 @@ export const buildPlan = (
       spec ? { ...testCase, spec } : testCase;
 
     if (definition.kind === "prompt") {
-      cases.push(...promptCases(definition, requested));
+      cases.push(...promptCases(definition, requested, loaded));
       continue;
     }
     if (definition.kind === "command") {

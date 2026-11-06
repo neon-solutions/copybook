@@ -121,6 +121,59 @@ describe(buildPlan, () => {
   });
 });
 
+describe("prompt checks", () => {
+  it("reads placeholders such as <agent> as words", async () => {
+    const prompt = definePrompt({
+      id: "plan.placeholder",
+      markdown: "```bash\nneon skills -y --global --agent <agent>\n```\n",
+    });
+    const [check] = buildPlan([loaded(prompt)], []);
+
+    expect(check?.text).toBe("neon skills -y --global --agent agent");
+    await expect(
+      checkSyntax("bash", check?.text ?? "", os.tmpdir())
+    ).resolves.toStrictEqual({ status: "pass" });
+  });
+
+  it("checks an included prompt once, under its own id", () => {
+    const shared = definePrompt({
+      id: "plan.shared",
+      template: (t) => t`Install: ${t.code("bash", "npm install acme")}`,
+    });
+    const page = definePrompt({
+      id: "plan.page",
+      template: (t) => t`Set up. ${t.include(shared)}`,
+    });
+
+    expect(
+      buildPlan([loaded(shared), loaded(page)], []).map((check) => check.id)
+    ).toStrictEqual(["plan.shared"]);
+  });
+
+  it("checks a command inside a shell block with the block", () => {
+    const prompt = definePrompt({
+      id: "plan.nested",
+      template: (t) =>
+        t`Run ${t.code("bash", t`${t.cmd("npm run build")}`)} and ${t.cmd("npm run build")}.`,
+    });
+
+    expect(
+      buildPlan([loaded(prompt)], []).map((check) => check.label)
+    ).toStrictEqual(["code block 1"]);
+  });
+
+  it("checks shell blocks in Markdown with Windows line endings", () => {
+    const prompt = definePrompt({
+      id: "plan.crlf",
+      markdown: "Run:\r\n\r\n```sh\r\nacme init\r\n```\r\n",
+    });
+
+    expect(buildPlan([loaded(prompt)], [])).toMatchObject([
+      { label: "code block 1", lang: "sh", text: "acme init" },
+    ]);
+  });
+});
+
 describe(checkSyntax, () => {
   it("catches broken shell, dotenv, TypeScript, and JSON", async () => {
     const results = await Promise.all([

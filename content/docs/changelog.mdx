@@ -13,6 +13,9 @@ metaDescription: "What changed in each release of @copybook/core and @copybook/c
 - A Markdown prompt's title skips `# ` lines inside nested code fences, and is found in files with Windows line endings.
 - Change detection skips dotfiles in a Markdown directory, like loading does, so `.drafts/wip.md` is no longer reported as a removed prompt.
 - A Markdown file without an extension, matched by a custom `include`, keeps its whole name in its id.
+- Shell checks in prompts read placeholders for the agent, such as `<agent>` or `<project-name>`, as plain words instead of failing on them as redirects. This narrows the 0.3.0 change that checks shell blocks in prompts.
+- A prompt included in another one has its commands and shell blocks checked once, under its own id, and a command inside a shell block is checked once, as part of the block.
+- Shell blocks in Markdown prompts with Windows line endings are checked too.
 - Usage scanning counts `require()` and dynamic `import()`, such as `const { setup } = require("./prompts.mjs")` in a CommonJS build script, and parses `.cjs` and `.cts` files.
 - Usage scanning finds definitions in a project whose path goes through a symlink. Before, it found none.
 - A Markdown prompt's URL counts only as a whole URL: `/docs/prompts/a.md` and `/prompts/a.md.bak` no longer count, and a URL at the end of a sentence, followed by a period, now does. Prompts from two sources that share a URL are all counted.
