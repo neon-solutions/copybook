@@ -46,4 +46,25 @@ describe(buildReport, () => {
       buildReport({ base: "origin/main", diffs: {}, entries: [] })
     ).toContain("No rendered snippets or prompts changed since `origin/main`.");
   });
+
+  it("lists removed definitions with their file and URL", () => {
+    const report = buildReport({
+      base: "origin/main",
+      diffs: {},
+      entries: [],
+      removed: [
+        { id: "acme.cli.old" },
+        {
+          file: "public/prompts/setup.md",
+          id: "site.prompts.setup",
+          url: "/prompts/setup.md",
+        },
+      ],
+    });
+
+    expect(report).toContain("but some were removed.");
+    expect(report).toContain(
+      "### Removed since `origin/main`\n\n- `acme.cli.old`\n- `site.prompts.setup`: `public/prompts/setup.md`, served at `/prompts/setup.md`, which no longer works"
+    );
+  });
 });

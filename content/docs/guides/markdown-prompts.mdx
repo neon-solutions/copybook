@@ -36,7 +36,7 @@ A file's id is `<idPrefix>.<path in dir>`, without the extension and with `/` as
 
 Ids always come from paths, so a file name must be lowercase letters, digits, and `.`, `-`, or `_`. The title is the frontmatter `title`, or else the first `# ` heading.
 
-Renaming a file changes its id, and usually a public URL that agents fetch. `copybook check --base origin/main` fails on it until you keep the old id as an alias:
+Renaming a file changes its id, and usually a public URL that agents fetch. `copybook check --base origin/main` warns about a prompt that's gone, naming its URL, and `copybook report` lists it under "Removed" in the pull request comment. That includes prompts renamed by a change to `idPrefix`, `dir`, or `include`, because Copybook reads the base's files with the config as it was then. If it was a rename, keep the old id as an alias:
 
 ```ts title="copybook.config.ts"
 markdown: [

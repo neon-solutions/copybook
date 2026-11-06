@@ -16,6 +16,8 @@ metaDescription: "What changed in each release of @copybook/core and @copybook/c
 - Shell checks in prompts read placeholders for the agent, such as `<agent>` or `<project-name>`, as plain words instead of failing on them as redirects. This narrows the 0.3.0 change that checks shell blocks in prompts.
 - A prompt included in another one has its commands and shell blocks checked once, under its own id, and a command inside a shell block is checked once, as part of the block.
 - Shell blocks in Markdown prompts with Windows line endings are checked too.
+- `check --base` and `report` find Markdown prompts removed since the base by reading the base's files with the config as it was then. Before, a change to `idPrefix`, `dir`, or `include`, or removing a source, removed prompts without a warning. Prompts that are new since the base count as changed.
+- `report` lists definitions removed since the base under "Removed", with each Markdown prompt's file and the URL that no longer works, and the `check --base` warning names that URL.
 - Usage scanning counts `require()` and dynamic `import()`, such as `const { setup } = require("./prompts.mjs")` in a CommonJS build script, and parses `.cjs` and `.cts` files.
 - Usage scanning finds definitions in a project whose path goes through a symlink. Before, it found none.
 - A Markdown prompt's URL counts only as a whole URL: `/docs/prompts/a.md` and `/prompts/a.md.bak` no longer count, and a URL at the end of a sentence, followed by a period, now does. Prompts from two sources that share a URL are all counted.

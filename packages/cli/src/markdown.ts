@@ -51,6 +51,25 @@ export const markdownId = (source: MarkdownSource, fileInDir: string) => {
 export const markdownDir = (config: ResolvedConfig, source: MarkdownSource) =>
   path.resolve(config.root, source.dir);
 
+/** A file's path relative to the config root, with forward slashes. */
+export const markdownFile = (
+  config: ResolvedConfig,
+  source: MarkdownSource,
+  fileInDir: string
+) =>
+  toPosix(
+    path.relative(
+      config.root,
+      path.join(markdownDir(config, source), fileInDir)
+    )
+  );
+
+/** Where the product serves a file, such as `/prompts/setup.md`, if `url` is set. */
+export const markdownUrl = (source: MarkdownSource, fileInDir: string) => {
+  const base = source.url?.replace(TRAILING_SLASHES, "");
+  return base === undefined ? undefined : `${base}/${fileInDir}`;
+};
+
 /** Whether a path in a source's `dir` is one of its prompts. */
 export const matchesSource = (
   source: MarkdownSource,
@@ -190,13 +209,7 @@ const buildFile = (
     ...source.meta?.[fileInDir],
   };
   const title = meta.title ?? firstHeading(body);
-  const file = toPosix(
-    path.relative(
-      config.root,
-      path.join(markdownDir(config, source), fileInDir)
-    )
-  );
-  const base = source.url?.replace(TRAILING_SLASHES, "");
+  const url = markdownUrl(source, fileInDir);
 
   return {
     definition: definePrompt({
@@ -205,9 +218,9 @@ const buildFile = (
       markdown: prompt,
       ...(title ? { title } : {}),
     }),
-    file,
+    file: markdownFile(config, source, fileInDir),
     text,
-    ...(base === undefined ? {} : { url: `${base}/${fileInDir}` }),
+    ...(url === undefined ? {} : { url }),
   };
 };
 

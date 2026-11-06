@@ -1,4 +1,4 @@
-import { removedWithoutAlias } from "./changes";
+import { removedSince } from "./changes";
 import { loadProject } from "./load";
 import type { LoadedDefinition, Project } from "./load";
 import { buildManifest } from "./manifest";
@@ -131,15 +131,16 @@ export const checkIssues = async (
     });
   }
   if (options.base) {
-    for (const id of await removedWithoutAlias(
+    for (const { id, url } of await removedSince(
       analysis.project,
       options.base
     )) {
+      const served = url ? ` It was served at ${url}.` : "";
       issues.push({
         code: "removed-without-alias",
         id,
         level: "warning",
-        message: `Removed since ${options.base}. If it was renamed, add "${id}" to the new definition's aliases.`,
+        message: `Removed since ${options.base}.${served} If it was renamed, add "${id}" to the new definition's aliases.`,
       });
     }
   }

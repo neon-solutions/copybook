@@ -1,3 +1,4 @@
+import type { RemovedDefinition } from "./changes";
 import type { ManifestEntry } from "./manifest";
 import type { TestResult } from "./test/types";
 
@@ -6,6 +7,8 @@ export interface ReportInput {
   /** Snapshot diff per changed id, from git. */
   diffs: Record<string, string>;
   entries: readonly ManifestEntry[];
+  /** Definitions removed since `base` without an alias. */
+  removed?: readonly RemovedDefinition[];
   /** Files that render each id, when usage scanning is configured. */
   renderedIn?: Record<string, string[]>;
   tests?: readonly TestResult[];
@@ -35,17 +38,45 @@ const fenceFor = (content: string) => {
   return ticks;
 };
 
+/** One line for a removed definition: its id, and its file and URL. */
+const removedLine = ({ file, id, url }: RemovedDefinition) => {
+  const details = [
+    ...(file ? [`\`${file}\``] : []),
+    ...(url ? [`served at \`${url}\`, which no longer works`] : []),
+  ];
+  return `- \`${id}\`${details.length > 0 ? `: ${details.join(", ")}` : ""}`;
+};
+
+/** The removed definitions, with what to do about a rename. */
+const removedSection = (base: string, removed: readonly RemovedDefinition[]) =>
+  removed.length === 0
+    ? []
+    : [
+        "",
+        `### Removed since \`${base}\``,
+        "",
+        ...removed.map(removedLine),
+        "",
+        "If one was renamed, add its old id to the new definition's `aliases`.",
+      ];
+
 /** A Markdown summary of the definitions a pull request changes. */
 export const buildReport = ({
   base,
   diffs,
   entries,
+  removed = [],
   renderedIn = {},
   tests = [],
 }: ReportInput) => {
   const lines = [REPORT_MARKER, "## Copybook", ""];
   if (entries.length === 0) {
-    lines.push(`No rendered snippets or prompts changed since \`${base}\`.`);
+    lines.push(
+      removed.length === 0
+        ? `No rendered snippets or prompts changed since \`${base}\`.`
+        : `No rendered snippets or prompts changed since \`${base}\`, but some were removed.`,
+      ...removedSection(base, removed)
+    );
     return `${lines.join("\n")}\n`;
   }
 
@@ -80,5 +111,6 @@ export const buildReport = ({
       "</details>"
     );
   }
+  lines.push(...removedSection(base, removed));
   return `${lines.join("\n")}\n`;
 };

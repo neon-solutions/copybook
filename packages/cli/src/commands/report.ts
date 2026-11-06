@@ -3,7 +3,7 @@ import { promisify } from "node:util";
 
 import type { Command } from "commander";
 
-import { changedIds } from "../changes";
+import { changedIds, removedSince } from "../changes";
 import { loadProject } from "../load";
 import { buildManifest } from "../manifest";
 import { cwd, write } from "../output";
@@ -53,9 +53,10 @@ export const registerReport = (program: Command) =>
       const embeds = new Map(
         snapshots.map((snapshot) => [snapshot.id, snapshot.embeds])
       );
-      const [usage, tests, diffs] = await Promise.all([
+      const [usage, tests, removed, diffs] = await Promise.all([
         findUsages(project, embeds),
         readTests(root),
+        removedSince(project, options.base),
         Promise.all(
           entries.map(async (entry) => [
             entry.id,
@@ -73,6 +74,7 @@ export const registerReport = (program: Command) =>
           base: options.base,
           diffs: Object.fromEntries(diffs),
           entries,
+          removed,
           tests,
           ...(usage ? { renderedIn: usage.usages } : {}),
         })

@@ -28,6 +28,12 @@ const realPath = async (target: string): Promise<string> => {
   }
 };
 
+/** The repository's top-level directory, as git reports it (a real path). */
+const toplevel = async (cwd: string) => {
+  const stdout = await git(cwd, ["rev-parse", "--show-toplevel"]);
+  return stdout.trim();
+};
+
 /**
  * Files under `dir` that differ from `base`, including uncommitted and
  * untracked ones. Paths are absolute.
@@ -37,8 +43,7 @@ export const changedFiles = async (
   dir: string,
   base: string
 ): Promise<string[]> => {
-  const toplevel = await git(cwd, ["rev-parse", "--show-toplevel"]);
-  const root = toplevel.trim();
+  const root = await toplevel(cwd);
   const relative = path.relative(root, await realPath(dir)) || ".";
   const [diff, untracked] = await Promise.all([
     git(root, ["diff", "--name-only", base, "--", relative]),
@@ -47,6 +52,47 @@ export const changedFiles = async (
   return [...diff.split("\n"), ...untracked.split("\n")]
     .filter((line) => line !== "")
     .map((line) => path.join(root, line));
+};
+
+const toPosix = (file: string) => file.split(path.sep).join("/");
+
+/** A file's content at `base`, or undefined when it didn't exist there. */
+export const showFile = async (
+  cwd: string,
+  base: string,
+  file: string
+): Promise<string | undefined> => {
+  const root = await toplevel(cwd);
+  const relative = toPosix(path.relative(root, await realPath(file)));
+  try {
+    return await git(root, ["show", `${base}:${relative}`]);
+  } catch {
+    return undefined;
+  }
+};
+
+/** Files under `dir` at `base`, relative to `dir` with forward slashes. */
+export const listFiles = async (
+  cwd: string,
+  base: string,
+  dir: string
+): Promise<string[]> => {
+  const root = await toplevel(cwd);
+  const relative = toPosix(path.relative(root, await realPath(dir)));
+  const stdout = await git(root, [
+    "ls-tree",
+    "-r",
+    "-z",
+    "--name-only",
+    base,
+    "--",
+    relative || ".",
+  ]).catch(() => "");
+  const prefix = relative === "" ? "" : `${relative}/`;
+  return stdout
+    .split("\0")
+    .filter((line) => line.startsWith(prefix) && line !== prefix)
+    .map((line) => line.slice(prefix.length));
 };
 
 export interface Commit {

@@ -149,6 +149,29 @@ const isConfig = (value: unknown): value is Config => {
   return (hasContent || hasMarkdown) && markdownValid;
 };
 
+const resolveConfig = (
+  config: unknown,
+  file: string,
+  label: string
+): ResolvedConfig => {
+  if (!isConfig(config)) {
+    throw new CopybookError(
+      "CONFIG_INVALID",
+      `${label} must default-export defineConfig({ content: [...] }) or defineConfig({ markdown: [{ dir, idPrefix }] }).`
+    );
+  }
+  const root = path.dirname(file);
+  return {
+    ...config,
+    file,
+    root,
+    snapshotsDir: path.resolve(
+      root,
+      config.snapshots?.dir ?? DEFAULT_SNAPSHOTS_DIR
+    ),
+  };
+};
+
 export const loadConfig = async (
   cwd: string,
   configPath?: string
@@ -177,20 +200,21 @@ export const loadConfig = async (
     name: "config",
     root,
   });
-  const config = loaded.default;
-  if (!isConfig(config)) {
-    throw new CopybookError(
-      "CONFIG_INVALID",
-      `${path.relative(cwd, file)} must default-export defineConfig({ content: [...] }) or defineConfig({ markdown: [{ dir, idPrefix }] }).`
-    );
-  }
-  return {
-    ...config,
-    file,
-    root,
-    snapshotsDir: path.resolve(
-      root,
-      config.snapshots?.dir ?? DEFAULT_SNAPSHOTS_DIR
-    ),
-  };
+  return resolveConfig(loaded.default, file, path.relative(cwd, file));
+};
+
+/**
+ * Loads a config from its source text, such as the config at a git base.
+ * Its imports resolve from the directory of `file`, where it lives now.
+ */
+export const loadConfigSource = async (
+  contents: string,
+  file: string
+): Promise<ResolvedConfig> => {
+  const loaded = await bundleAndImport({
+    contents,
+    name: "config-base",
+    root: path.dirname(file),
+  });
+  return resolveConfig(loaded.default, file, path.basename(file));
 };

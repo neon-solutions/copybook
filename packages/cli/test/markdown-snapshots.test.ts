@@ -6,7 +6,7 @@ import path from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { changedIds, removedWithoutAlias } from "../src/changes";
+import { changedIds, removedSince } from "../src/changes";
 import { fileHistory } from "../src/git";
 import { loadProject } from "../src/load";
 import {
@@ -140,8 +140,8 @@ describe("Markdown files as their own snapshots", () => {
     );
     const project = await loadProject(root);
 
-    await expect(removedWithoutAlias(project, "main")).resolves.toStrictEqual([
-      "site.prompts.connect",
+    await expect(removedSince(project, "main")).resolves.toStrictEqual([
+      { file: "prompts/connect.md", id: "site.prompts.connect" },
     ]);
   });
 
@@ -159,6 +159,55 @@ describe("Markdown files as their own snapshots", () => {
     expect(history.map((commit) => commit.subject)).toStrictEqual([
       "Reword the setup prompt",
       "initial",
+    ]);
+  });
+
+  it("reads the base's ids with its config, so an idPrefix change shows", async () => {
+    const root = await committedProject();
+    await writeFile(
+      path.join(root, "copybook.config.mjs"),
+      config().replace('idPrefix: "site.prompts"', 'idPrefix: "docs.prompts"')
+    );
+    const project = await loadProject(root);
+    const { snapshots } = buildSnapshots(project);
+    const removed = await removedSince(project, "main");
+
+    expect(removed.map(({ id }) => id)).toStrictEqual([
+      "site.prompts.connect",
+      "site.prompts.setup",
+    ]);
+    await expect(changedIds(project, snapshots, "main")).resolves.toStrictEqual(
+      ["docs.prompts.connect", "docs.prompts.setup"]
+    );
+  });
+
+  it("reports every prompt of a removed source, with its URL", async () => {
+    const root = await committedProject();
+    await writeFile(
+      path.join(root, "copybook.config.mjs"),
+      config().replace(
+        'idPrefix: "site.prompts"',
+        'idPrefix: "site.prompts", url: "/prompts"'
+      )
+    );
+    git(root, "commit", "-q", "-am", "Serve the prompts");
+    await writeFile(
+      path.join(root, "copybook.config.mjs"),
+      'export default { content: ["defs.mjs"] };\n'
+    );
+    const project = await loadProject(root);
+
+    await expect(removedSince(project, "HEAD")).resolves.toStrictEqual([
+      {
+        file: "prompts/connect.md",
+        id: "site.prompts.connect",
+        url: "/prompts/connect.md",
+      },
+      {
+        file: "prompts/setup.md",
+        id: "site.prompts.setup",
+        url: "/prompts/setup.md",
+      },
     ]);
   });
 });
