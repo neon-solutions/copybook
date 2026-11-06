@@ -31,7 +31,7 @@ export default defineConfig({
 | `tsconfig` | Used to resolve path aliases such as `@/`. Defaults to `tsconfig.json`. |
 | `stubs` | Modules to replace with empty ones while loading content, such as `server-only`. CSS imports are always stubbed. |
 | `snapshots.dir` | Where snapshots are written. Defaults to `copybook/snapshots`. |
-| `usage.include`, `usage.exclude` | Product files to scan for imports of definitions and for the URLs of Markdown prompts, for `usages`, `check`, `report`, and Studio. Markdown and MDX files are scanned for URLs only. |
+| `usage.include`, `usage.exclude` | Product files to scan for imports of definitions, including `require()` and `import()`, and for the URLs of Markdown prompts, for `usages`, `check`, `report`, and Studio. Markdown and MDX files are scanned for URLs only. |
 | `placements` | Known placements, each with an optional `route` and `description`. When you set this, `check` fails on placements that aren't listed. |
 
 ## How content loads

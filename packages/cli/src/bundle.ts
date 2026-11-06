@@ -19,7 +19,7 @@ interface BundleOptions {
   tsconfig?: string;
 }
 
-const escapeRegExp = (value: string) =>
+export const escapeRegExp = (value: string) =>
   value.replaceAll(/[.*+?^${}()|[\]\\]/gu, String.raw`\$&`);
 
 const stubPlugin = (stubs: readonly string[]): Plugin => ({

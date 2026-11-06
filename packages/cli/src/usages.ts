@@ -1,4 +1,4 @@
-import { existsSync } from "node:fs";
+import { existsSync, realpathSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
@@ -6,7 +6,10 @@ import { parseSync } from "oxc-parser";
 import { ResolverFactory } from "oxc-resolver";
 import { glob } from "tinyglobby";
 
+import { escapeRegExp } from "./bundle";
 import type { Project } from "./load";
+import { moduleUses, NAMESPACE } from "./module-uses";
+import type { ModuleUse } from "./module-uses";
 
 export interface UsageReport {
   /** Definition id → product files that import it, relative to the config. */
@@ -35,21 +38,47 @@ const reachable = (
   return seen;
 };
 
-const EXTENSIONS = [".ts", ".tsx", ".mts", ".js", ".jsx", ".mjs"];
+const EXTENSIONS = [
+  ".ts",
+  ".tsx",
+  ".mts",
+  ".cts",
+  ".js",
+  ".jsx",
+  ".mjs",
+  ".cjs",
+];
 const BASE_EXPORT = /^[^.[]+/u;
-const REGEXP_SPECIAL = /[.*+?^${}()|[\]\\]/gu;
-/** A URL that continues past a match, such as `a.md` inside `a.mdx`, isn't a match. */
-const PATH_CHAR = /[\w./-]/u;
+/** The path goes on past the match, as in `a.mdx` or `a.md.bak`. */
+const CONTINUES = /^(?:[\w/-]|\.\w)/u;
+/** The match is the end of a longer path, as in `/docs/prompts/a.md`. */
+const PATH_BEFORE = /[\w.-]$/u;
+/** An origin right before the match, as in `https://acme.dev/prompts/a.md`. */
+const ORIGIN_BEFORE = /[a-z][\w+.-]*:\/\/[^\s"'`()<>/]+$/iu;
+/** How far back to look for an origin. */
+const ORIGIN_LOOKBEHIND = 256;
+
+/** Whether the match at `start`–`end` is a whole URL, not part of another path. */
+const isWholeUrl = (source: string, start: number, end: number) => {
+  if (CONTINUES.test(source.slice(end, end + 2))) {
+    return false;
+  }
+  const before = source.slice(Math.max(0, start - ORIGIN_LOOKBEHIND), start);
+  return !PATH_BEFORE.test(before) || ORIGIN_BEFORE.test(before);
+};
 
 /**
  * A matcher for the URLs Markdown prompts are served at, such as
  * `/prompts/setup.md`, or nothing when no prompt has a URL.
  */
 const urlMatcher = (project: Project) => {
-  const byUrl = new Map<string, string>();
+  const byUrl = new Map<string, string[]>();
   for (const { definition, markdown } of project.definitions) {
     if (markdown?.url) {
-      byUrl.set(markdown.url, definition.id);
+      byUrl.set(markdown.url, [
+        ...(byUrl.get(markdown.url) ?? []),
+        definition.id,
+      ]);
     }
   }
   if (byUrl.size === 0) {
@@ -58,27 +87,31 @@ const urlMatcher = (project: Project) => {
   // Longest first, so a URL never stops a longer one from matching.
   const pattern = [...byUrl.keys()]
     .toSorted((a, b) => b.length - a.length)
-    .map((url) => url.replaceAll(REGEXP_SPECIAL, String.raw`\$&`))
+    .map(escapeRegExp)
     .join("|");
   const regexp = new RegExp(pattern, "gu");
-  return (source: string): string[] => {
-    const ids: string[] = [];
-    for (const match of source.matchAll(regexp)) {
-      const next = source[match.index + match[0].length] ?? "";
-      const id = byUrl.get(match[0]);
-      if (id && !PATH_CHAR.test(next)) {
-        ids.push(id);
-      }
-    }
-    return ids;
-  };
+  return (source: string): string[] =>
+    [...source.matchAll(regexp)].flatMap((match) =>
+      isWholeUrl(source, match.index, match.index + match[0].length)
+        ? (byUrl.get(match[0]) ?? [])
+        : []
+    );
 };
 
-/** content file → export name → the ids it holds. */
+/** The real path, because the resolver follows symlinks. */
+const realPath = (file: string) => {
+  try {
+    return realpathSync(file);
+  } catch {
+    return file;
+  }
+};
+
+/** content file → export name → the ids it holds, keyed by real path. */
 const indexExports = (project: Project) => {
   const index = new Map<string, Map<string, string[]>>();
   for (const { definition, exportName, file } of project.definitions) {
-    const absolute = path.resolve(project.config.root, file);
+    const absolute = realPath(path.resolve(project.config.root, file));
     const name = BASE_EXPORT.exec(exportName)?.[0] ?? exportName;
     const byName = index.get(absolute) ?? new Map<string, string[]>();
     byName.set(name, [...(byName.get(name) ?? []), definition.id]);
@@ -87,23 +120,42 @@ const indexExports = (project: Project) => {
   return index;
 };
 
-const importedIds = (
+/** The ids a file takes from a content file, by export name. */
+const idsFor = (
   byName: ReadonlyMap<string, string[]>,
-  kind: string,
-  name: string | null
-) => {
-  if (kind === "NamespaceObject") {
-    return [...byName.values()].flat();
-  }
-  return byName.get(kind === "Default" ? "default" : (name ?? "")) ?? [];
+  names: readonly string[]
+) =>
+  names.flatMap((name) =>
+    name === NAMESPACE ? [...byName.values()].flat() : (byName.get(name) ?? [])
+  );
+
+/**
+ * Everything a JS or TS file imports: static imports (type-only ones don't
+ * count), `require()` calls, and dynamic `import()`s.
+ */
+const importsOf = (file: string, source: string): ModuleUse[] => {
+  const { module, program } = parseSync(file, source);
+  const statements = module.staticImports.map((statement) => ({
+    names: statement.entries
+      .filter((entry) => !entry.isType)
+      .map((entry) => {
+        const kind = String(entry.importName.kind);
+        if (kind === "NamespaceObject") {
+          return NAMESPACE;
+        }
+        return kind === "Default" ? "default" : (entry.importName.name ?? "");
+      }),
+    request: statement.moduleRequest.value,
+  }));
+  return [...statements, ...moduleUses(program)];
 };
 
 /**
  * Finds which product files import each definition, by parsing the files the
  * config's `usage.include` globs match and resolving their imports with the
- * project's tsconfig paths. Type-only imports don't count. Markdown prompts
- * with a `url` are used by every file that contains their URL, Markdown and
- * MDX included.
+ * project's tsconfig paths. Type-only imports don't count, and `require()`
+ * and `import()` do. Markdown prompts with a `url` are used by every file
+ * that contains their URL, Markdown and MDX included.
  */
 export const findUsages = async (
   project: Project,
@@ -148,24 +200,11 @@ export const findUsages = async (
     if (!EXTENSIONS.includes(path.extname(file))) {
       continue;
     }
-    const { module } = parseSync(file, source);
-    for (const statement of module.staticImports) {
-      const target = resolver.resolveFileSync(
-        file,
-        statement.moduleRequest.value
-      ).path;
+    for (const use of importsOf(file, source)) {
+      const target = resolver.resolveFileSync(file, use.request).path;
       const byName = target ? exportsByFile.get(target) : undefined;
-      if (!byName) {
-        continue;
-      }
-      for (const entry of statement.entries) {
-        if (entry.isType) {
-          continue;
-        }
-        const kind = String(entry.importName.kind);
-        for (const id of importedIds(byName, kind, entry.importName.name)) {
-          record(id, file);
-        }
+      for (const id of byName ? idsFor(byName, use.names) : []) {
+        record(id, file);
       }
     }
   }

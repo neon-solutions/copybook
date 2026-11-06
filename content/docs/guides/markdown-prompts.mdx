@@ -71,7 +71,7 @@ Pages point at a Markdown prompt by URL, not by importing it. With `url` set, ev
 const PROMPT = "Fetch https://acme.dev/prompts/agent-setup.md and follow it.";
 ```
 
-`copybook usages`, `show`, `report`, and Studio list those files, and a prompt that no file mentions is reported as unused.
+Only whole URLs count, so `/docs/prompts/nextjs.md` and `/prompts/nextjs.mdx` don't, while `https://acme.dev/prompts/nextjs.md.` at the end of a sentence does. `copybook usages`, `show`, `report`, and Studio list those files, and a prompt that no file mentions is reported as unused.
 
 ## Each file is its own snapshot
 

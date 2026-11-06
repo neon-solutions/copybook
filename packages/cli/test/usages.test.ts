@@ -1,3 +1,5 @@
+import { mkdir, mkdtemp, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import path from "node:path";
 
 import { describe, expect, it } from "vitest";
@@ -36,6 +38,91 @@ describe("usages of Markdown prompts", () => {
       usages: {
         "fixture.prompts.guides.connect": ["app/docs/connect.mdx"],
         "fixture.prompts.setup": ["app/setup-button.tsx"],
+      },
+    });
+  });
+});
+
+/** A project in a temp dir with the given config and files. */
+const tempProject = async (
+  config: string,
+  files: Readonly<Record<string, string>>
+) => {
+  const root = await mkdtemp(path.join(tmpdir(), "copybook-usages-"));
+  await writeFile(path.join(root, "copybook.config.mjs"), config);
+  await Promise.all(
+    Object.entries(files).map(async ([file, text]) => {
+      await mkdir(path.dirname(path.join(root, file)), { recursive: true });
+      await writeFile(path.join(root, file), text);
+    })
+  );
+  return root;
+};
+
+const definition = (id: string) =>
+  `{ [Symbol.for("copybook.def")]: true, id: "${id}", kind: "prompt", params: {}, template: () => "" }`;
+
+describe("usages through require() and import()", () => {
+  it("counts destructured, member, and namespace requires, and dynamic imports", async () => {
+    const root = await tempProject(
+      'export default { content: ["defs/*.mjs"], usage: { include: ["app/**/*"] } };',
+      {
+        "app/destructure.cjs":
+          'const { greet, other: alias } = require("../defs/main.mjs");\n',
+        "app/lazy.mjs": 'const lazy = await import("../defs/lazy.mjs");\n',
+        "app/member.cjs":
+          'const text = require("../defs/main.mjs").farewell;\n',
+        "defs/lazy.mjs": `export const lazyOne = ${definition("site.lazy")};\n`,
+        "defs/main.mjs": [
+          `export const greet = ${definition("site.greet")};`,
+          `export const farewell = ${definition("site.farewell")};`,
+          `export const other = ${definition("site.other")};`,
+          `export const unusedOne = ${definition("site.unused")};`,
+        ].join("\n"),
+      }
+    );
+    const report = await findUsages(await loadProject(root));
+
+    expect(report).toStrictEqual({
+      unused: ["site.unused"],
+      usages: {
+        "site.farewell": ["app/member.cjs"],
+        "site.greet": ["app/destructure.cjs"],
+        "site.lazy": ["app/lazy.mjs"],
+        "site.other": ["app/destructure.cjs"],
+      },
+    });
+  });
+});
+
+describe("usages of Markdown prompts by URL", () => {
+  it("counts whole URLs only, and every prompt that shares one", async () => {
+    const root = await tempProject(
+      [
+        "export default {",
+        '  markdown: [{ dir: "p", idPrefix: "site", url: "/prompts" }, { dir: "q", idPrefix: "mirror", url: "/prompts" }],',
+        '  usage: { include: ["app/**/*"] },',
+        "};",
+      ].join("\n"),
+      {
+        "app/cta.mdx": '<CopyPrompt src="/prompts/a.md" />\n',
+        "app/elsewhere.md":
+          "See /docs/prompts/c.md, /prompts/c.mdx, and /prompts/c.md.bak.\n",
+        "app/sentence.md": "Fetch https://acme.dev/prompts/b.md.\n",
+        "p/a.md": "A\n",
+        "p/b.md": "B\n",
+        "p/c.md": "C\n",
+        "q/a.md": "Mirror A\n",
+      }
+    );
+    const report = await findUsages(await loadProject(root));
+
+    expect(report).toStrictEqual({
+      unused: ["site.c"],
+      usages: {
+        "mirror.a": ["app/cta.mdx"],
+        "site.a": ["app/cta.mdx"],
+        "site.b": ["app/sentence.md"],
       },
     });
   });
