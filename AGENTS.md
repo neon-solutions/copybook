@@ -140,5 +140,5 @@ Most formatting and common issues are automatically fixed by Oxlint + Oxfmt. Run
 
 ## Copybook
 
-The code snippets, shell commands, and coding-agent prompts in this product's UI are Copybook definitions, configured in `copybook.config.ts`. Before changing one, run `pnpm exec copybook status --json`. After changing one, run `pnpm exec copybook snapshot` and `pnpm exec copybook check`, and commit the snapshots with the code. The Copybook skill in `.agents/skills/copybook` and the `copybook` MCP server have the details. Docs for agents: https://copybook.dev/llms.txt
+The code snippets, shell commands, and coding-agent prompts in this product's UI are Copybook definitions, configured in `copybook.config.ts`. Before changing one, run `pnpm exec copybook status --json`. After changing one, run `pnpm exec copybook snapshot` and `pnpm exec copybook check`, and commit the snapshots with the code. Markdown prompts from the config's `markdown` sources are their own snapshots, so editing one needs no snapshot. The Copybook skill in `.agents/skills/copybook` and the `copybook` MCP server have the details. Docs for agents: https://copybook.dev/llms.txt
 <!-- copybook:end -->

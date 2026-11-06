@@ -77,7 +77,7 @@ Only whole URLs count, so `/docs/prompts/nextjs.md` and `/prompts/nextjs.mdx` do
 
 A Markdown prompt renders to exactly its own text, so the file is its snapshot. `copybook snapshot` doesn't write a copy, and `check` never asks you to update one: edit the file and commit it. History, `report` diffs, and `list --changed` read the file's own git history.
 
-Code fences become `code` nodes in the rendered tree, with the language as `lang` and the rest of the info string, such as `title="lib/db.ts"`, as `meta`. `toSegments` marks the fences and the code inside them, and `copybook test` knows which blocks are shell. The rendered text is still the file's text, byte for byte.
+Code fences become `code` nodes in the rendered tree, with the language as `lang` and the rest of the info string, such as `title="lib/db.ts"`, as `meta`. `toSegments` marks the fences and the code inside them, and `copybook test` knows which blocks are shell. The rendered text is still the file's text, byte for byte. In a file with Windows line endings, the fences stay plain text in the tree, but the title and the shell checks still work.
 
 ## Tests and evals
 

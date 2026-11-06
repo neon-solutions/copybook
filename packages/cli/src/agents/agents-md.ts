@@ -13,7 +13,7 @@ export const renderAgentsBlock = ({
 
 ## Copybook
 
-The code snippets, shell commands, and coding-agent prompts in this product's UI are Copybook definitions, configured in \`${configFile}\`. Before changing one, run \`${runner} status --json\`. After changing one, run \`${runner} snapshot\` and \`${runner} check\`, and commit the snapshots with the code. The Copybook skill in \`.agents/skills/copybook\` and the \`copybook\` MCP server have the details. Docs for agents: https://copybook.dev/llms.txt
+The code snippets, shell commands, and coding-agent prompts in this product's UI are Copybook definitions, configured in \`${configFile}\`. Before changing one, run \`${runner} status --json\`. After changing one, run \`${runner} snapshot\` and \`${runner} check\`, and commit the snapshots with the code. Markdown prompts from the config's \`markdown\` sources are their own snapshots, so editing one needs no snapshot. The Copybook skill in \`.agents/skills/copybook\` and the \`copybook\` MCP server have the details. Docs for agents: https://copybook.dev/llms.txt
 ${END}`;
 
 /**

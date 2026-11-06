@@ -33,6 +33,9 @@ describe(upsertBlock, () => {
 describe(renderAgentsBlock, () => {
   it("names the project's config file", () => {
     expect(block).toContain("configured in `copybook.config.ts`.");
+    expect(block).toContain(
+      "Markdown prompts from the config's `markdown` sources are their own snapshots"
+    );
     expect(
       renderAgentsBlock({
         configFile: "copybook.config.mjs",

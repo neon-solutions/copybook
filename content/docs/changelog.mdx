@@ -9,6 +9,7 @@ metaDescription: "What changed in each release of @copybook/core and @copybook/c
 **Fixes in `@copybook/cli`:**
 
 - `eval` skips a spec whose id isn't a prompt, such as `defineEval("acme.cli.init", …)`, with a warning. Before, it warned and then ran agents against the command anyway.
+- The `AGENTS.md` section `copybook init` writes says that Markdown prompts are their own snapshots, so agents don't look for a snapshot to update.
 - `copybook init` names the project's config file in the `AGENTS.md` section, such as `copybook.config.mjs`. It used to say `copybook.config.ts` for every project.
 - With `frontmatter: "strip"`, a YAML line that ends in `---`, such as `description: Pros and cons---`, no longer ends the frontmatter early. Before, the rest of the frontmatter leaked into the prompt and its later fields were lost.
 - A Markdown prompt's title skips `# ` lines inside nested code fences, and is found in files with Windows line endings.
