@@ -148,15 +148,36 @@ const toTemplate = <S extends ParamsShape>(body: Body<S>): TemplateFn<S> => {
   return () => code ?? "";
 };
 
+/** Puts `when` keys in dimension declaration order for stable labels. */
+const normalizeWhen = (
+  dimensions: Dimensions,
+  when: Readonly<Record<string, string>>
+): Record<string, string> => {
+  const ordered: Record<string, string> = {};
+  for (const key of Object.keys(dimensions)) {
+    const value = when[key];
+    if (value !== undefined) {
+      ordered[key] = value;
+    }
+  }
+  for (const [key, value] of Object.entries(when)) {
+    if (!(key in ordered)) {
+      ordered[key] = value;
+    }
+  }
+  return ordered;
+};
+
 const toVariant = <S extends ParamsShape>(
   dimensions: Dimensions,
   input: VariantInput<S, Dimensions> | SingleSnippetInput<S>,
   when: Readonly<Record<string, string>>
 ): SnippetVariant<S> => {
+  const orderedWhen = normalizeWhen(dimensions, when);
   const variant: SnippetVariant<S> = {
-    key: variantKey(dimensions, when),
+    key: variantKey(dimensions, orderedWhen),
     template: toTemplate(input),
-    when,
+    when: orderedWhen,
     ...(input.deps ? { deps: input.deps } : {}),
     ...(input.lang ? { lang: input.lang } : {}),
     ...(input.verify ? { verify: input.verify } : {}),

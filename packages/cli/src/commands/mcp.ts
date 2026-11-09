@@ -18,8 +18,14 @@ const toStderr = (...args: unknown[]) => {
  * stdout carries the protocol, so anything the project's code logs while it
  * loads goes to stderr instead.
  */
-const keepStdoutForProtocol = () => {
-  Object.assign(console, { debug: toStderr, info: toStderr, log: toStderr });
+export const keepStdoutForProtocol = () => {
+  Object.assign(console, {
+    debug: toStderr,
+    dir: toStderr,
+    dirxml: toStderr,
+    info: toStderr,
+    log: toStderr,
+  });
 };
 
 export const registerMcp = (program: Command) =>

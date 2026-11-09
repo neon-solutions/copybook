@@ -54,6 +54,28 @@ const clip = (text: string) =>
     ? `${text.slice(0, MAX_OUTPUT)}\n… (truncated)`
     : text;
 
+/** Kill the child and any grandchildren started in its process group. */
+const killProcessTree = (
+  child: ReturnType<typeof spawn>,
+  pid: number | undefined
+) => {
+  if (pid === undefined) {
+    child.kill("SIGKILL");
+    return;
+  }
+  if (process.platform === "win32") {
+    child.kill("SIGKILL");
+    return;
+  }
+  try {
+    // Negative pid targets the process group (child is group leader when
+    // spawned with detached: true).
+    process.kill(-pid, "SIGKILL");
+  } catch {
+    child.kill("SIGKILL");
+  }
+};
+
 /** Runs a command without a shell, with a timeout and a clean environment. */
 export const exec = (
   command: string,
@@ -62,8 +84,12 @@ export const exec = (
 ): Promise<ExecResult> => {
   const started = performance.now();
   const { promise, resolve } = Promise.withResolvers<ExecResult>();
+  // On POSIX, detached makes the child a process-group leader so timeout can
+  // SIGKILL the whole tree (grandchildren included). Windows has no equivalent
+  // that is safe without extra deps, so fall back to child.kill there.
   const child = spawn(command, args, {
     cwd,
+    detached: process.platform !== "win32",
     env: { ...baseEnv(), ...env },
     stdio: ["pipe", "pipe", "pipe"],
   });
@@ -71,10 +97,31 @@ export const exec = (
   let stderr = "";
   let output = "";
   let timedOut = false;
+  let settled = false;
   const timer = setTimeout(() => {
     timedOut = true;
-    child.kill("SIGKILL");
+    killProcessTree(child, child.pid);
   }, timeoutMs);
+  const settle = (code: number | null) => {
+    if (settled) {
+      return;
+    }
+    settled = true;
+    clearTimeout(timer);
+    // Grandchildren can keep inherited stdio open after the leader dies;
+    // destroy so we never wait forever for a close that will not come.
+    child.stdout.destroy();
+    child.stderr.destroy();
+    child.stdin.destroy();
+    resolve({
+      code,
+      durationMs: performance.now() - started,
+      output: clip(output),
+      stderr: clip(stderr),
+      stdout: clip(stdout),
+      timedOut,
+    });
+  };
 
   child.stdout.on("data", (chunk: Buffer) => {
     stdout += chunk.toString();
@@ -86,6 +133,10 @@ export const exec = (
   });
   child.on("error", (error) => {
     clearTimeout(timer);
+    if (settled) {
+      return;
+    }
+    settled = true;
     resolve({
       code: null,
       durationMs: performance.now() - started,
@@ -95,16 +146,10 @@ export const exec = (
       timedOut,
     });
   });
-  child.on("close", (code) => {
-    clearTimeout(timer);
-    resolve({
-      code,
-      durationMs: performance.now() - started,
-      output: clip(output),
-      stderr: clip(stderr),
-      stdout: clip(stdout),
-      timedOut,
-    });
+  // Resolve on exit (not close): close waits for all stdio fds to close, which
+  // never happens if a grandchild still holds the pipes open after a timeout.
+  child.on("exit", (code) => {
+    settle(code);
   });
   // A process that exits before reading its input closes the pipe, so the
   // write fails with EPIPE. Its exit code already says what happened.

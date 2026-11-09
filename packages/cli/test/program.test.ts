@@ -166,4 +166,72 @@ describe(runCli, () => {
     expect(code).toBe(1);
     expect(stderr).toContain("Has no snapshot.");
   });
+
+  it("rejects a non-integer --concurrency with INVALID_OPTION", async () => {
+    const { code, stdout } = await run([
+      "test",
+      "--concurrency",
+      "abc",
+      "--json",
+      "--only",
+      "fixture.hello",
+    ]);
+
+    expect(code).toBe(2);
+    expect(JSON.parse(stdout)).toMatchObject({
+      error: { code: "INVALID_OPTION" },
+      ok: false,
+    });
+  });
+
+  it("dedupes repeated --tier values", async () => {
+    const { code, stdout } = await run([
+      "test",
+      "--tier",
+      "syntax,syntax",
+      "--json",
+      "--only",
+      "fixture.hello",
+    ]);
+    const report = JSON.parse(stdout);
+
+    expect(code).toBe(0);
+    expect(report.results).toHaveLength(1);
+    expect(report.results[0]).toMatchObject({
+      id: "fixture.hello",
+      tier: "syntax",
+    });
+  });
+
+  it("rejects a non-integer --trials with INVALID_OPTION", async () => {
+    const { code, stdout } = await run([
+      "eval",
+      "--trials",
+      "nope",
+      "--json",
+      "--unsafe-local",
+    ]);
+
+    expect(code).toBe(2);
+    expect(JSON.parse(stdout)).toMatchObject({
+      error: { code: "INVALID_OPTION" },
+      ok: false,
+    });
+  });
+
+  it("rejects a non-number --budget-usd with INVALID_OPTION", async () => {
+    const { code, stdout } = await run([
+      "eval",
+      "--budget-usd",
+      "nope",
+      "--json",
+      "--unsafe-local",
+    ]);
+
+    expect(code).toBe(2);
+    expect(JSON.parse(stdout)).toMatchObject({
+      error: { code: "INVALID_OPTION" },
+      ok: false,
+    });
+  });
 });

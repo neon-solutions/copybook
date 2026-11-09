@@ -73,6 +73,28 @@ describe(render, () => {
       "First line.\n  Indented line.\n\nLast line."
     );
   });
+
+  it("dedents from raw so cooked \\n escapes don't cancel indent", () => {
+    const prompt = definePrompt({
+      id: "dedent-escape",
+      template: (t) => t`
+        printf 'a\nb'
+        next
+      `,
+    });
+
+    expect(toText(render(prompt))).toBe("printf 'a\nb'\nnext");
+  });
+
+  it("falls back to raw when a cooked escape is invalid", () => {
+    const prompt = definePrompt({
+      id: "invalid-escape",
+      // Windows-style path: \u is not a valid Unicode escape here.
+      template: (t) => t`cd C:\users\me`,
+    });
+
+    expect(toText(render(prompt))).toBe("cd C:\\users\\me");
+  });
 });
 
 describe("embedding", () => {
@@ -130,6 +152,24 @@ describe("embedding", () => {
     expect(toText(render(prompt), { format: "plain" })).toBe(
       'Run npm test and add:{\n  "a": 1\n}'
     );
+  });
+
+  it("uses a longer fence when the code contains triple backticks", () => {
+    const prompt = definePrompt({
+      id: "nested-fence",
+      template: (t) => t`${t.code("md", "```bash\nacme\n```")}`,
+    });
+
+    expect(toText(render(prompt))).toBe("````md\n```bash\nacme\n```\n````");
+  });
+
+  it("puts a newline after a closing fence before following text", () => {
+    const prompt = definePrompt({
+      id: "fence-tail",
+      template: (t) => t`${t.code("ts", "x")} tail`,
+    });
+
+    expect(toText(render(prompt))).toBe("```ts\nx\n```\n tail");
   });
 
   it("includes other prompts", () => {
@@ -254,6 +294,38 @@ describe(listVariants, () => {
         label: "cURL",
         lang: "bash",
         when: { framework: "curl" },
+      },
+    ]);
+  });
+
+  it("orders when keys by dimension declaration, not insertion", () => {
+    // JSON keeps framework-before-env insertion; dimensions declare env first.
+    const when = JSON.parse('{"framework":"ai-sdk","env":"dotenv"}') as Record<
+      string,
+      string
+    >;
+
+    const snippet = defineSnippet({
+      dimensions: {
+        env: [
+          { label: ".env", value: "dotenv" },
+          { label: "inline", value: "inline" },
+        ],
+        framework: [
+          { label: "AI SDK", value: "ai-sdk" },
+          { label: "cURL", value: "curl" },
+        ],
+      },
+      id: "ordered.when",
+      variants: [{ code: "a", lang: "ts", when }],
+    });
+
+    expect(listVariants(snippet)).toStrictEqual([
+      {
+        key: "env=dotenv;framework=ai-sdk",
+        label: ".env · AI SDK",
+        lang: "ts",
+        when: { env: "dotenv", framework: "ai-sdk" },
       },
     ]);
   });

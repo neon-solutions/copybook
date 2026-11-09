@@ -1,4 +1,4 @@
-import { mkdtemp } from "node:fs/promises";
+import { mkdtemp, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
@@ -15,9 +15,11 @@ import {
   ranInOrder,
   succeeds,
 } from "../src/eval/define";
+import { readHistory } from "../src/eval/history";
 import { runEvals } from "../src/eval/runner";
 import type { EvalRunOptions, EvalTarget } from "../src/eval/runner";
 import { selectEvalTargets } from "../src/eval/select";
+import type { EvalHistoryEntry } from "../src/eval/types";
 
 const init = defineCommand({
   id: "eval.init",
@@ -192,6 +194,34 @@ describe(defineEval, () => {
     expect(
       defineEval("site.prompts.setup", { agents: ["literal"], assert: [] }).id
     ).toBe("site.prompts.setup");
+  });
+});
+
+describe(readHistory, () => {
+  it("skips corrupt JSONL lines and keeps valid ones", async () => {
+    const historyDir = await mkdtemp(
+      path.join(os.tmpdir(), "copybook-eval-history-")
+    );
+    const valid: EvalHistoryEntry = {
+      agent: "follows",
+      agentVersion: "1",
+      contentHash: "hash-1",
+      costUsd: 0,
+      date: "2026-10-26",
+      passRate: 1,
+      runId: "a",
+      status: "pass",
+      trials: 1,
+    };
+    await writeFile(
+      path.join(historyDir, "eval.setup.jsonl"),
+      `${JSON.stringify(valid)}\nnot-json\n{broken\n${JSON.stringify({ ...valid, runId: "b" })}\n`
+    );
+
+    await expect(readHistory(historyDir, "eval.setup")).resolves.toStrictEqual([
+      valid,
+      { ...valid, runId: "b" },
+    ]);
   });
 });
 

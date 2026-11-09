@@ -1,4 +1,4 @@
-import { mkdtemp, writeFile } from "node:fs/promises";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
@@ -212,19 +212,31 @@ const runValues = (
 
 const prepareDir = async (testCase: TestCase, options: RunOptions) => {
   const npm = testCase.deps?.npm ?? [];
-  const sandbox =
-    npm.length > 0
-      ? await npmSandbox(options.root, npm)
-      : await mkdtemp(path.join(os.tmpdir(), "copybook-run-"));
-  const dir = await caseDir(
-    sandbox,
-    `${testCase.id}-${testCase.variant ?? ""}-${options.runId}`
-  );
-  const files = Object.entries(testCase.spec?.options.files ?? {});
-  await Promise.all(
-    files.map(([file, content]) => writeFile(path.join(dir, file), content))
-  );
-  return dir;
+  const ephemeral = npm.length === 0;
+  const sandbox = ephemeral
+    ? await mkdtemp(path.join(os.tmpdir(), "copybook-run-"))
+    : await npmSandbox(options.root, npm);
+  try {
+    const dir = await caseDir(
+      sandbox,
+      `${testCase.id}-${testCase.variant ?? ""}-${options.runId}`
+    );
+    const files = Object.entries(testCase.spec?.options.files ?? {});
+    await Promise.all(
+      files.map(([file, content]) => writeFile(path.join(dir, file), content))
+    );
+    return {
+      dir,
+      ...(ephemeral
+        ? { cleanup: () => rm(sandbox, { force: true, recursive: true }) }
+        : {}),
+    };
+  } catch (error) {
+    if (ephemeral) {
+      await rm(sandbox, { force: true, recursive: true });
+    }
+    throw error;
+  }
 };
 
 const matchesStdout = (
@@ -255,24 +267,29 @@ const runTier = async (
     return values;
   }
 
-  const result = await execute(testCase, renderCode(testCase, values), {
-    dir: await prepareDir(testCase, options),
-    env: { ...fixture?.env, ...spec?.env },
-    ...(spec?.timeoutMs ? { timeoutMs: spec.timeoutMs } : {}),
-  });
-  if (isOutcome(result)) {
-    return result;
+  const prepared = await prepareDir(testCase, options);
+  try {
+    const result = await execute(testCase, renderCode(testCase, values), {
+      dir: prepared.dir,
+      env: { ...fixture?.env, ...spec?.env },
+      ...(spec?.timeoutMs ? { timeoutMs: spec.timeoutMs } : {}),
+    });
+    if (isOutcome(result)) {
+      return result;
+    }
+    if (result.timedOut || result.code !== (spec?.expect?.exitCode ?? 0)) {
+      return failure(result, "the run");
+    }
+    const expected = spec?.expect?.stdout;
+    return matchesStdout(result.stdout, expected)
+      ? { status: "pass" }
+      : {
+          message: `stdout didn't match ${String(expected)}\n${tail(result.stdout)}`,
+          status: "fail",
+        };
+  } finally {
+    await prepared.cleanup?.();
   }
-  if (result.timedOut || result.code !== (spec?.expect?.exitCode ?? 0)) {
-    return failure(result, "the run");
-  }
-  const expected = spec?.expect?.stdout;
-  return matchesStdout(result.stdout, expected)
-    ? { status: "pass" }
-    : {
-        message: `stdout didn't match ${String(expected)}\n${tail(result.stdout)}`,
-        status: "fail",
-      };
 };
 
 const runCase = async (

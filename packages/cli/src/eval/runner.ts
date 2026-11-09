@@ -1,4 +1,4 @@
-import { cp, mkdir, mkdtemp, writeFile } from "node:fs/promises";
+import { cp, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
@@ -94,76 +94,81 @@ const runTrial = async ({
   const { definition, spec } = target;
   const started = performance.now();
   const sandbox = await mkdtemp(path.join(os.tmpdir(), "copybook-eval-"));
-  const cwd = path.join(sandbox, "project");
-  await mkdir(cwd, { recursive: true });
-  if (spec.options.sandbox?.template) {
-    await cp(path.resolve(options.root, spec.options.sandbox.template), cwd, {
-      recursive: true,
+  try {
+    const cwd = path.join(sandbox, "project");
+    await mkdir(cwd, { recursive: true });
+    if (spec.options.sandbox?.template) {
+      await cp(path.resolve(options.root, spec.options.sandbox.template), cwd, {
+        recursive: true,
+      });
+    }
+    const shimDir = path.join(sandbox, "shims");
+    const log = await installShims(shimDir, spec.options.shims ?? {});
+    const base = baseEnv();
+    const env = {
+      ...base,
+      ...passthroughEnv(agent),
+      ...fixture?.env,
+      ...spec.options.env,
+      PATH: `${shimDir}${path.delimiter}${base.PATH ?? ""}`,
+    };
+
+    const rendered = renderExample(definition, {
+      values: promptValues(definition, spec, fixture?.value),
     });
-  }
-  const shimDir = path.join(sandbox, "shims");
-  const log = await installShims(shimDir, spec.options.shims ?? {});
-  const base = baseEnv();
-  const env = {
-    ...base,
-    ...passthroughEnv(agent),
-    ...fixture?.env,
-    ...spec.options.env,
-    PATH: `${shimDir}${path.delimiter}${base.PATH ?? ""}`,
-  };
+    const run = await agent.run({
+      cwd,
+      env,
+      prompt: toText(rendered),
+      rendered,
+      timeoutMs: spec.options.timeoutMs ?? DEFAULT_TIMEOUT_MS,
+      ...(spec.options.maxCostUsd === undefined
+        ? {}
+        : { maxCostUsd: spec.options.maxCostUsd }),
+    });
 
-  const rendered = renderExample(definition, {
-    values: promptValues(definition, spec, fixture?.value),
-  });
-  const run = await agent.run({
-    cwd,
-    env,
-    prompt: toText(rendered),
-    rendered,
-    timeoutMs: spec.options.timeoutMs ?? DEFAULT_TIMEOUT_MS,
-    ...(spec.options.maxCostUsd === undefined
-      ? {}
-      : { maxCostUsd: spec.options.maxCostUsd }),
-  });
-
-  const transcripts = path.join(
-    options.root,
-    ".copybook",
-    "results",
-    "evals",
-    definition.id
-  );
-  await mkdir(transcripts, { recursive: true });
-  await writeFile(
-    path.join(transcripts, `${agent.name}-${trial}.log`),
-    run.transcript
-  );
-
-  const calls = await readShimCalls(log);
-  const context = { agent: run, calls, cwd, env };
-  const assertions: AssertionOutcome[] = [];
-  for (const assertion of spec.options.assert) {
-    // Assertions such as `succeeds` change the sandbox, so they run in order.
-    // oxlint-disable-next-line no-await-in-loop
-    const outcome = await Promise.resolve(assertion.check(context)).catch(
-      (error: unknown) => ({
-        message: error instanceof Error ? error.message : String(error),
-        passed: false,
-      })
+    const transcripts = path.join(
+      options.root,
+      ".copybook",
+      "results",
+      "evals",
+      definition.id
     );
-    assertions.push({ name: assertion.name, ...outcome });
-  }
+    await mkdir(transcripts, { recursive: true });
+    await writeFile(
+      path.join(transcripts, `${agent.name}-${trial}.log`),
+      run.transcript
+    );
 
-  return {
-    agentExitCode: run.exitCode,
-    assertions,
-    calls: calls.map((call) => call.line),
-    durationMs: Math.round(performance.now() - started),
-    passed: !run.timedOut && assertions.every((assertion) => assertion.passed),
-    timedOut: run.timedOut,
-    trial,
-    ...(run.costUsd === undefined ? {} : { costUsd: run.costUsd }),
-  };
+    const calls = await readShimCalls(log);
+    const context = { agent: run, calls, cwd, env };
+    const assertions: AssertionOutcome[] = [];
+    for (const assertion of spec.options.assert) {
+      // Assertions such as `succeeds` change the sandbox, so they run in order.
+      // oxlint-disable-next-line no-await-in-loop
+      const outcome = await Promise.resolve(assertion.check(context)).catch(
+        (error: unknown) => ({
+          message: error instanceof Error ? error.message : String(error),
+          passed: false,
+        })
+      );
+      assertions.push({ name: assertion.name, ...outcome });
+    }
+
+    return {
+      agentExitCode: run.exitCode,
+      assertions,
+      calls: calls.map((call) => call.line),
+      durationMs: Math.round(performance.now() - started),
+      passed:
+        !run.timedOut && assertions.every((assertion) => assertion.passed),
+      timedOut: run.timedOut,
+      trial,
+      ...(run.costUsd === undefined ? {} : { costUsd: run.costUsd }),
+    };
+  } finally {
+    await rm(sandbox, { force: true, recursive: true });
+  }
 };
 
 const sum = (values: readonly number[]) => {

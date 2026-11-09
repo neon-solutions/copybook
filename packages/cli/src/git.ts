@@ -3,14 +3,79 @@ import { realpath } from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
 
+import { CopybookError } from "./errors";
+
 const run = promisify(execFile);
 
+const gitMessage = (error: unknown) => {
+  if (!(error instanceof Error)) {
+    return String(error);
+  }
+  const stderr =
+    "stderr" in error && typeof error.stderr === "string" ? error.stderr : "";
+  return `${stderr}\n${error.message}`;
+};
+
 const git = async (cwd: string, args: string[]) => {
-  const { stdout } = await run("git", args, {
-    cwd,
-    maxBuffer: 16 * 1024 * 1024,
-  });
-  return stdout;
+  try {
+    const { stdout } = await run("git", args, {
+      cwd,
+      maxBuffer: 16 * 1024 * 1024,
+    });
+    return stdout;
+  } catch (error) {
+    if (error instanceof CopybookError) {
+      throw error;
+    }
+    const detail = gitMessage(error);
+    if (/not a git repository/iu.test(detail)) {
+      throw new CopybookError(
+        "USAGE",
+        "Not a git repository. Run this from inside a git working tree."
+      );
+    }
+    if (/bad revision|unknown revision|invalid object name/iu.test(detail)) {
+      throw new CopybookError(
+        "INVALID_OPTION",
+        detail
+          .split("\n")
+          .map((line) => line.replace(/^fatal:\s*/iu, "").trim())
+          .find((line) => line !== "") ?? "Unknown git revision."
+      );
+    }
+    throw error;
+  }
+};
+
+/**
+ * Reject option-like refs, then resolve `base` to a commit SHA so later git
+ * args cannot treat it as an option.
+ */
+const resolveCommit = async (cwd: string, base: string): Promise<string> => {
+  if (base.startsWith("-")) {
+    throw new CopybookError(
+      "INVALID_OPTION",
+      `Invalid git ref "${base}": refs must not start with "-"`
+    );
+  }
+  try {
+    const stdout = await git(cwd, [
+      "rev-parse",
+      "--verify",
+      "--quiet",
+      "--end-of-options",
+      `${base}^{commit}`,
+    ]);
+    return stdout.trim();
+  } catch (error) {
+    if (error instanceof CopybookError) {
+      throw error;
+    }
+    throw new CopybookError(
+      "INVALID_OPTION",
+      `Invalid git ref "${base}": unknown revision`
+    );
+  }
 };
 
 /**
@@ -44,9 +109,10 @@ export const changedFiles = async (
   base: string
 ): Promise<string[]> => {
   const root = await toplevel(cwd);
+  const commit = await resolveCommit(root, base);
   const relative = path.relative(root, await realPath(dir)) || ".";
   const [diff, untracked] = await Promise.all([
-    git(root, ["diff", "--name-only", base, "--", relative]),
+    git(root, ["diff", "--name-only", commit, "--", relative]),
     git(root, ["ls-files", "--others", "--exclude-standard", "--", relative]),
   ]);
   return [...diff.split("\n"), ...untracked.split("\n")]
@@ -63,10 +129,14 @@ export const showFile = async (
   file: string
 ): Promise<string | undefined> => {
   const root = await toplevel(cwd);
+  const commit = await resolveCommit(root, base);
   const relative = toPosix(path.relative(root, await realPath(file)));
   try {
-    return await git(root, ["show", `${base}:${relative}`]);
-  } catch {
+    return await git(root, ["show", `${commit}:${relative}`]);
+  } catch (error) {
+    if (error instanceof CopybookError) {
+      throw error;
+    }
     return undefined;
   }
 };
@@ -78,16 +148,22 @@ export const listFiles = async (
   dir: string
 ): Promise<string[]> => {
   const root = await toplevel(cwd);
+  const commit = await resolveCommit(root, base);
   const relative = toPosix(path.relative(root, await realPath(dir)));
   const stdout = await git(root, [
     "ls-tree",
     "-r",
     "-z",
     "--name-only",
-    base,
+    commit,
     "--",
     relative || ".",
-  ]).catch(() => "");
+  ]).catch((error) => {
+    if (error instanceof CopybookError) {
+      throw error;
+    }
+    return "";
+  });
   const prefix = relative === "" ? "" : `${relative}/`;
   return stdout
     .split("\0")

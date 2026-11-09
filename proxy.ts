@@ -16,8 +16,11 @@ const rewriteHome = (path: string) => (path === "/" ? "/index.md" : false);
  * it via `Accept`.
  */
 export const proxy = (request: NextRequest) => {
-  if (isMarkdownPreferred(request)) {
-    const { pathname } = request.nextUrl;
+  const { pathname } = request.nextUrl;
+
+  // Explicit `.md` URLs are handled by `next.config` rewrites — skip negotiation
+  // so `/docs/page.md` is not treated as a slug and rewritten to `.../page.md/content.md`.
+  if (!pathname.endsWith(".md") && isMarkdownPreferred(request)) {
     const negotiated = rewriteHome(pathname) || rewriteDocs(pathname);
 
     if (negotiated) {
@@ -28,7 +31,10 @@ export const proxy = (request: NextRequest) => {
     }
   }
 
-  return NextResponse.next();
+  // HTML (and pass-through `.md`) responses share the URL with Markdown negotiation.
+  return NextResponse.next({
+    headers: { Vary: "Accept" },
+  });
 };
 
 export const config = {

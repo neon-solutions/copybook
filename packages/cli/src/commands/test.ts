@@ -41,7 +41,19 @@ const parseTiers = (value: string): Tier[] => {
       `Unknown tier "${unknown.join(", ")}". Use ${TIERS.join(", ")}.`
     );
   }
-  return tiers as Tier[];
+  return [...new Set(tiers as Tier[])];
+};
+
+/** Positive integer ≥ 1 for options such as `--concurrency`. */
+const parsePositiveInt = (flag: string, value: string): number => {
+  const n = Number(value);
+  if (!(Number.isFinite(n) && Number.isInteger(n) && n >= 1)) {
+    throw new CopybookError(
+      "INVALID_OPTION",
+      `${flag} must be an integer >= 1, got "${value}".`
+    );
+  }
+  return n;
 };
 
 export const registerTest = (program: Command) =>
@@ -77,7 +89,12 @@ export const registerTest = (program: Command) =>
         base: options.base,
         ...(options.changed ? { changed: true } : {}),
         ...(options.concurrency
-          ? { concurrency: Number(options.concurrency) }
+          ? {
+              concurrency: parsePositiveInt(
+                "--concurrency",
+                options.concurrency
+              ),
+            }
           : {}),
         ...(options.only ? { ids: options.only } : {}),
         ...(pretty

@@ -15,4 +15,18 @@ describe(exec, () => {
 
     expect(result.code).toBe(3);
   });
+
+  it("times out without hanging when grandchildren hold stdio open", async () => {
+    const started = performance.now();
+    const result = await exec("bash", ["-eo", "pipefail"], {
+      cwd: os.tmpdir(),
+      input: "sleep 30\n",
+      timeoutMs: 200,
+    });
+    const elapsedMs = performance.now() - started;
+
+    expect(result.timedOut).toBeTruthy();
+    // Must settle soon after the timeout; hanging until sleep finishes is the bug.
+    expect(elapsedMs).toBeLessThan(3000);
+  });
 });

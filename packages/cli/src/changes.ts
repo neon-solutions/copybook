@@ -136,14 +136,15 @@ export const changedIds = async (
 
 /**
  * Definitions removed since `base` whose id isn't kept as an alias: snapshot
- * files that were deleted, and Markdown prompts that existed at `base`.
+ * files that existed at `base` (so renames still count as removals), and
+ * Markdown prompts that existed at `base`.
  */
 export const removedSince = async (
   project: Project,
   base: string
 ): Promise<RemovedDefinition[]> => {
-  const [files, markdown] = await Promise.all([
-    changedFiles(project.config.root, project.config.snapshotsDir, base),
+  const [snapshotFiles, markdown] = await Promise.all([
+    listFiles(project.config.root, base, project.config.snapshotsDir),
     markdownAtBase(project, base),
   ]);
   const current = new Set(
@@ -153,7 +154,7 @@ export const removedSince = async (
     project.definitions.flatMap(({ definition }) => definition.aliases ?? [])
   );
   const removed = new Map<string, RemovedDefinition>();
-  for (const file of files) {
+  for (const file of snapshotFiles) {
     if (file.endsWith(SNAPSHOT_EXTENSION)) {
       const id = path.basename(file, SNAPSHOT_EXTENSION);
       removed.set(id, { id });

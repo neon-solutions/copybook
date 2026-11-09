@@ -10,6 +10,7 @@ import {
 import { createMcpHandler } from "@modelcontextprotocol/server";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
+import { keepStdoutForProtocol } from "../src/commands/mcp";
 import { loadProject } from "../src/load";
 import { createCopybookMcp } from "../src/mcp/server";
 import { openWorkspace } from "../src/workspace";
@@ -58,6 +59,42 @@ const call = async (
   const [first] = result.content;
   return { isError: result.isError ?? false, text: first?.text ?? "" };
 };
+
+describe(keepStdoutForProtocol, () => {
+  it("redirects log methods that would break the stdio protocol", () => {
+    const original = {
+      debug: console.debug,
+      dir: console.dir,
+      dirxml: console.dirxml,
+      info: console.info,
+      log: console.log,
+    };
+    const writes: string[] = [];
+    const write = process.stderr.write.bind(process.stderr);
+    process.stderr.write = ((chunk: string | Uint8Array) => {
+      writes.push(
+        typeof chunk === "string" ? chunk : Buffer.from(chunk).toString()
+      );
+      return true;
+    }) as typeof process.stderr.write;
+
+    try {
+      keepStdoutForProtocol();
+      console.dir({ ok: true });
+      console.dirxml({ ok: true });
+      console.log("hello");
+
+      expect(console.dir).not.toBe(original.dir);
+      expect(console.dirxml).not.toBe(original.dirxml);
+      expect(console.log).not.toBe(original.log);
+      expect(writes.some((chunk) => chunk.includes("ok"))).toBeTruthy();
+      expect(writes.some((chunk) => chunk.includes("hello"))).toBeTruthy();
+    } finally {
+      Object.assign(console, original);
+      process.stderr.write = write;
+    }
+  });
+});
 
 describe(createCopybookMcp, () => {
   let snapshotsDir: string;
