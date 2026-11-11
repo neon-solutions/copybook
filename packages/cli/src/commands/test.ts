@@ -32,7 +32,7 @@ interface TestCommandOptions {
   tier: string;
 }
 
-const parseTiers = (value: string): Tier[] => {
+export const parseTiers = (value: string): Tier[] => {
   const tiers = value.split(",").map((tier) => tier.trim());
   const unknown = tiers.filter((tier) => !TIERS.includes(tier as Tier));
   if (unknown.length > 0) {

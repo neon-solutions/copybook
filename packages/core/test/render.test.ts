@@ -99,6 +99,19 @@ describe(render, () => {
     expect(toText(render(prompt))).toBe("A\nC\n  B\nD\n  E\n   F");
   });
 
+  it("reads uppercase \\X and \\U as plain escapes when dedenting", () => {
+    const prompt = definePrompt({
+      id: "dedent-uppercase-escape",
+      template: (t) => t`
+        \X41 a
+          b \U0041
+          c
+      `,
+    });
+
+    expect(toText(render(prompt))).toBe("X41 a\n  b U0041\n  c");
+  });
+
   it("strips source indentation after a line continuation", () => {
     const prompt = definePrompt({
       id: "dedent-continuation",

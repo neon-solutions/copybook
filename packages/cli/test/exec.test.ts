@@ -5,6 +5,33 @@ import { describe, expect, it } from "vitest";
 
 import { exec, killLiveChildren } from "../src/test/exec";
 
+const isRunning = async (pid: number) => {
+  try {
+    process.kill(pid, 0);
+  } catch {
+    return false;
+  }
+  // A killed process can stay a zombie until its new parent reaps it.
+  const { stdout } = await exec("ps", ["-o", "stat=", "-p", String(pid)], {
+    cwd: os.tmpdir(),
+  });
+  return stdout.trim() !== "" && !stdout.trim().startsWith("Z");
+};
+
+const waitUntilStopped = async (
+  pid: number,
+  deadline = performance.now() + 2000
+): Promise<boolean> => {
+  if (!(await isRunning(pid))) {
+    return true;
+  }
+  if (performance.now() >= deadline) {
+    return false;
+  }
+  await delay(50);
+  return waitUntilStopped(pid, deadline);
+};
+
 describe(exec, () => {
   it("survives a process that exits without reading its input", async () => {
     // More than a pipe buffer holds, so the write fails with EPIPE.
@@ -43,9 +70,7 @@ describe(exec, () => {
     expect(result).toMatchObject({ code: 0, timedOut: false });
     expect(elapsedMs).toBeLessThan(1500);
     expect(backgroundPid).toBeGreaterThan(0);
-    expect(() => process.kill(backgroundPid, 0)).toThrow(
-      /ESRCH|No such process/u
-    );
+    await expect(waitUntilStopped(backgroundPid)).resolves.toBeTruthy();
   });
 
   it("killLiveChildren terminates a tracked detached child group", async () => {

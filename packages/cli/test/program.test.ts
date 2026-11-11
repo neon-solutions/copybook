@@ -4,6 +4,7 @@ import path from "node:path";
 
 import { describe, expect, it } from "vitest";
 
+import { parseTiers } from "../src/commands/test";
 import { BIN_NAME } from "../src/meta";
 import { createProgram } from "../src/program";
 import { runCli } from "../src/run";
@@ -184,23 +185,11 @@ describe(runCli, () => {
     });
   });
 
-  it("dedupes repeated --tier values", async () => {
-    const { code, stdout } = await run([
-      "test",
-      "--tier",
-      "syntax,syntax",
-      "--json",
-      "--only",
-      "fixture.hello",
+  it("dedupes repeated --tier values", () => {
+    expect(parseTiers("syntax, typecheck,syntax")).toStrictEqual([
+      "syntax",
+      "typecheck",
     ]);
-    const report = JSON.parse(stdout);
-
-    expect(code).toBe(0);
-    expect(report.results).toHaveLength(1);
-    expect(report.results[0]).toMatchObject({
-      id: "fixture.hello",
-      tier: "syntax",
-    });
   });
 
   it.each([

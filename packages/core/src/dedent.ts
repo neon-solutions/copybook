@@ -4,7 +4,7 @@ const BLANK_LAST_LINE = /\n[ \t]*$/u;
 
 /** Escapes (with `\u{...}` captured) and real newlines in a raw string. */
 const SOURCE_TOKEN =
-  /\\(?:u\{(?<codePoint>[\da-f]+)\}|u[\da-f]{4}|x[\da-f]{2}|[^])|\n/giu;
+  /\\(?:u\{(?<codePoint>\p{AHex}+)\}|u\p{AHex}{4}|x\p{AHex}{2}|[^])|\n/gu;
 
 type TemplateParts = readonly string[] & {
   readonly raw?: readonly (string | undefined)[];
