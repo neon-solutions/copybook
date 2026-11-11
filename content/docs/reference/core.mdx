@@ -71,3 +71,19 @@ type Node =
 ```
 
 `Rendered` is plain JSON. Render on the server and pass it to client components.
+
+## Blocks
+
+`@copybook/core/blocks` exports `toBlocks(rendered)`, which parses a prompt's Markdown into blocks for a formatted view, such as the components' rendered view. It's a separate entry, so apps that only copy text don't load it.
+
+| Block           | Fields                                                     |
+| --------------- | ---------------------------------------------------------- |
+| `heading`       | `level` (1 to 6), `children`                               |
+| `paragraph`     | `children`                                                 |
+| `list`          | `ordered`, `start?`, `items: { children: Block[] }[]`      |
+| `code`          | `lang?`, `meta?`, `id?`, `children` (text and params)      |
+| `command`       | `id?`, `children`, for an embedded command on its own line |
+| `blockquote`    | `children: Block[]`                                        |
+| `thematicBreak` |                                                            |
+
+Inline `children` are `text`, `param` (with `name`, `secret?`, `placeholder?`), `inlineCode` (`command: true` for embedded commands), `strong`, `emphasis`, and `link` (`href`). Params and commands are never read as Markdown. Links with schemes other than `http`, `https`, and `mailto` stay text, and Markdown that `toBlocks` doesn't know, such as tables, stays paragraph text. Frontmatter kept in a Markdown prompt becomes a `yaml` code block.

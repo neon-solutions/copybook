@@ -31,10 +31,26 @@ export const CreateProjectDone = ({ orgId, projectId }) => (
 
 If the copied text would contain a real secret, rather than its placeholder, the component shows a warning under the prompt.
 
+## Rendered view
+
+By default the prompt shows as written, in monospace. Set `defaultView="rendered"` to format its Markdown instead: numbered and bulleted lists, headings, code blocks, inline code, emphasis, and links. Params stay highlighted, and commands that sit on their own line show as terminal rows. Add `viewToggle` to let readers switch between Preview and Markdown, like the demo above.
+
+```tsx
+<AgentPrompt
+  defaultView="rendered"
+  rendered={render(setUpWithAgent, { orgId, projectId })}
+  viewToggle
+/>
+```
+
+Either way, the copy button copies the same Markdown from `toText(rendered)`, which is what coding agents read best. The formatting comes from `toBlocks` in `@copybook/core/blocks`, which handles the common Markdown blocks and keeps anything else, such as tables, as plain paragraph text.
+
 ## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |
 | `rendered` | `Rendered` | The rendered prompt. |
 | `title` | `string` | The header label. Defaults to `"Agent prompt"`. |
+| `defaultView` | `"source" \| "rendered"` | The view shown first. Defaults to `"source"`. |
+| `viewToggle` | `boolean` | Shows a Preview / Markdown switch in the header. |
 | `onCopy` | `(event: CopyEvent) => void` | Called with `{ id, text }` after a copy. |

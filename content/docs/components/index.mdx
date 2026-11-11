@@ -18,6 +18,7 @@ Each component takes a `Rendered` tree, not a definition. Call `render()` on the
 Every component:
 
 - highlights params, and shows secret placeholders differently from real values;
+- copies Markdown, and can show prompts formatted with `defaultView="rendered"` and a `viewToggle`;
 - sets `data-copybook-id` (and `data-copybook-variant`) on its root, so you can find definitions on a live page;
 - calls `onCopy({ id, variant, text })` after a copy, for analytics;
 - depends only on shadcn's `button`, `tabs`, and `utils`, plus `@copybook/core`.

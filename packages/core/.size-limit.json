@@ -9,5 +9,10 @@
     "limit": "3.5 kB",
     "name": "render a prompt",
     "path": "dist/index.js"
+  },
+  {
+    "name": "blocks",
+    "limit": "4 kB",
+    "path": "dist/blocks.js"
   }
 ]

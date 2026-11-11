@@ -3,7 +3,8 @@ import type { Rendered, Segment, TextFormat } from "@copybook/core";
 
 import { cn } from "@/lib/utils";
 
-const segmentClassName = (segment: Segment) => {
+/** Highlight classes for a segment, shared by every Copybook view. */
+export const segmentClassName = (segment: Segment) => {
   if (segment.type === "fence") {
     return "text-muted-foreground";
   }
