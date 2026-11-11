@@ -38,6 +38,31 @@
       ]
     },
     {
+      "name": "rendered-markdown",
+      "type": "registry:component",
+      "title": "Rendered Markdown",
+      "description": "Renders a Copybook prompt's Markdown as formatted content, with params highlighted.",
+      "dependencies": ["@copybook/core"],
+      "registryDependencies": ["utils"],
+      "files": [
+        {
+          "path": "components/copybook/rendered-markdown.tsx",
+          "target": "components/copybook/rendered-markdown.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "components/copybook/rendered-text.tsx",
+          "target": "components/copybook/rendered-text.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "components/copybook/icons.tsx",
+          "target": "components/copybook/icons.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
       "name": "agent-prompt",
       "type": "registry:component",
       "title": "Agent Prompt",
@@ -53,6 +78,16 @@
         {
           "path": "components/copybook/rendered-text.tsx",
           "target": "components/copybook/rendered-text.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "components/copybook/rendered-markdown.tsx",
+          "target": "components/copybook/rendered-markdown.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "components/copybook/view-toggle.tsx",
+          "target": "components/copybook/view-toggle.tsx",
           "type": "registry:component"
         },
         {
@@ -91,6 +126,16 @@
           "type": "registry:component"
         },
         {
+          "path": "components/copybook/rendered-markdown.tsx",
+          "target": "components/copybook/rendered-markdown.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "components/copybook/view-toggle.tsx",
+          "target": "components/copybook/view-toggle.tsx",
+          "type": "registry:component"
+        },
+        {
           "path": "components/copybook/copy-button.tsx",
           "target": "components/copybook/copy-button.tsx",
           "type": "registry:component"
@@ -123,6 +168,16 @@
         {
           "path": "components/copybook/rendered-text.tsx",
           "target": "components/copybook/rendered-text.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "components/copybook/rendered-markdown.tsx",
+          "target": "components/copybook/rendered-markdown.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "components/copybook/view-toggle.tsx",
+          "target": "components/copybook/view-toggle.tsx",
           "type": "registry:component"
         },
         {

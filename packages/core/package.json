@@ -41,6 +41,10 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
+    "./blocks": {
+      "types": "./dist/blocks.d.ts",
+      "default": "./dist/blocks.js"
+    },
     "./package.json": "./package.json"
   },
   "publishConfig": {

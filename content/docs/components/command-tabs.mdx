@@ -45,10 +45,14 @@ export const GetStarted = () => (
 );
 ```
 
+Prompt tabs can format their Markdown, like [Agent Prompt's rendered view](/docs/components/agent-prompt#rendered-view). Set `defaultView="rendered"`, and add `viewToggle` for a Preview / Markdown switch. The copy button still copies the Markdown.
+
 ## Props
 
 | Prop | Type | Description |
 | --- | --- | --- |
 | `tabs` | `{ id, label, rendered, kind? }[]` | One tab each, in order. `kind: "prompt"` wraps long lines and adds an agent icon. |
 | `defaultTab` | `string` | The tab that starts selected. |
+| `defaultView` | `"source" \| "rendered"` | The view prompt tabs show first. Defaults to `"source"`. |
+| `viewToggle` | `boolean` | Shows a Preview / Markdown switch on prompt tabs. |
 | `onCopy` | `(event: CopyEvent) => void` | Called with `{ id, text }` after a copy. |

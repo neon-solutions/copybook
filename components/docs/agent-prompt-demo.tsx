@@ -22,7 +22,11 @@ export const AgentPromptDemo = () => {
           value={projectId}
         />
       </div>
-      <AgentPrompt rendered={render(setUpWithAgent, { orgId, projectId })} />
+      <AgentPrompt
+        defaultView="rendered"
+        rendered={render(setUpWithAgent, { orgId, projectId })}
+        viewToggle
+      />
     </div>
   );
 };

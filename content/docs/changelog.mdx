@@ -6,6 +6,14 @@ metaDescription: "What changed in each release of @copybook/core and @copybook/c
 
 ## Unreleased
 
+**New in `@copybook/core`:**
+
+- `toBlocks(rendered)`, from the new `@copybook/core/blocks` entry, parses a prompt's Markdown into blocks (headings, lists, code, commands, blockquotes, and inline code, emphasis, and links) for a formatted view. Params and embedded commands keep their names and ids. Apps that only import `@copybook/core` don't load the parser.
+
+**New in the components:**
+
+- Agent Prompt and Command Tabs take `defaultView="rendered"` to show a prompt's Markdown formatted, and `viewToggle` for a Preview / Markdown switch. The copy button still copies the Markdown. A new `rendered-markdown` registry item draws the blocks, and Studio's prompt preview has the switch. Installing these needs a `@copybook/core` release with `@copybook/core/blocks`.
+
 **Fixes in `@copybook/cli`:**
 
 - Git refs passed to `--base` and to MCP `base` / `changedSince` that start with `-`, such as `--output=/tmp/x`, are rejected. Before, git treated them as options and could empty or overwrite a file the user can write.
