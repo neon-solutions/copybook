@@ -51,6 +51,39 @@ describe("define", () => {
     ).toThrow('Snippet "dupe" has two variants for "framework=ts".');
   });
 
+  it.each([["constructor"], ["toString"]])(
+    "rejects an inherited-looking when key like %s as unknown",
+    (key) => {
+      expect(() =>
+        defineSnippet({
+          dimensions: { framework: [{ label: "TypeScript", value: "ts" }] },
+          id: "proto",
+          variants: [
+            {
+              code: "",
+              when: {
+                framework: "ts",
+                [key]: "x",
+              } as never,
+            },
+          ],
+        })
+      ).toThrow(`Snippet "proto" has a variant with unknown ${key} "x".`);
+    }
+  );
+
+  it("rejects a __proto__ when key from JSON as unknown", () => {
+    const when = JSON.parse('{"framework":"ts","__proto__":"x"}') as never;
+
+    expect(() =>
+      defineSnippet({
+        dimensions: { framework: [{ label: "TypeScript", value: "ts" }] },
+        id: "proto",
+        variants: [{ code: "", when }],
+      })
+    ).toThrow('Snippet "proto" has a variant with unknown __proto__ "x".');
+  });
+
   it("builds variant keys in dimension order and skips unset ones", () => {
     const dimensions = { framework: [], setup: [] };
 

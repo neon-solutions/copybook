@@ -4,6 +4,7 @@ import path from "node:path";
 
 import { describe, expect, it } from "vitest";
 
+import { parseTiers } from "../src/commands/test";
 import { BIN_NAME } from "../src/meta";
 import { createProgram } from "../src/program";
 import { runCli } from "../src/run";
@@ -165,5 +166,52 @@ describe(runCli, () => {
 
     expect(code).toBe(1);
     expect(stderr).toContain("Has no snapshot.");
+  });
+
+  it("rejects a non-integer --concurrency with INVALID_OPTION", async () => {
+    const { code, stdout } = await run([
+      "test",
+      "--concurrency",
+      "abc",
+      "--json",
+      "--only",
+      "fixture.hello",
+    ]);
+
+    expect(code).toBe(2);
+    expect(JSON.parse(stdout)).toMatchObject({
+      error: { code: "INVALID_OPTION" },
+      ok: false,
+    });
+  });
+
+  it("dedupes repeated --tier values", () => {
+    expect(parseTiers("syntax, typecheck,syntax")).toStrictEqual([
+      "syntax",
+      "typecheck",
+    ]);
+  });
+
+  it.each([
+    ["--trials", "nope"],
+    ["--trials", ""],
+    ["--trials", "  "],
+    ["--budget-usd", "nope"],
+    ["--budget-usd", ""],
+    ["--budget-usd", "  "],
+  ])("rejects %s %j with INVALID_OPTION", async (flag, value) => {
+    const { code, stdout } = await run([
+      "eval",
+      flag,
+      value,
+      "--json",
+      "--unsafe-local",
+    ]);
+
+    expect(code).toBe(2);
+    expect(JSON.parse(stdout)).toMatchObject({
+      error: { code: "INVALID_OPTION" },
+      ok: false,
+    });
   });
 });

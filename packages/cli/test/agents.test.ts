@@ -28,6 +28,24 @@ describe(upsertBlock, () => {
     expect(appended).toBe(`# Rules\n\nUse tabs.\n\n${block}\n`);
     expect(replaced).toBe(appended);
   });
+
+  it("keeps user content when only a start marker is present", () => {
+    const withStrayStart = [
+      "# Rules",
+      "",
+      "<!-- copybook:start -->",
+      "",
+      "Keep this section.",
+      "",
+    ].join("\n");
+    const first = upsertBlock(withStrayStart, block);
+    const second = upsertBlock(first, block);
+
+    expect(first).toContain("Keep this section.");
+    expect(first).toContain(block);
+    expect(second).toContain("Keep this section.");
+    expect(second).toBe(first);
+  });
 });
 
 describe(renderAgentsBlock, () => {
@@ -65,6 +83,25 @@ describe(mergeMcpConfig, () => {
       mergeMcpConfig('// comment\n{ "servers": {} }', "servers", entry)
     ).toBeUndefined();
     expect(mergeMcpConfig("[]", "servers", entry)).toBeUndefined();
+  });
+
+  it("leaves an existing customized copybook entry alone", () => {
+    const text = `${JSON.stringify(
+      {
+        mcpServers: {
+          copybook: {
+            args: ["exec", "copybook", "mcp", "--config", "other.ts"],
+            command: "pnpm",
+            env: { COPYBOOK_ENV: "1" },
+          },
+          other: { command: "x" },
+        },
+      },
+      null,
+      2
+    )}\n`;
+
+    expect(mergeMcpConfig(text, "mcpServers", entry)).toBe(text);
   });
 });
 

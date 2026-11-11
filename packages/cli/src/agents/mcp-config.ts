@@ -1,5 +1,3 @@
-import { isDeepStrictEqual } from "node:util";
-
 import type { PackageManager } from "../package-manager";
 
 export interface McpServerEntry {
@@ -46,8 +44,9 @@ const formatJson = (value: unknown) =>
 /**
  * Adds the `copybook` server to an MCP config's `key` (`mcpServers`, or
  * `servers` for VS Code), keeping every other server. Returns the file as
- * it is when the server is already there, however it's formatted, and
- * undefined when the file isn't strict JSON, so it can be left alone.
+ * it is when a `copybook` entry is already there — including a customized
+ * one — however it's formatted, and undefined when the file isn't strict
+ * JSON, so it can be left alone.
  */
 export const mergeMcpConfig = (
   text: string | undefined,
@@ -70,7 +69,7 @@ export const mergeMcpConfig = (
   if (servers !== undefined && !isRecord(servers)) {
     return undefined;
   }
-  if (text !== undefined && isDeepStrictEqual(servers?.copybook, entry)) {
+  if (text !== undefined && servers?.copybook !== undefined) {
     return text;
   }
   return formatJson({ ...config, [key]: { ...servers, copybook: entry } });

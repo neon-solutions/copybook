@@ -217,6 +217,19 @@ describe("Markdown edge cases", () => {
     expect(crlf && toText(renderExample(crlf.definition))).toBe("Body.\r\n");
   });
 
+  it("strips a leading UTF-8 BOM before frontmatter", async () => {
+    const loaded = await onlyDefinition(STRIP_CONFIG, {
+      "p/a.md":
+        "\uFEFF---\ntitle: Bom title\naliases: [site.a.old]\n---\nBody.\n",
+    });
+
+    expect(loaded?.definition).toMatchObject({
+      aliases: ["site.a.old"],
+      title: "Bom title",
+    });
+    expect(loaded && toText(renderExample(loaded.definition))).toBe("Body.\n");
+  });
+
   it("finds the title outside nested fences and in CRLF files", async () => {
     const nested = await onlyDefinition(KEEP_CONFIG, {
       "p/a.md": "````md\n```\n# Code line\n````\n\n# Real title\n",

@@ -35,43 +35,48 @@ export const npmSandbox = (
   }
 
   const install = (async () => {
-    const dir = path.join(
-      root,
-      "node_modules",
-      ".cache",
-      "copybook",
-      "sandboxes",
-      hash
-    );
-    const marker = path.join(dir, ".installed");
-    if (existsSync(marker)) {
-      return dir;
-    }
-    await mkdir(dir, { recursive: true });
-    const dependencies = Object.fromEntries(sorted.map(parseDependency));
-    await writeFile(
-      path.join(dir, "package.json"),
-      JSON.stringify({ dependencies, private: true, type: "module" }, null, 2)
-    );
-    const result = await exec(
-      "npm",
-      [
-        "install",
-        "--no-audit",
-        "--no-fund",
-        "--ignore-scripts",
-        "--no-package-lock",
-        "--loglevel=error",
-      ],
-      { cwd: dir, timeoutMs: INSTALL_TIMEOUT_MS }
-    );
-    if (result.code !== 0) {
-      throw new Error(
-        `npm install ${sorted.join(" ")} failed:\n${result.output.trim()}`
+    try {
+      const dir = path.join(
+        root,
+        "node_modules",
+        ".cache",
+        "copybook",
+        "sandboxes",
+        hash
       );
+      const marker = path.join(dir, ".installed");
+      if (existsSync(marker)) {
+        return dir;
+      }
+      await mkdir(dir, { recursive: true });
+      const dependencies = Object.fromEntries(sorted.map(parseDependency));
+      await writeFile(
+        path.join(dir, "package.json"),
+        JSON.stringify({ dependencies, private: true, type: "module" }, null, 2)
+      );
+      const result = await exec(
+        "npm",
+        [
+          "install",
+          "--no-audit",
+          "--no-fund",
+          "--ignore-scripts",
+          "--no-package-lock",
+          "--loglevel=error",
+        ],
+        { cwd: dir, timeoutMs: INSTALL_TIMEOUT_MS }
+      );
+      if (result.code !== 0) {
+        throw new Error(
+          `npm install ${sorted.join(" ")} failed:\n${result.output.trim()}`
+        );
+      }
+      await writeFile(marker, sorted.join("\n"));
+      return dir;
+    } catch (error) {
+      installs.delete(hash);
+      throw error;
     }
-    await writeFile(marker, sorted.join("\n"));
-    return dir;
   })();
 
   installs.set(hash, install);

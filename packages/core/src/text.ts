@@ -22,7 +22,47 @@ const LEADING_WHITESPACE = /^[ \t]*/u;
 const currentLine = (output: string) =>
   output.slice(output.lastIndexOf("\n") + 1);
 
+/** Longest run of backticks in `text`, for sizing Markdown fences. */
+const longestBacktickRun = (text: string): number => {
+  let longest = 0;
+  let run = 0;
+  for (const char of text) {
+    if (char === "`") {
+      run += 1;
+      longest = Math.max(longest, run);
+    } else {
+      run = 0;
+    }
+  }
+  return longest;
+};
+
+const fenceFor = (content: string) =>
+  "`".repeat(Math.max(3, longestBacktickRun(content) + 1));
+
+/**
+ * Flattened text of a subtree, used only to size fences. Nested code blocks
+ * count with the fences they'll get, so an outer fence outgrows them.
+ */
+const flatText = (nodes: readonly Node[]): string => {
+  let text = "";
+  for (const node of nodes) {
+    if (node.type === "text" || node.type === "param") {
+      text += node.value;
+    } else if (node.type === "code") {
+      const inner = flatText(node.children);
+      const fence = fenceFor(inner);
+      text += `${fence}${inner}${fence}`;
+    } else {
+      text += flatText(node.children);
+    }
+  }
+  return text;
+};
+
 interface WalkState {
+  /** The last fence pushed was a closing one that still needs its newline. */
+  closedFence: boolean;
   format: TextFormat;
   output: string;
   segments: Segment[];
@@ -50,16 +90,64 @@ const push = (state: WalkState, segment: Segment, indent: string) => {
   if (text === "") {
     return;
   }
+  // Text that continues a closing fence's line moves to its own line.
+  const last = state.segments.at(-1);
+  if (state.closedFence && last && !text.startsWith("\n")) {
+    last.text += "\n";
+    state.output += "\n";
+  }
+  state.closedFence = false;
   state.segments.push({ ...segment, text });
   state.output += text;
 };
 
-const walk = (
+type Walk = (
   state: WalkState,
   nodes: readonly Node[],
   indent: string,
   context: Pick<Segment, "id" | "in">
+) => void;
+
+const walkCode = (
+  state: WalkState,
+  node: Extract<Node, { type: "code" }>,
+  context: Pick<Segment, "id" | "in">,
+  recurse: Walk
 ) => {
+  const line = currentLine(state.output);
+  const lineIndent = LEADING_WHITESPACE.exec(line)?.[0] ?? "";
+  const inner = { id: node.id ?? context.id, in: "code" as const };
+  const lang = node.lang ? { lang: node.lang } : {};
+
+  if (state.format === "plain") {
+    recurse(state, node.children, lineIndent, inner);
+    return;
+  }
+  // Fences must start on their own line.
+  if (line.trim() !== "") {
+    push(state, { ...context, text: `\n${lineIndent}`, type: "text" }, "");
+  }
+  const fence = fenceFor(flatText(node.children));
+  push(
+    state,
+    {
+      ...inner,
+      ...lang,
+      text: `${fence}${node.lang ?? ""}${node.meta ? ` ${node.meta}` : ""}\n`,
+      type: "fence",
+    },
+    lineIndent
+  );
+  recurse(state, node.children, lineIndent, inner);
+  push(
+    state,
+    { ...inner, ...lang, text: `\n${fence}`, type: "fence" },
+    lineIndent
+  );
+  state.closedFence = true;
+};
+
+const walk: Walk = (state, nodes, indent, context) => {
   for (const node of nodes) {
     switch (node.type) {
       case "text": {
@@ -91,39 +179,7 @@ const walk = (
         break;
       }
       case "code": {
-        const line = currentLine(state.output);
-        const lineIndent = LEADING_WHITESPACE.exec(line)?.[0] ?? "";
-        const inner = { id: node.id ?? context.id, in: "code" as const };
-        const lang = node.lang ? { lang: node.lang } : {};
-
-        if (state.format === "plain") {
-          walk(state, node.children, lineIndent, inner);
-          break;
-        }
-        // Fences must start on their own line.
-        if (line.trim() !== "") {
-          push(
-            state,
-            { ...context, text: `\n${lineIndent}`, type: "text" },
-            ""
-          );
-        }
-        push(
-          state,
-          {
-            ...inner,
-            ...lang,
-            text: `\`\`\`${node.lang ?? ""}${node.meta ? ` ${node.meta}` : ""}\n`,
-            type: "fence",
-          },
-          lineIndent
-        );
-        walk(state, node.children, lineIndent, inner);
-        push(
-          state,
-          { ...inner, ...lang, text: "\n```", type: "fence" },
-          lineIndent
-        );
+        walkCode(state, node, context, walk);
         break;
       }
       default: {
@@ -143,6 +199,7 @@ export const toSegments = (
   options: { format?: TextFormat } = {}
 ): Segment[] => {
   const state: WalkState = {
+    closedFence: false,
     format: options.format ?? "markdown",
     output: "",
     segments: [],

@@ -7,9 +7,11 @@ import os from "node:os";
 import path from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
 
+import { defineCommand, p } from "@copybook/core";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { loadProject } from "../src/load";
+import type { Project } from "../src/load";
 import { startStudio } from "../src/studio/server";
 
 const fixture = path.join(import.meta.dirname, "fixtures/basic");
@@ -182,6 +184,119 @@ describe("studio server", () => {
     const response = await fetch(`${studio.url}/definitions/anything`);
 
     await expect(response.text()).resolves.toContain("studio");
+  });
+
+  it("rejects malformed percent-encoding with 400", async () => {
+    const response = await fetch(`${studio.url}/api/definitions/%E0%A4%A`);
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toMatchObject({
+      error: { code: "BAD_REQUEST" },
+    });
+  });
+});
+
+const withExtraDefinitions = async (
+  extras: ReturnType<typeof defineCommand>[]
+): Promise<Project> => {
+  const project = await loadProject(fixture);
+  return {
+    ...project,
+    definitions: [
+      ...project.definitions,
+      ...extras.map((definition) => ({
+        definition,
+        exportName: definition.id,
+        file: "extra.ts",
+      })),
+    ],
+  };
+};
+
+describe("studio edge cases", () => {
+  it("survives a definition that JSON.stringify cannot serialize", async () => {
+    const staticDir = await mkdtemp(path.join(os.tmpdir(), "copybook-bigint-"));
+    await writeFile(
+      path.join(staticDir, "index.html"),
+      "<!doctype html><p>studio</p>"
+    );
+    const schema = {
+      "~standard": {
+        types: { input: 0n as bigint, output: 0n as bigint },
+        vendor: "test",
+        version: 1 as const,
+      },
+    };
+    const studio = await startStudio({
+      cwd: fixture,
+      host: "127.0.0.1",
+      load: () =>
+        withExtraDefinitions([
+          defineCommand({
+            id: "fixture.bigint",
+            params: { n: p.schema(schema).example(10n) },
+            template: (t, { n }) => t`echo ${String(n)}`,
+          }),
+        ]),
+      port: 0,
+      staticDir,
+      watch: false,
+    });
+    try {
+      const bad = await fetch(`${studio.url}/api/definitions/fixture.bigint`);
+      const ok = await fetch(`${studio.url}/api/status`);
+
+      expect(bad.status).toBe(500);
+      await expect(bad.json()).resolves.toMatchObject({
+        error: { code: "INTERNAL" },
+      });
+      expect(ok.status).toBe(200);
+      await expect(ok.json()).resolves.toMatchObject({ schemaVersion: 1 });
+    } finally {
+      studio.close();
+    }
+  });
+
+  it("serves JSON for an exact id that ends in .md", async () => {
+    const staticDir = await mkdtemp(path.join(os.tmpdir(), "copybook-md-id-"));
+    await writeFile(
+      path.join(staticDir, "index.html"),
+      "<!doctype html><p>studio</p>"
+    );
+    const studio = await startStudio({
+      cwd: fixture,
+      host: "127.0.0.1",
+      load: () =>
+        withExtraDefinitions([
+          defineCommand({
+            id: "fx.notes",
+            template: () => "notes",
+          }),
+          defineCommand({
+            id: "fx.notes.md",
+            template: () => "notes.md body",
+          }),
+        ]),
+      port: 0,
+      staticDir,
+      watch: false,
+    });
+    try {
+      const response = await fetch(`${studio.url}/api/definitions/fx.notes.md`);
+      const body = (await response.json()) as {
+        definition: { id: string };
+        outputs: { text: string }[];
+      };
+
+      expect(response.status).toBe(200);
+      expect(response.headers.get("content-type")).toContain(
+        "application/json"
+      );
+      expect(body.definition.id).toBe("fx.notes.md");
+      expect(body.outputs[0]?.text).toBe("notes.md body");
+    } finally {
+      studio.close();
+    }
   });
 });
 

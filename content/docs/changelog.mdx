@@ -4,6 +4,36 @@ description: What changed in each release.
 metaDescription: "What changed in each release of @copybook/core and @copybook/cli: new commands and flags, fixes, and the breaking changes a 0.x minor release can bring."
 ---
 
+## Unreleased
+
+**Fixes in `@copybook/cli`:**
+
+- Git refs passed to `--base` and to MCP `base` / `changedSince` that start with `-`, such as `--output=/tmp/x`, are rejected. Before, git treated them as options and could empty or overwrite a file the user can write.
+- Missing git repositories and unknown `--base` refs fail with a clear `USAGE` or `INVALID_OPTION` error instead of `INTERNAL` and a raw git message.
+- `check --base` and `report` still report a removed snapshot id when git records the change as a rename of similar content. Before, only the new path appeared, so the old id was never warned about.
+- `copybook test --tier run` kills the whole process group when a case times out, so grandchildren such as `sleep` no longer keep the run hanging after the timeout.
+- `--concurrency`, `--trials`, and `--budget-usd` reject non-numeric values with `INVALID_OPTION`. Before, bad concurrency wrote `[null]` results and crashed, bad trials looked like a budget skip, and bad budgets never capped spend.
+- Duplicate names in `--tier`, such as `syntax,syntax`, run once.
+- Corrupt lines in an eval history JSONL file are skipped instead of aborting the run.
+- Per-case `copybook-run-*` and `copybook-eval-*` temp directories are removed after each case or trial, and a failed shared `npm` install can be retried in the same process.
+- Studio's JSON responses stringify before writing headers, so a definition whose example cannot be serialized returns 500 JSON and leaves the server up. Before, the process exited.
+- Studio serves JSON for a definition whose id ends in `.md` when that id exists, instead of stripping `.md` and returning Markdown for the shorter id. Malformed percent-encoding in a definition URL returns 400.
+- `copybook init` no longer deletes user content in `AGENTS.md` when only a `<!-- copybook:start -->` marker is present. A customized existing `copybook` entry in `.mcp.json` is left alone.
+- `copybook mcp` redirects `console.dir` and `console.dirxml` to stderr, so a content file that logs that way no longer breaks the JSON-RPC stream.
+- With `frontmatter: "strip"`, a leading UTF-8 BOM no longer prevents frontmatter from being read and removed.
+
+**Fixes in `@copybook/core`:**
+
+- Fenced code in rendered Markdown uses a fence longer than any backtick run in the code, so nested fences stay closed correctly.
+- Text that follows a code block on the same template line is placed after the closing fence, on a new line.
+- Dedent reads indentation from the raw template strings, so a cooked `\n` escape inside a line no longer cancels dedenting, and an invalid escape such as `\users` no longer throws `Cannot read properties of undefined`.
+- Variant `when` keys are stored in dimension declaration order, so `listVariants` labels match the canonical key order.
+
+**Fixes in the site:**
+
+- `/docs/<page>.md` URLs advertised in `llms.txt` return Markdown when the client sends `Accept: text/markdown` or `text/plain`. Before, the proxy rewrote them to a path that 404'd.
+- Pass-through negotiated responses set `Vary: Accept`. The Markdown docs route requires a final `content.md` segment and sends `charset=utf-8`.
+
 ## 0.3.1
 
 Released November 6, 2026.

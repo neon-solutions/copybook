@@ -90,11 +90,13 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
 const splitFrontmatter = (text: string, strict: boolean): Frontmatter => {
-  const match = FRONTMATTER.exec(text);
+  // Editors and some tools write a UTF-8 BOM; strip it so `^---` still matches.
+  const source = text.startsWith("\uFEFF") ? text.slice(1) : text;
+  const match = FRONTMATTER.exec(source);
   if (!match) {
-    return { body: text };
+    return { body: source };
   }
-  const body = text.slice(match[0].length);
+  const body = source.slice(match[0].length);
   try {
     const data: unknown = parse(match.groups?.yaml ?? "");
     return isRecord(data) ? { body, data } : { body };

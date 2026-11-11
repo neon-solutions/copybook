@@ -6,6 +6,9 @@ import type { EvalHistoryEntry, EvalResult } from "./types";
 
 const historyFile = (dir: string, id: string) => path.join(dir, `${id}.jsonl`);
 
+const isEntry = (value: unknown): value is EvalHistoryEntry =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
 export const readHistory = async (
   dir: string,
   id: string
@@ -15,10 +18,21 @@ export const readHistory = async (
     return [];
   }
   const content = await readFile(file, "utf-8");
-  return content
-    .split("\n")
-    .filter((line) => line.trim() !== "")
-    .map((line) => JSON.parse(line) as EvalHistoryEntry);
+  const entries: EvalHistoryEntry[] = [];
+  for (const line of content.split("\n")) {
+    if (line.trim() === "") {
+      continue;
+    }
+    try {
+      const entry: unknown = JSON.parse(line);
+      if (isEntry(entry)) {
+        entries.push(entry);
+      }
+    } catch {
+      // Best-effort history: skip corrupt lines instead of aborting the run.
+    }
+  }
+  return entries;
 };
 
 /** The latest finished result for this exact prompt text and agent version. */

@@ -148,8 +148,9 @@ Docs: https://copybook.dev/docs/guides/studio
 `;
 
 const sendJson = (response: ServerResponse, status: number, body: unknown) => {
+  const json = JSON.stringify(body);
   response.writeHead(status, { "Content-Type": CONTENT_TYPES[".json"] });
-  response.end(JSON.stringify(body));
+  response.end(json);
 };
 
 const sendMarkdown = (response: ServerResponse, text: string) => {
@@ -427,9 +428,25 @@ const definitionRoute = async (
   workspace: Workspace,
   pathname: string
 ): Promise<{ json: unknown; status?: number } | { markdown: string }> => {
-  const id = decodeURIComponent(pathname.slice(DEFINITIONS_PREFIX.length));
+  let id: string;
+  try {
+    id = decodeURIComponent(pathname.slice(DEFINITIONS_PREFIX.length));
+  } catch (error) {
+    if (error instanceof URIError) {
+      throw new HttpError(
+        400,
+        "BAD_REQUEST",
+        "Invalid percent-encoding in the definition id."
+      );
+    }
+    throw error;
+  }
+  const analysis = await workspace.current();
+  if (findDefinition(analysis, id)) {
+    return { json: await workspace.definition(id) };
+  }
   const base = id.endsWith(".md") ? id.slice(0, -".md".length) : undefined;
-  if (base && findDefinition(await workspace.current(), base)) {
+  if (base && findDefinition(analysis, base)) {
     return { markdown: definitionMarkdown(await workspace.definition(base)) };
   }
   return { json: await workspace.definition(id) };
@@ -524,6 +541,10 @@ export const startStudio = async (options: StudioOptions) => {
     try {
       await handle(request, response);
     } catch (error) {
+      if (response.headersSent) {
+        response.destroy();
+        return;
+      }
       const { body, status } = toErrorResponse(error);
       sendJson(response, status, body);
     }

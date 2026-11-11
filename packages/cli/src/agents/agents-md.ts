@@ -18,16 +18,30 @@ ${END}`;
 
 /**
  * Replaces the marked block in `text`, or appends it. Everything outside
- * the markers stays as it is.
+ * the markers stays as it is. Only a start/end pair with no other start
+ * between them is replaced, so a stray start marker can't swallow user
+ * content when a later block is appended.
  */
 export const upsertBlock = (text: string | undefined, block: string) => {
   if (text === undefined || text.trim() === "") {
     return `${block}\n`;
   }
-  const start = text.indexOf(START);
-  const end = text.indexOf(END, start);
-  if (start !== -1 && end !== -1) {
-    return `${text.slice(0, start)}${block}${text.slice(end + END.length)}`;
+  let from = 0;
+  while (from < text.length) {
+    const start = text.indexOf(START, from);
+    if (start === -1) {
+      break;
+    }
+    const afterStart = start + START.length;
+    const end = text.indexOf(END, afterStart);
+    if (end === -1) {
+      break;
+    }
+    const nextStart = text.indexOf(START, afterStart);
+    if (nextStart === -1 || nextStart > end) {
+      return `${text.slice(0, start)}${block}${text.slice(end + END.length)}`;
+    }
+    from = nextStart;
   }
   return `${text.trimEnd()}\n\n${block}\n`;
 };
