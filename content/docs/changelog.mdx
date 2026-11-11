@@ -4,7 +4,9 @@ description: What changed in each release.
 metaDescription: "What changed in each release of @copybook/core and @copybook/cli: new commands and flags, fixes, and the breaking changes a 0.x minor release can bring."
 ---
 
-## Unreleased
+## 0.4.0
+
+Released November 11, 2026.
 
 **New in `@copybook/core`:**
 
@@ -36,11 +38,6 @@ metaDescription: "What changed in each release of @copybook/core and @copybook/c
 - Text that follows a code block on the same template line is placed after the closing fence, on a new line.
 - Dedent reads indentation from the raw template strings, so a cooked `\n` escape inside a line no longer cancels dedenting, and an invalid escape such as `\users` no longer throws `Cannot read properties of undefined`.
 - Variant `when` keys are stored in dimension declaration order, so `listVariants` labels match the canonical key order.
-
-**Fixes in the site:**
-
-- `/docs/<page>.md` URLs advertised in `llms.txt` return Markdown when the client sends `Accept: text/markdown` or `text/plain`. Before, the proxy rewrote them to a path that 404'd.
-- Pass-through negotiated responses set `Vary: Accept`. The Markdown docs route requires a final `content.md` segment and sends `charset=utf-8`.
 
 ## 0.3.1
 
