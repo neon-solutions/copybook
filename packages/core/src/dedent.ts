@@ -2,8 +2,49 @@ const LEADING_WHITESPACE = /^[ \t]*/u;
 const BLANK_FIRST_LINE = /^[ \t]*\n/u;
 const BLANK_LAST_LINE = /\n[ \t]*$/u;
 
+/** Escapes (with `\u{...}` captured) and real newlines in a raw string. */
+const SOURCE_TOKEN =
+  /\\(?:u\{(?<codePoint>[\da-f]+)\}|u[\da-f]{4}|x[\da-f]{2}|[^])|\n/giu;
+
 type TemplateParts = readonly string[] & {
   readonly raw?: readonly (string | undefined)[];
+};
+
+/**
+ * Strips up to `strip` source whitespace characters after each real line
+ * break in `raw`, and applies that to `cooked`. Whitespace that comes from
+ * an escape, like `\x20`, isn't source indentation, so it stays. `literal`
+ * says `raw` has no escapes to decode.
+ */
+const stripSourceIndent = (
+  cooked: string,
+  raw: string,
+  strip: number,
+  literal: boolean
+): string => {
+  let result = "";
+  let copied = 0;
+  // Cooked offset minus raw offset, as escapes shorten or lengthen the text.
+  let shift = 0;
+  for (const match of raw.matchAll(SOURCE_TOKEN)) {
+    const { 0: token, groups } = match;
+    const codePoint = Number.parseInt(groups?.codePoint ?? "0", 16);
+    let length = codePoint > 0xff_ff ? 2 : 1;
+    if (token === "\\\n") {
+      length = 0;
+    }
+    if (!literal) {
+      shift += length - token.length;
+    }
+    if (!token.endsWith("\n")) {
+      continue;
+    }
+    const end = match.index + token.length;
+    const indent = LEADING_WHITESPACE.exec(raw.slice(end))?.[0].length ?? 0;
+    result += cooked.slice(copied, end + shift);
+    copied = end + shift + Math.min(strip, indent);
+  }
+  return result + cooked.slice(copied);
 };
 
 /**
@@ -44,16 +85,8 @@ export const dedentStrings = (strings: TemplateParts): string[] => {
         "Invalid escape sequence in template. Escape each backslash as \\\\."
       );
     }
-    return string
-      .split("\n")
-      .map((line, lineIndex) => {
-        if (lineIndex === 0) {
-          return line;
-        }
-        const leading = LEADING_WHITESPACE.exec(line)?.[0].length ?? 0;
-        return line.slice(Math.min(strip, leading));
-      })
-      .join("\n");
+    const literal = cooked === undefined || !strings.raw;
+    return stripSourceIndent(string, raw[index] ?? string, strip, literal);
   });
 
   const [first] = result;

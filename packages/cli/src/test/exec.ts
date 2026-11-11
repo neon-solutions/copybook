@@ -1,4 +1,5 @@
 import { spawn } from "node:child_process";
+import type { ChildProcess } from "node:child_process";
 
 export interface ExecResult {
   code: number | null;
@@ -29,6 +30,14 @@ const INHERITED_ENV = [
   "USER",
 ] as const;
 
+interface LiveChild {
+  child: ChildProcess;
+  pid: number;
+}
+
+const liveChildren = new Set<LiveChild>();
+let cleanupHandlersInstalled = false;
+
 export const baseEnv = (): Record<string, string> => {
   const env: Record<string, string> = {};
   for (const name of INHERITED_ENV) {
@@ -55,10 +64,7 @@ const clip = (text: string) =>
     : text;
 
 /** Kill the child and any grandchildren started in its process group. */
-const killProcessTree = (
-  child: ReturnType<typeof spawn>,
-  pid: number | undefined
-) => {
+const killProcessTree = (child: ChildProcess, pid: number | undefined) => {
   if (pid === undefined) {
     child.kill("SIGKILL");
     return;
@@ -74,6 +80,45 @@ const killProcessTree = (
   } catch {
     child.kill("SIGKILL");
   }
+};
+
+/** Kill every tracked detached child process group. Exported for tests. */
+export const killLiveChildren = () => {
+  for (const entry of liveChildren) {
+    killProcessTree(entry.child, entry.pid);
+  }
+  liveChildren.clear();
+};
+
+const onInterruptSignal = (signal: NodeJS.Signals) => {
+  killLiveChildren();
+  // Another handler, such as the MCP server's graceful stop, owns shutdown.
+  if (process.listenerCount(signal) > 1) {
+    return;
+  }
+  process.removeListener(signal, onInterruptSignal);
+  process.kill(process.pid, signal);
+};
+
+const installCleanupHandlers = () => {
+  if (cleanupHandlersInstalled || process.platform === "win32") {
+    return;
+  }
+  cleanupHandlersInstalled = true;
+  process.on("exit", killLiveChildren);
+  process.on("SIGINT", onInterruptSignal);
+  process.on("SIGTERM", onInterruptSignal);
+};
+
+const trackLiveChild = (child: ChildProcess) => {
+  const { pid } = child;
+  if (pid === undefined || process.platform === "win32") {
+    return;
+  }
+  installCleanupHandlers();
+  const entry: LiveChild = { child, pid };
+  liveChildren.add(entry);
+  return entry;
 };
 
 /** Runs a command without a shell, with a timeout and a clean environment. */
@@ -93,21 +138,24 @@ export const exec = (
     env: { ...baseEnv(), ...env },
     stdio: ["pipe", "pipe", "pipe"],
   });
+  const live = trackLiveChild(child);
   let stdout = "";
   let stderr = "";
   let output = "";
   let timedOut = false;
   let settled = false;
-  const timer = setTimeout(() => {
-    timedOut = true;
-    killProcessTree(child, child.pid);
-  }, timeoutMs);
+  let exited = false;
+  let exitCode: number | null = null;
+  const timerRef: { id?: ReturnType<typeof setTimeout> } = {};
   const settle = (code: number | null) => {
     if (settled) {
       return;
     }
     settled = true;
-    clearTimeout(timer);
+    if (live !== undefined) {
+      liveChildren.delete(live);
+    }
+    clearTimeout(timerRef.id);
     // Grandchildren can keep inherited stdio open after the leader dies;
     // destroy so we never wait forever for a close that will not come.
     child.stdout.destroy();
@@ -122,6 +170,15 @@ export const exec = (
       timedOut,
     });
   };
+  timerRef.id = setTimeout(() => {
+    timedOut = true;
+    killProcessTree(child, child.pid);
+    // If the leader already exited and we are waiting on close, settle now so
+    // a grandchild holding stdio cannot hang the case past the deadline.
+    if (exited) {
+      settle(exitCode);
+    }
+  }, timeoutMs);
 
   child.stdout.on("data", (chunk: Buffer) => {
     stdout += chunk.toString();
@@ -132,7 +189,10 @@ export const exec = (
     output += chunk.toString();
   });
   child.on("error", (error) => {
-    clearTimeout(timer);
+    clearTimeout(timerRef.id);
+    if (live !== undefined) {
+      liveChildren.delete(live);
+    }
     if (settled) {
       return;
     }
@@ -146,10 +206,22 @@ export const exec = (
       timedOut,
     });
   });
-  // Resolve on exit (not close): close waits for all stdio fds to close, which
-  // never happens if a grandchild still holds the pipes open after a timeout.
   child.on("exit", (code) => {
-    settle(code);
+    exited = true;
+    exitCode = code;
+    if (timedOut) {
+      // Timeout already killed the tree; settle without waiting on close so a
+      // stuck grandchild pipe cannot hang us.
+      settle(code);
+      return;
+    }
+    // Leader exited normally — reap any background grandchildren so they do
+    // not outlive the case into sandbox deletion, and so close can fire.
+    killProcessTree(child, child.pid);
+  });
+  // On a normal exit, wait for close (stdio drained). Timeout stays armed.
+  child.on("close", () => {
+    settle(exitCode);
   });
   // A process that exits before reading its input closes the pipe, so the
   // write fails with EPIPE. Its exit code already says what happened.

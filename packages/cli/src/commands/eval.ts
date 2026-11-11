@@ -53,7 +53,7 @@ Run them in CI (CI=true), or pass --unsafe-local if you accept that.`;
 /** Positive integer ≥ 1 for options such as `--trials`. */
 const parsePositiveInt = (flag: string, value: string): number => {
   const n = Number(value);
-  if (!(Number.isFinite(n) && Number.isInteger(n) && n >= 1)) {
+  if (!(value.trim() !== "" && Number.isInteger(n) && n >= 1)) {
     throw new CopybookError(
       "INVALID_OPTION",
       `${flag} must be an integer >= 1, got "${value}".`
@@ -65,7 +65,7 @@ const parsePositiveInt = (flag: string, value: string): number => {
 /** Non-negative finite number for `--budget-usd`. */
 const parseBudgetUsd = (value: string): number => {
   const n = Number(value);
-  if (!(Number.isFinite(n) && n >= 0)) {
+  if (!(value.trim() !== "" && Number.isFinite(n) && n >= 0)) {
     throw new CopybookError(
       "INVALID_OPTION",
       `--budget-usd must be a number >= 0, got "${value}".`
@@ -124,17 +124,17 @@ export const registerEval = (program: Command) =>
         : undefined;
       const report = await runEvals(targets, {
         ...(options.agent ? { agents: options.agent } : {}),
-        ...(options.budgetUsd
-          ? { budgetUsd: parseBudgetUsd(options.budgetUsd) }
-          : {}),
+        ...(options.budgetUsd === undefined
+          ? {}
+          : { budgetUsd: parseBudgetUsd(options.budgetUsd) }),
         ...(options.force ? { force: true } : {}),
         ...(historyDir ? { historyDir } : {}),
         ...(options.json
           ? {}
           : { onResult: (result) => write(formatEvalResult(result)) }),
-        ...(options.trials
-          ? { trials: parsePositiveInt("--trials", options.trials) }
-          : {}),
+        ...(options.trials === undefined
+          ? {}
+          : { trials: parsePositiveInt("--trials", options.trials) }),
         root: project.config.root,
         runId,
       });

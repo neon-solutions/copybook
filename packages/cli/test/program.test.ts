@@ -203,27 +203,18 @@ describe(runCli, () => {
     });
   });
 
-  it("rejects a non-integer --trials with INVALID_OPTION", async () => {
+  it.each([
+    ["--trials", "nope"],
+    ["--trials", ""],
+    ["--trials", "  "],
+    ["--budget-usd", "nope"],
+    ["--budget-usd", ""],
+    ["--budget-usd", "  "],
+  ])("rejects %s %j with INVALID_OPTION", async (flag, value) => {
     const { code, stdout } = await run([
       "eval",
-      "--trials",
-      "nope",
-      "--json",
-      "--unsafe-local",
-    ]);
-
-    expect(code).toBe(2);
-    expect(JSON.parse(stdout)).toMatchObject({
-      error: { code: "INVALID_OPTION" },
-      ok: false,
-    });
-  });
-
-  it("rejects a non-number --budget-usd with INVALID_OPTION", async () => {
-    const { code, stdout } = await run([
-      "eval",
-      "--budget-usd",
-      "nope",
+      flag,
+      value,
       "--json",
       "--unsafe-local",
     ]);

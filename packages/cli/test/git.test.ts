@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
@@ -102,6 +102,15 @@ describe("git base ref safety", () => {
   });
 });
 
+describe(showFile, () => {
+  it("returns undefined for a missing path that mentions bad revision", async () => {
+    const root = await committedProject();
+    const missing = path.join(root, "bad revision", "unknown revision.md");
+
+    await expect(showFile(root, "main", missing)).resolves.toBeUndefined();
+  });
+});
+
 describe("removedSince snapshot renames", () => {
   it("reports the old snapshot id when git records a rename", async () => {
     const root = await committedProject("site.old");
@@ -118,6 +127,33 @@ describe("removedSince snapshot renames", () => {
     const project = await loadProject(root);
     await expect(removedSince(project, "main")).resolves.toStrictEqual([
       { id: "site.old" },
+    ]);
+  });
+});
+
+describe("removedSince orphans", () => {
+  it("ignores snapshots already orphaned at the base", async () => {
+    const root = await committedProject("site.old");
+    const before = await loadProject(root);
+    await writeFile(snapshotPath(before.config, "site.stale"), "stale\n");
+    git(root, "add", "-A");
+    git(root, "commit", "-q", "-m", "orphan");
+    const project = await loadProject(root);
+
+    await expect(removedSince(project, "main")).resolves.toStrictEqual([]);
+  });
+
+  it("reports an orphaned snapshot that was deleted since the base", async () => {
+    const root = await committedProject("site.old");
+    const before = await loadProject(root);
+    await writeFile(snapshotPath(before.config, "site.stale"), "stale\n");
+    git(root, "add", "-A");
+    git(root, "commit", "-q", "-m", "orphan");
+    await rm(snapshotPath(before.config, "site.stale"));
+    const project = await loadProject(root);
+
+    await expect(removedSince(project, "HEAD")).resolves.toStrictEqual([
+      { id: "site.stale" },
     ]);
   });
 });

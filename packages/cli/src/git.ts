@@ -7,14 +7,14 @@ import { CopybookError } from "./errors";
 
 const run = promisify(execFile);
 
-const gitMessage = (error: unknown) => {
-  if (!(error instanceof Error)) {
-    return String(error);
-  }
-  const stderr =
-    "stderr" in error && typeof error.stderr === "string" ? error.stderr : "";
-  return `${stderr}\n${error.message}`;
-};
+const NOT_A_REPOSITORY = /^fatal: not a git repository/mu;
+
+const gitStderr = (error: unknown) =>
+  error instanceof Error &&
+  "stderr" in error &&
+  typeof error.stderr === "string"
+    ? error.stderr
+    : "";
 
 const git = async (cwd: string, args: string[]) => {
   try {
@@ -27,20 +27,10 @@ const git = async (cwd: string, args: string[]) => {
     if (error instanceof CopybookError) {
       throw error;
     }
-    const detail = gitMessage(error);
-    if (/not a git repository/iu.test(detail)) {
+    if (NOT_A_REPOSITORY.test(gitStderr(error))) {
       throw new CopybookError(
         "USAGE",
         "Not a git repository. Run this from inside a git working tree."
-      );
-    }
-    if (/bad revision|unknown revision|invalid object name/iu.test(detail)) {
-      throw new CopybookError(
-        "INVALID_OPTION",
-        detail
-          .split("\n")
-          .map((line) => line.replace(/^fatal:\s*/iu, "").trim())
-          .find((line) => line !== "") ?? "Unknown git revision."
       );
     }
     throw error;

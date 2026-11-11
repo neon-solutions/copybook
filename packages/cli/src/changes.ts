@@ -1,4 +1,4 @@
-import { readFile, realpath } from "node:fs/promises";
+import { access, readFile, realpath } from "node:fs/promises";
 import path from "node:path";
 
 import { loadConfigSource } from "./config";
@@ -13,7 +13,7 @@ import {
   markdownUrl,
   matchesSource,
 } from "./markdown";
-import { compareSnapshots, SNAPSHOT_EXTENSION } from "./snapshot";
+import { compareSnapshots, SNAPSHOT_EXTENSION, snapshotPath } from "./snapshot";
 import type { Snapshot } from "./snapshot";
 
 /**
@@ -134,10 +134,17 @@ export const changedIds = async (
   return [...ids].filter((id) => defined.has(id)).toSorted();
 };
 
+const exists = (file: string) =>
+  access(file).then(
+    () => true,
+    () => false
+  );
+
 /**
  * Definitions removed since `base` whose id isn't kept as an alias: snapshot
- * files that existed at `base` (so renames still count as removals), and
- * Markdown prompts that existed at `base`.
+ * files that existed at `base` and are gone now (so renames still count as
+ * removals, and snapshots already orphaned at `base` don't), and Markdown
+ * prompts that existed at `base`.
  */
 export const removedSince = async (
   project: Project,
@@ -154,9 +161,14 @@ export const removedSince = async (
     project.definitions.flatMap(({ definition }) => definition.aliases ?? [])
   );
   const removed = new Map<string, RemovedDefinition>();
-  for (const file of snapshotFiles) {
-    if (file.endsWith(SNAPSHOT_EXTENSION)) {
-      const id = path.basename(file, SNAPSHOT_EXTENSION);
+  const ids = snapshotFiles
+    .filter((file) => file.endsWith(SNAPSHOT_EXTENSION))
+    .map((file) => path.basename(file, SNAPSHOT_EXTENSION));
+  const kept = await Promise.all(
+    ids.map((id) => exists(snapshotPath(project.config, id)))
+  );
+  for (const [index, id] of ids.entries()) {
+    if (!kept[index]) {
       removed.set(id, { id });
     }
   }

@@ -86,6 +86,32 @@ describe(render, () => {
     expect(toText(render(prompt))).toBe("printf 'a\nb'\nnext");
   });
 
+  it("keeps whitespace made by escapes after a newline", () => {
+    const prompt = definePrompt({
+      id: "dedent-escaped-space",
+      template: (t) => t`
+        A\nC\n\u0020\u0020B
+        D\n\u0020\u0020E
+          \u0020F
+      `,
+    });
+
+    expect(toText(render(prompt))).toBe("A\nC\n  B\nD\n  E\n   F");
+  });
+
+  it("strips source indentation after a line continuation", () => {
+    const prompt = definePrompt({
+      id: "dedent-continuation",
+      template: (t) => t`
+        a \
+        b
+        c
+      `,
+    });
+
+    expect(toText(render(prompt))).toBe("a b\nc");
+  });
+
   it("falls back to raw when a cooked escape is invalid", () => {
     const prompt = definePrompt({
       id: "invalid-escape",
@@ -170,6 +196,47 @@ describe("embedding", () => {
     });
 
     expect(toText(render(prompt))).toBe("```ts\nx\n```\n tail");
+  });
+
+  it("puts a newline between a closing fence and a command after it", () => {
+    const prompt = definePrompt({
+      id: "fence-then-cmd",
+      template: (t) => t`${t.code("ts", "x")}${t.cmd("npm test")}`,
+    });
+
+    expect(toText(render(prompt))).toBe("```ts\nx\n```\nnpm test");
+  });
+
+  it("puts a newline after a fence that ends an included prompt", () => {
+    const inner = definePrompt({
+      id: "ends-with-code",
+      template: (t) => t`${t.code("ts", "x")}`,
+    });
+    const prompt = definePrompt({
+      id: "include-then-text",
+      template: (t) => t`${t.include(inner)} tail`,
+    });
+
+    expect(toText(render(prompt))).toBe("```ts\nx\n```\n tail");
+    expect(toText(render(prompt), { format: "plain" })).toBe("x tail");
+  });
+
+  it("keeps a closing fence at the end of a prompt bare", () => {
+    const prompt = definePrompt({
+      id: "fence-end",
+      template: (t) => t`${t.code("ts", "x")}`,
+    });
+
+    expect(toText(render(prompt))).toBe("```ts\nx\n```");
+  });
+
+  it("sizes an outer fence past the fences of nested code", () => {
+    const prompt = definePrompt({
+      id: "code-in-code",
+      template: (t) => t`${t.code("md", t`${t.code("ts", "x")}`)}`,
+    });
+
+    expect(toText(render(prompt))).toBe("````md\n```ts\nx\n```\n````");
   });
 
   it("includes other prompts", () => {

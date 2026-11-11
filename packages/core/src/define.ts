@@ -148,32 +148,44 @@ const toTemplate = <S extends ParamsShape>(body: Body<S>): TemplateFn<S> => {
   return () => code ?? "";
 };
 
-/** Puts `when` keys in dimension declaration order for stable labels. */
+/**
+ * Puts `when` keys in dimension declaration order for stable labels. Every
+ * own key must be a declared dimension with a known option.
+ */
 const normalizeWhen = (
+  id: string,
   dimensions: Dimensions,
   when: Readonly<Record<string, string>>
 ): Record<string, string> => {
-  const ordered: Record<string, string> = {};
-  for (const key of Object.keys(dimensions)) {
-    const value = when[key];
-    if (value !== undefined) {
-      ordered[key] = value;
+  for (const [dimension, option] of Object.entries(when)) {
+    const options = Object.hasOwn(dimensions, dimension)
+      ? dimensions[dimension]
+      : undefined;
+    const isUnset = options !== undefined && option === undefined;
+    if (
+      !(isUnset || options?.some((candidate) => candidate.value === option))
+    ) {
+      throw new Error(
+        `Snippet "${id}" has a variant with unknown ${dimension} "${option}".`
+      );
     }
   }
-  for (const [key, value] of Object.entries(when)) {
-    if (!(key in ordered)) {
-      ordered[key] = value;
-    }
-  }
-  return ordered;
+  return Object.fromEntries(
+    Object.keys(dimensions).flatMap((dimension) =>
+      Object.hasOwn(when, dimension) && when[dimension] !== undefined
+        ? [[dimension, when[dimension]]]
+        : []
+    )
+  );
 };
 
 const toVariant = <S extends ParamsShape>(
+  id: string,
   dimensions: Dimensions,
   input: VariantInput<S, Dimensions> | SingleSnippetInput<S>,
   when: Readonly<Record<string, string>>
 ): SnippetVariant<S> => {
-  const orderedWhen = normalizeWhen(dimensions, when);
+  const orderedWhen = normalizeWhen(id, dimensions, when);
   const variant: SnippetVariant<S> = {
     key: variantKey(dimensions, orderedWhen),
     template: toTemplate(input),
@@ -185,21 +197,9 @@ const toVariant = <S extends ParamsShape>(
   return Object.freeze(variant);
 };
 
-const assertVariants = (
-  id: string,
-  dimensions: Dimensions,
-  variants: readonly SnippetVariant[]
-) => {
+const assertVariants = (id: string, variants: readonly SnippetVariant[]) => {
   const seen = new Set<string>();
   for (const variant of variants) {
-    for (const [dimension, option] of Object.entries(variant.when)) {
-      const options = dimensions[dimension] ?? [];
-      if (!options.some((candidate) => candidate.value === option)) {
-        throw new Error(
-          `Snippet "${id}" has a variant with unknown ${dimension} "${option}".`
-        );
-      }
-    }
     if (seen.has(variant.key)) {
       throw new Error(`Snippet "${id}" has two variants for "${variant.key}".`);
     }
@@ -227,17 +227,18 @@ export function defineSnippet<S extends ParamsShape>(
   const variants = input.variants
     ? input.variants.map((variant) =>
         toVariant(
+          input.id,
           dimensions,
           variant,
           variant.when as Readonly<Record<string, string>>
         )
       )
-    : [toVariant<S>(dimensions, input as SingleSnippetInput<S>, {})];
+    : [toVariant<S>(input.id, dimensions, input as SingleSnippetInput<S>, {})];
 
   if (variants.length === 0) {
     throw new Error(`Snippet "${input.id}" needs at least one variant.`);
   }
-  assertVariants(input.id, dimensions, variants);
+  assertVariants(input.id, variants);
 
   const {
     code: _code,
