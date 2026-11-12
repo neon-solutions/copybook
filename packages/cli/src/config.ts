@@ -175,6 +175,9 @@ const listFieldProblem = (config: Config): string | undefined => {
       return `\`${name}\` must be an array of strings.`;
     }
   }
+  if (config.markdown !== undefined && !Array.isArray(config.markdown)) {
+    return "`markdown` must be an array of { dir, idPrefix } sources.";
+  }
   for (const [index, source] of (config.markdown ?? []).entries()) {
     for (const name of ["include", "exclude"] as const) {
       if (source[name] !== undefined && !isStringArray(source[name])) {

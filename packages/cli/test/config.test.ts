@@ -43,6 +43,11 @@ describe(loadConfigSource, () => {
       "`content` must be an array of strings.",
     ],
     [
+      "markdown as an object",
+      `{ content: ["a.ts"], markdown: {} }`,
+      "`markdown` must be an array of { dir, idPrefix } sources.",
+    ],
+    [
       "a Markdown include string",
       `{ markdown: [{ dir: "p", idPrefix: "p", include: "*.md" }] }`,
       "`markdown[0].include` must be an array of strings.",

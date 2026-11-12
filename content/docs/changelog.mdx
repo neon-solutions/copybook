@@ -8,7 +8,7 @@ metaDescription: "What changed in each release of @copybook/core and @copybook/c
 
 **Fixes in `@copybook/cli`:**
 
-- A config whose `content`, `exclude`, `stubs`, `verify`, `usage`, or Markdown `include` / `exclude` has the wrong shape, such as `usage: ["app/**/*.tsx"]` instead of `usage: { include: [...] }`, fails with `CONFIG_INVALID` and names the field. Before, `check`, `list`, `show`, and `usages` failed with `INTERNAL` and `Cannot read properties of undefined (reading 'patterns')`.
+- A config whose `content`, `exclude`, `stubs`, `verify`, `usage`, `markdown`, or Markdown `include` / `exclude` has the wrong shape, such as `usage: ["app/**/*.tsx"]` instead of `usage: { include: [...] }`, fails with `CONFIG_INVALID` and names the field. Before, `check`, `list`, `show`, and `usages` failed with `INTERNAL` and `Cannot read properties of undefined (reading 'patterns')`.
 
 **Fixes in the components:**
 
