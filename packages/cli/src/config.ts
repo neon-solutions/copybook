@@ -149,6 +149,45 @@ const isConfig = (value: unknown): value is Config => {
   return (hasContent || hasMarkdown) && markdownValid;
 };
 
+const isStringArray = (value: unknown): value is string[] =>
+  Array.isArray(value) && value.every((item) => typeof item === "string");
+
+const isUsage = (value: unknown): value is Config["usage"] => {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return false;
+  }
+  const { exclude, include } = value as NonNullable<Config["usage"]>;
+  return (
+    isStringArray(include) && (exclude === undefined || isStringArray(exclude))
+  );
+};
+
+/** What's wrong with the first malformed list field, if any. */
+const listFieldProblem = (config: Config): string | undefined => {
+  const lists = {
+    content: config.content,
+    exclude: config.exclude,
+    stubs: config.stubs,
+    verify: config.verify,
+  };
+  for (const [name, value] of Object.entries(lists)) {
+    if (value !== undefined && !isStringArray(value)) {
+      return `\`${name}\` must be an array of strings.`;
+    }
+  }
+  for (const [index, source] of (config.markdown ?? []).entries()) {
+    for (const name of ["include", "exclude"] as const) {
+      if (source[name] !== undefined && !isStringArray(source[name])) {
+        return `\`markdown[${index}].${name}\` must be an array of strings.`;
+      }
+    }
+  }
+  if (config.usage !== undefined && !isUsage(config.usage)) {
+    return "`usage` must be an object like { include: [...globs], exclude?: [...globs] }.";
+  }
+  return undefined;
+};
+
 const resolveConfig = (
   config: unknown,
   file: string,
@@ -159,6 +198,10 @@ const resolveConfig = (
       "CONFIG_INVALID",
       `${label} must default-export defineConfig({ content: [...] }) or defineConfig({ markdown: [{ dir, idPrefix }] }).`
     );
+  }
+  const problem = listFieldProblem(config);
+  if (problem) {
+    throw new CopybookError("CONFIG_INVALID", `${label}: ${problem}`);
   }
   const root = path.dirname(file);
   return {
