@@ -63,6 +63,25 @@
       ]
     },
     {
+      "name": "open-in-agent",
+      "type": "registry:component",
+      "title": "Open in Agent",
+      "description": "Links that open a prompt in Cursor, Claude Code, or Codex, pre-filled and unsent.",
+      "registryDependencies": ["button"],
+      "files": [
+        {
+          "path": "components/copybook/open-in-agent.tsx",
+          "target": "components/copybook/open-in-agent.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "components/copybook/agent-links.ts",
+          "target": "components/copybook/agent-links.ts",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
       "name": "agent-prompt",
       "type": "registry:component",
       "title": "Agent Prompt",
@@ -88,6 +107,16 @@
         {
           "path": "components/copybook/view-toggle.tsx",
           "target": "components/copybook/view-toggle.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "components/copybook/open-in-agent.tsx",
+          "target": "components/copybook/open-in-agent.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "components/copybook/agent-links.ts",
+          "target": "components/copybook/agent-links.ts",
           "type": "registry:component"
         },
         {
@@ -136,6 +165,16 @@
           "type": "registry:component"
         },
         {
+          "path": "components/copybook/open-in-agent.tsx",
+          "target": "components/copybook/open-in-agent.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "components/copybook/agent-links.ts",
+          "target": "components/copybook/agent-links.ts",
+          "type": "registry:component"
+        },
+        {
           "path": "components/copybook/copy-button.tsx",
           "target": "components/copybook/copy-button.tsx",
           "type": "registry:component"
@@ -178,6 +217,16 @@
         {
           "path": "components/copybook/view-toggle.tsx",
           "target": "components/copybook/view-toggle.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "components/copybook/open-in-agent.tsx",
+          "target": "components/copybook/open-in-agent.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "components/copybook/agent-links.ts",
+          "target": "components/copybook/agent-links.ts",
           "type": "registry:component"
         },
         {

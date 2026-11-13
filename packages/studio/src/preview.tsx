@@ -84,7 +84,13 @@ export const Preview = ({
     return <p className="text-muted-foreground text-sm">Rendering…</p>;
   }
   if (entry.kind === "prompt") {
-    return <AgentPrompt rendered={first.rendered} viewToggle />;
+    return (
+      <AgentPrompt
+        openIn={["cursor", "claude-code", "codex"]}
+        rendered={first.rendered}
+        viewToggle
+      />
+    );
   }
   return <CodeVariants items={items} />;
 };

@@ -45,6 +45,26 @@ By default the prompt shows as written, in monospace. Set `defaultView="rendered
 
 Either way, the copy button copies the same Markdown from `toText(rendered)`, which is what coding agents read best. The formatting comes from `toBlocks` in `@copybook/core/blocks`, which handles the common Markdown blocks and keeps anything else, such as tables, as plain paragraph text.
 
+## Open in an agent
+
+Set `openIn` to add links under the prompt that open it in a coding agent, pre-filled. No agent sends a prompt from a link on its own: the reader reviews it and presses Enter.
+
+```tsx
+<AgentPrompt
+  onOpen={({ agent, id }) => track("prompt_opened", { agent, id })}
+  openIn={["cursor", "claude-code", "codex"]}
+  rendered={render(setUpWithAgent, { orgId, projectId })}
+/>
+```
+
+| Agent | Link | Limit |
+| --- | --- | --- |
+| `cursor` | `https://cursor.com/link/prompt?text=…`, which offers to open the app | 8,000 characters of URL |
+| `claude-code` | `claude-cli://open?q=…` | 5,000 characters of prompt |
+| `codex` | `codex://new?prompt=…` | 8,000 characters of URL |
+
+The Claude Code and Codex links do nothing on a computer without that app, so offer them where your readers are likely to have it. A prompt over an agent's limit gets a note to copy it instead of a link. A prompt with a real secret gets no links at all, because URLs end up in browser history and logs.
+
 ## Props
 
 | Prop | Type | Description |
@@ -54,3 +74,5 @@ Either way, the copy button copies the same Markdown from `toText(rendered)`, wh
 | `defaultView` | `"source" \| "rendered"` | The view shown first. Defaults to `"source"`. |
 | `viewToggle` | `boolean` | Shows a Preview / Markdown switch in the header. |
 | `onCopy` | `(event: CopyEvent) => void` | Called with `{ id, text }` after a copy. |
+| `openIn` | `AgentId[]` | Agents to link to: `"cursor"`, `"claude-code"`, and `"codex"`. |
+| `onOpen` | `(event: OpenEvent) => void` | Called with `{ agent, id, text }` when a link is followed. |

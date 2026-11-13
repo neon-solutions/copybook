@@ -6,6 +6,10 @@ metaDescription: "What changed in each release of @copybook/core and @copybook/c
 
 ## Unreleased
 
+**New in the components:**
+
+- Agent Prompt takes `openIn={["cursor", "claude-code", "codex"]}` to add links that open the prompt in those agents, pre-filled and unsent, and `onOpen` for analytics. A prompt too long for an agent's link gets a note to copy it instead, and a prompt with a real secret gets no links. The new `open-in-agent` registry item draws the links.
+
 **Fixes in `@copybook/cli`:**
 
 - A config whose `content`, `exclude`, `stubs`, `verify`, `usage`, `markdown`, or Markdown `include` / `exclude` has the wrong shape, such as `usage: ["app/**/*.tsx"]` instead of `usage: { include: [...] }`, fails with `CONFIG_INVALID` and names the field. Before, `check`, `list`, `show`, and `usages` failed with `INTERNAL` and `Cannot read properties of undefined (reading 'patterns')`.
