@@ -24,6 +24,7 @@ export const AgentPromptDemo = () => {
       </div>
       <AgentPrompt
         defaultView="rendered"
+        openIn={["cursor", "claude-code", "codex"]}
         rendered={render(setUpWithAgent, { orgId, projectId })}
         viewToggle
       />

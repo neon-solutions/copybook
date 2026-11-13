@@ -4,6 +4,12 @@ description: What changed in each release.
 metaDescription: "What changed in each release of @copybook/core and @copybook/cli: new commands and flags, fixes, and the breaking changes a 0.x minor release can bring."
 ---
 
+## Unreleased
+
+**New in the components:**
+
+- Agent Prompt takes `openIn={["cursor", "claude-code", "codex"]}` to add links that open the prompt in those agents, pre-filled and unsent, and `onOpen` for analytics. A prompt too long for an agent's link gets a note to copy it instead, and a prompt with a real secret gets no links. The new `open-in-agent` registry item draws the links.
+
 ## 0.4.0
 
 Released November 11, 2026.
