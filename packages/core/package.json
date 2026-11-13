@@ -1,6 +1,6 @@
 {
   "name": "@copybook/core",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Define code snippets, commands, and agent prompts as typed, testable content.",
   "keywords": [
     "agent",
