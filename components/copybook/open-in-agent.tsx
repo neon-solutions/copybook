@@ -1,3 +1,5 @@
+"use client";
+
 import { AGENTS } from "@/components/copybook/agent-links";
 import type { AgentId } from "@/components/copybook/agent-links";
 import { Button } from "@/components/ui/button";
