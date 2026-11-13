@@ -12,9 +12,16 @@ metaDescription: "What changed in each release of @copybook/core and @copybook/c
 
 **New in the components:**
 
-- Agent Prompt takes `editParams={["orgId"]}` to show an input for each named param. What readers type updates the prompt, the copied text, and the `openIn` links, and secrets get a password input. The new `param-inputs` registry item draws the inputs, and installing it needs a `@copybook/core` release with `@copybook/core/fill`.
-
 - Agent Prompt takes `openIn={["cursor", "claude-code", "codex"]}` to add links that open the prompt in those agents, pre-filled and unsent, and `onOpen` for analytics. A prompt too long for an agent's link gets a note to copy it instead, and a prompt with a real secret gets no links. The new `open-in-agent` registry item draws the links.
+- Agent Prompt takes `editParams={["orgId"]}` to show an input for each named param. What readers type updates the prompt, the copied text, and the `openIn` links, and secrets get a password input. The new `param-inputs` registry item draws the inputs.
+
+**Fixes in `@copybook/cli`:**
+
+- A config whose `content`, `exclude`, `stubs`, `verify`, `usage`, `markdown`, or Markdown `include` / `exclude` has the wrong shape, such as `usage: ["app/**/*.tsx"]` instead of `usage: { include: [...] }`, fails with `CONFIG_INVALID` and names the field. Before, `check`, `list`, `show`, and `usages` failed with `INTERNAL` and `Cannot read properties of undefined (reading 'patterns')`.
+
+**Fixes in the components:**
+
+- The `rendered-markdown` registry item depends on `@copybook/core@^0.4.0`, and `agent-prompt`, `code-variants`, `command-tabs`, and `param-inputs` on `@copybook/core@^0.5.0`, so `shadcn add` installs a version with the `@copybook/core/blocks` and `@copybook/core/fill` entries they import, or fails clearly when it can't.
 
 ## 0.4.0
 
