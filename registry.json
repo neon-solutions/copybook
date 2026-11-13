@@ -42,7 +42,7 @@
       "type": "registry:component",
       "title": "Rendered Markdown",
       "description": "Renders a Copybook prompt's Markdown as formatted content, with params highlighted.",
-      "dependencies": ["@copybook/core"],
+      "dependencies": ["@copybook/core@^0.4.0"],
       "registryDependencies": ["utils"],
       "files": [
         {
@@ -86,7 +86,7 @@
       "type": "registry:component",
       "title": "Agent Prompt",
       "description": "A prompt to paste into a coding agent, with a copy button and a warning when it contains a secret.",
-      "dependencies": ["@copybook/core"],
+      "dependencies": ["@copybook/core@^0.4.0"],
       "registryDependencies": ["button", "utils"],
       "files": [
         {
@@ -136,7 +136,7 @@
       "type": "registry:component",
       "title": "Code Variants",
       "description": "One snippet in several frameworks or setups, as tabs with a copy button.",
-      "dependencies": ["@copybook/core"],
+      "dependencies": ["@copybook/core@^0.4.0"],
       "registryDependencies": ["button", "tabs", "utils"],
       "files": [
         {
@@ -191,7 +191,7 @@
       "type": "registry:component",
       "title": "Command Tabs",
       "description": "Package-manager tabs for a command, with an optional agent prompt tab.",
-      "dependencies": ["@copybook/core"],
+      "dependencies": ["@copybook/core@^0.4.0"],
       "registryDependencies": ["button", "tabs", "utils"],
       "files": [
         {
