@@ -4,6 +4,16 @@ description: What changed in each release.
 metaDescription: "What changed in each release of @copybook/core and @copybook/cli: new commands and flags, fixes, and the breaking changes a 0.x minor release can bring."
 ---
 
+## Unreleased
+
+**Fixes in `@copybook/cli`:**
+
+- A config whose `content`, `exclude`, `stubs`, `verify`, `usage`, `markdown`, or Markdown `include` / `exclude` has the wrong shape, such as `usage: ["app/**/*.tsx"]` instead of `usage: { include: [...] }`, fails with `CONFIG_INVALID` and names the field. Before, `check`, `list`, `show`, and `usages` failed with `INTERNAL` and `Cannot read properties of undefined (reading 'patterns')`.
+
+**Fixes in the components:**
+
+- The `agent-prompt`, `code-variants`, `command-tabs`, and `rendered-markdown` registry items depend on `@copybook/core@^0.4.0`, so `shadcn add` installs a version with `@copybook/core/blocks`, or fails clearly when it can't.
+
 ## 0.4.0
 
 Released November 11, 2026.
