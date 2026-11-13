@@ -7,7 +7,7 @@ metaDescription: A shadcn component that shows a prompt to paste into a coding a
 
 <AgentPromptDemo />
 
-This is the Acme "Create project" prompt from `examples/acme`. Edit the params to see them update.
+This is the Acme "Create project" prompt from `examples/acme`, rendered with its example values. Type an org or project id to see the prompt update.
 
 ## Installation
 
@@ -45,6 +45,43 @@ By default the prompt shows as written, in monospace. Set `defaultView="rendered
 
 Either way, the copy button copies the same Markdown from `toText(rendered)`, which is what coding agents read best. The formatting comes from `toBlocks` in `@copybook/core/blocks`, which handles the common Markdown blocks and keeps anything else, such as tables, as plain paragraph text.
 
+## Fill in params
+
+Where you don't know the reader's values, such as on a signed-out docs page, render the prompt with its examples and let readers type their own. `editParams` adds an input for each param you name:
+
+```tsx
+import { renderExample } from "@copybook/core";
+
+<AgentPrompt
+  editParams={["orgId", "projectId"]}
+  rendered={renderExample(setUpWithAgent)}
+/>;
+```
+
+Each input shows the value the param rendered with as its placeholder. As the reader types, both views, the copied text, and the `openIn` links use their value. It also fills params with the same name in embedded commands and snippets. Secret params get a password input. Once a reader types a real secret, the component warns about it and drops the `openIn` links. What readers type stays in the component's state and isn't stored, though `onCopy` and `onOpen` receive the copied text.
+
+The inputs are plain text, and only params interpolated directly into a template update. Text the template derives from a param, such as `` t`${projectId.toUpperCase()}` ``, keeps the value it was rendered with. The substitution is `fillParams` from `@copybook/core/fill`, if you build your own inputs.
+
+## Open in an agent
+
+Set `openIn` to add links under the prompt that open it in a coding agent, pre-filled. No agent sends a prompt from a link on its own: the reader reviews it and presses Enter.
+
+```tsx
+<AgentPrompt
+  onOpen={({ agent, id }) => track("prompt_opened", { agent, id })}
+  openIn={["cursor", "claude-code", "codex"]}
+  rendered={render(setUpWithAgent, { orgId, projectId })}
+/>
+```
+
+| Agent | Link | Limit |
+| --- | --- | --- |
+| `cursor` | `https://cursor.com/link/prompt?text=…`, which offers to open the app | 8,000 characters of URL |
+| `claude-code` | `claude-cli://open?q=…` | 5,000 characters of prompt |
+| `codex` | `codex://new?prompt=…` | 8,000 characters of URL |
+
+The Claude Code and Codex links do nothing on a computer without that app, so offer them where your readers are likely to have it. A prompt over an agent's limit gets a note to copy it instead of a link. A prompt with a real secret gets no links at all, because URLs end up in browser history and logs.
+
 ## Props
 
 | Prop | Type | Description |
@@ -53,4 +90,7 @@ Either way, the copy button copies the same Markdown from `toText(rendered)`, wh
 | `title` | `string` | The header label. Defaults to `"Agent prompt"`. |
 | `defaultView` | `"source" \| "rendered"` | The view shown first. Defaults to `"source"`. |
 | `viewToggle` | `boolean` | Shows a Preview / Markdown switch in the header. |
+| `editParams` | `string[]` | Params readers can fill in, with an input each. |
 | `onCopy` | `(event: CopyEvent) => void` | Called with `{ id, text }` after a copy. |
+| `openIn` | `AgentId[]` | Agents to link to: `"cursor"`, `"claude-code"`, and `"codex"`. |
+| `onOpen` | `(event: OpenEvent) => void` | Called with `{ agent, id, text }` when a link is followed. |

@@ -14,5 +14,10 @@
     "name": "blocks",
     "limit": "4 kB",
     "path": "dist/blocks.js"
+  },
+  {
+    "name": "fill",
+    "limit": "1 kB",
+    "path": "dist/fill.js"
   }
 ]
