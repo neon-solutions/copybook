@@ -8,6 +8,7 @@ import { glob } from "tinyglobby";
 
 import { escapeRegExp } from "./bundle";
 import type { Project } from "./load";
+import { mdxEsm } from "./mdx";
 import { moduleUses, NAMESPACE } from "./module-uses";
 import type { ModuleUse } from "./module-uses";
 
@@ -48,6 +49,7 @@ const EXTENSIONS = [
   ".mjs",
   ".cjs",
 ];
+const MDX = ".mdx";
 const BASE_EXPORT = /^[^.[]+/u;
 /** The path goes on past the match, as in `a.mdx` or `a.md.bak`. */
 const CONTINUES = /^(?:[\w/-]|\.\w)/u;
@@ -131,10 +133,14 @@ const idsFor = (
 
 /**
  * Everything a JS or TS file imports: static imports (type-only ones don't
- * count), `require()` calls, and dynamic `import()`s.
+ * count), `require()` calls, and dynamic `import()`s. An MDX file's imports
+ * are those in its ESM blocks.
  */
 const importsOf = (file: string, source: string): ModuleUse[] => {
-  const { module, program } = parseSync(file, source);
+  const { module, program } =
+    path.extname(file) === MDX
+      ? parseSync(file, mdxEsm(source), { lang: "tsx" })
+      : parseSync(file, source);
   const statements = module.staticImports.map((statement) => ({
     names: statement.entries
       .filter((entry) => !entry.isType)
@@ -154,8 +160,8 @@ const importsOf = (file: string, source: string): ModuleUse[] => {
  * Finds which product files import each definition, by parsing the files the
  * config's `usage.include` globs match and resolving their imports with the
  * project's tsconfig paths. Type-only imports don't count, and `require()`
- * and `import()` do. Markdown prompts with a `url` are used by every file
- * that contains their URL, Markdown and MDX included.
+ * and `import()` do, as do imports in MDX. Markdown prompts with a `url` are
+ * used by every file that contains their URL, Markdown and MDX included.
  */
 export const findUsages = async (
   project: Project,
@@ -197,7 +203,8 @@ export const findUsages = async (
     for (const id of urlsIn?.(source) ?? []) {
       record(id, file);
     }
-    if (!EXTENSIONS.includes(path.extname(file))) {
+    const extension = path.extname(file);
+    if (extension !== MDX && !EXTENSIONS.includes(extension)) {
       continue;
     }
     for (const use of importsOf(file, source)) {
