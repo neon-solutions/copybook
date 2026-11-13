@@ -87,3 +87,21 @@ type Node =
 | `thematicBreak` |                                                            |
 
 Inline `children` are `text`, `param` (with `name`, `secret?`, `placeholder?`), `inlineCode` (`command: true` for embedded commands), `strong`, `emphasis`, and `link` (`href`). Params and commands are never read as Markdown. Links with schemes other than `http`, `https`, and `mailto` stay text, and Markdown that `toBlocks` doesn't know, such as tables, stays paragraph text. Frontmatter kept in a Markdown prompt becomes a `yaml` code block.
+
+## Fill
+
+`@copybook/core/fill` lets readers fill in params in the browser, without the definition.
+
+- `listParams(rendered)` returns each param once, in the order they first appear: `{ name, value, secret?, placeholder? }`.
+- `fillParams(rendered, values)` returns a new tree in which every param named in `values` has that value, in embedded definitions too. A filled secret loses `placeholder`, and empty values are ignored.
+
+```ts
+import { renderExample } from "@copybook/core";
+import { fillParams } from "@copybook/core/fill";
+
+const rendered = fillParams(renderExample(setUpWithAgent), {
+  orgId: "org-123",
+});
+```
+
+Only params interpolated directly into a template are param nodes, so text the template derives from a param doesn't change.

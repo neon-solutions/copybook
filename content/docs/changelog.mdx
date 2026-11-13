@@ -6,7 +6,13 @@ metaDescription: "What changed in each release of @copybook/core and @copybook/c
 
 ## Unreleased
 
+**New in `@copybook/core`:**
+
+- `fillParams(rendered, values)` and `listParams(rendered)`, from the new `@copybook/core/fill` entry, replace params in a rendered tree by name, so a browser can fill in values without the definition.
+
 **New in the components:**
+
+- Agent Prompt takes `editParams={["orgId"]}` to show an input for each named param. What readers type updates the prompt, the copied text, and the `openIn` links, and secrets get a password input. The new `param-inputs` registry item draws the inputs, and installing it needs a `@copybook/core` release with `@copybook/core/fill`.
 
 - Agent Prompt takes `openIn={["cursor", "claude-code", "codex"]}` to add links that open the prompt in those agents, pre-filled and unsent, and `onOpen` for analytics. A prompt too long for an agent's link gets a note to copy it instead, and a prompt with a real secret gets no links. The new `open-in-agent` registry item draws the links.
 

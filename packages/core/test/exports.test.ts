@@ -19,6 +19,17 @@ const prompt = definePrompt({ id: "cjs.blocks", markdown: "# Hi agent" });
 process.stdout.write(toBlocks(render(prompt))[0].type);
 `;
 
+const FILL_SCRIPT = `
+const { definePrompt, p, renderExample, toText } = require("@copybook/core");
+const { fillParams } = require("@copybook/core/fill");
+const prompt = definePrompt({
+  id: "cjs.fill",
+  params: { orgId: p.string().example("org-example") },
+  template: (t, { orgId }) => t\`Hi \${orgId}\`,
+});
+process.stdout.write(toText(fillParams(renderExample(prompt), { orgId: "org-real" })));
+`;
+
 describe("package exports", () => {
   it("loads from CommonJS with require()", () => {
     const output = execFileSync(
@@ -38,5 +49,15 @@ describe("package exports", () => {
     );
 
     expect(output).toBe("heading");
+  });
+
+  it("loads the fill subpath", () => {
+    const output = execFileSync(
+      process.execPath,
+      ["--input-type=commonjs", "--eval", FILL_SCRIPT],
+      { cwd: packageDir, encoding: "utf-8" }
+    );
+
+    expect(output).toBe("Hi org-real");
   });
 });
