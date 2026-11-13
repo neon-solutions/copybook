@@ -45,6 +45,10 @@
       "types": "./dist/blocks.d.ts",
       "default": "./dist/blocks.js"
     },
+    "./fill": {
+      "types": "./dist/fill.d.ts",
+      "default": "./dist/fill.js"
+    },
     "./package.json": "./package.json"
   },
   "publishConfig": {

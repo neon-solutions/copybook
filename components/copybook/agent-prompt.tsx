@@ -2,12 +2,14 @@
 
 import { toText } from "@copybook/core";
 import type { Rendered } from "@copybook/core";
+import { fillParams, listParams } from "@copybook/core/fill";
 import { useState } from "react";
 
 import type { AgentId } from "@/components/copybook/agent-links";
 import { CopyButton } from "@/components/copybook/copy-button";
 import { AgentIcon, WarningIcon } from "@/components/copybook/icons";
 import { OpenInAgent } from "@/components/copybook/open-in-agent";
+import { ParamInputs } from "@/components/copybook/param-inputs";
 import { RenderedMarkdown } from "@/components/copybook/rendered-markdown";
 import {
   containsSecret,
@@ -31,6 +33,11 @@ export interface OpenEvent {
 interface AgentPromptProps {
   /** The view shown first. `rendered` formats the prompt's Markdown. */
   defaultView?: PromptView;
+  /**
+   * Params readers can fill in, such as an id on a signed-out page. What
+   * they type stays in the component, and the prompt, copy, and links use it.
+   */
+  editParams?: readonly string[];
   /** Fired after the prompt is copied, for analytics. */
   onCopy?: (event: CopyEvent) => void;
   /** Fired when an `openIn` link is followed, for analytics. */
@@ -47,18 +54,25 @@ interface AgentPromptProps {
 }
 
 const NO_AGENTS: readonly AgentId[] = [];
+const NO_PARAMS: readonly string[] = [];
 
 /** A prompt to paste into a coding agent, with a copy button. */
 export const AgentPrompt = ({
   defaultView = "source",
+  editParams = NO_PARAMS,
   onCopy,
   onOpen,
   openIn = NO_AGENTS,
-  rendered,
+  rendered: given,
   title = "Agent prompt",
   viewToggle = false,
 }: AgentPromptProps) => {
   const [view, setView] = useState(defaultView);
+  const [values, setValues] = useState<Record<string, string>>({});
+  const editable = listParams(given).filter(({ name }) =>
+    editParams.includes(name)
+  );
+  const rendered = fillParams(given, values);
   const text = toText(rendered);
   const hasSecret = containsSecret(rendered);
   const showLinks = openIn.length > 0 && !hasSecret;
@@ -82,6 +96,15 @@ export const AgentPrompt = ({
           />
         </span>
       </figcaption>
+      {editable.length > 0 ? (
+        <ParamInputs
+          onChange={(name, value) =>
+            setValues((current) => ({ ...current, [name]: value }))
+          }
+          params={editable}
+          values={values}
+        />
+      ) : null}
       {view === "rendered" ? (
         <RenderedMarkdown
           className="max-h-80 overflow-y-auto p-3"

@@ -82,12 +82,27 @@
       ]
     },
     {
+      "name": "param-inputs",
+      "type": "registry:component",
+      "title": "Param Inputs",
+      "description": "Inputs for filling in a rendered prompt's params, with secrets masked.",
+      "dependencies": ["@copybook/core@^0.5.0"],
+      "registryDependencies": ["input", "label"],
+      "files": [
+        {
+          "path": "components/copybook/param-inputs.tsx",
+          "target": "components/copybook/param-inputs.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
       "name": "agent-prompt",
       "type": "registry:component",
       "title": "Agent Prompt",
       "description": "A prompt to paste into a coding agent, with a copy button and a warning when it contains a secret.",
-      "dependencies": ["@copybook/core@^0.4.0"],
-      "registryDependencies": ["button", "utils"],
+      "dependencies": ["@copybook/core@^0.5.0"],
+      "registryDependencies": ["button", "input", "label", "utils"],
       "files": [
         {
           "path": "components/copybook/agent-prompt.tsx",
@@ -120,6 +135,11 @@
           "type": "registry:component"
         },
         {
+          "path": "components/copybook/param-inputs.tsx",
+          "target": "components/copybook/param-inputs.tsx",
+          "type": "registry:component"
+        },
+        {
           "path": "components/copybook/copy-button.tsx",
           "target": "components/copybook/copy-button.tsx",
           "type": "registry:component"
@@ -136,8 +156,8 @@
       "type": "registry:component",
       "title": "Code Variants",
       "description": "One snippet in several frameworks or setups, as tabs with a copy button.",
-      "dependencies": ["@copybook/core@^0.4.0"],
-      "registryDependencies": ["button", "tabs", "utils"],
+      "dependencies": ["@copybook/core@^0.5.0"],
+      "registryDependencies": ["button", "input", "label", "tabs", "utils"],
       "files": [
         {
           "path": "components/copybook/code-variants.tsx",
@@ -175,6 +195,11 @@
           "type": "registry:component"
         },
         {
+          "path": "components/copybook/param-inputs.tsx",
+          "target": "components/copybook/param-inputs.tsx",
+          "type": "registry:component"
+        },
+        {
           "path": "components/copybook/copy-button.tsx",
           "target": "components/copybook/copy-button.tsx",
           "type": "registry:component"
@@ -191,8 +216,8 @@
       "type": "registry:component",
       "title": "Command Tabs",
       "description": "Package-manager tabs for a command, with an optional agent prompt tab.",
-      "dependencies": ["@copybook/core@^0.4.0"],
-      "registryDependencies": ["button", "tabs", "utils"],
+      "dependencies": ["@copybook/core@^0.5.0"],
+      "registryDependencies": ["button", "input", "label", "tabs", "utils"],
       "files": [
         {
           "path": "components/copybook/command-tabs.tsx",
@@ -227,6 +252,11 @@
         {
           "path": "components/copybook/agent-links.ts",
           "target": "components/copybook/agent-links.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "components/copybook/param-inputs.tsx",
+          "target": "components/copybook/param-inputs.tsx",
           "type": "registry:component"
         },
         {

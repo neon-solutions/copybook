@@ -3,7 +3,7 @@ import { defineConfig } from "tsup";
 export default defineConfig({
   clean: true,
   dts: true,
-  entry: ["src/index.ts", "src/blocks.ts"],
+  entry: ["src/index.ts", "src/blocks.ts", "src/fill.ts"],
   format: ["esm"],
   platform: "neutral",
   sourcemap: true,
