@@ -95,6 +95,42 @@ describe("usages through require() and import()", () => {
   });
 });
 
+describe("usages in MDX", () => {
+  it("counts imports in ESM blocks, not in code fences", async () => {
+    const root = await tempProject(
+      'export default { content: ["defs/*.mjs"], usage: { include: ["docs/**/*.mdx"] } };',
+      {
+        "defs/main.mjs": [
+          `export const greet = ${definition("site.greet")};`,
+          `export const farewell = ${definition("site.farewell")};`,
+        ].join("\n"),
+        "docs/guide.mdx": [
+          "---",
+          "title: Guide",
+          "---",
+          "",
+          'import { greet } from "../defs/main.mjs";',
+          'import { AgentPrompt } from "./agent-prompt";',
+          "",
+          "# Guide",
+          "",
+          "```ts",
+          'import { farewell } from "../defs/main.mjs";',
+          "```",
+          "",
+          "<AgentPrompt rendered={render(greet)} />",
+        ].join("\n"),
+      }
+    );
+    const report = await findUsages(await loadProject(root));
+
+    expect(report).toStrictEqual({
+      unused: ["site.farewell"],
+      usages: { "site.greet": ["docs/guide.mdx"] },
+    });
+  });
+});
+
 describe("usages of Markdown prompts by URL", () => {
   it("counts whole URLs only, and every prompt that shares one", async () => {
     const root = await tempProject(

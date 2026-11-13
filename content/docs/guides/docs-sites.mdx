@@ -1,0 +1,52 @@
+---
+title: Docs sites
+description: Show the same tested snippets and prompts in your docs as in your product.
+metaTitle: "Docs sites: render definitions in MDX"
+metaDescription: Import Copybook definitions into MDX pages, so your docs and product render the same tested snippets and prompts, and copybook usages lists every page.
+---
+
+Docs often repeat the snippets and prompts the product shows, and the copies drift apart. Import the definitions into your MDX pages instead. Then docs and product render the same definitions, a fix lands in both, and `copybook usages` lists every page that shows one.
+
+## Render a definition in MDX
+
+Any MDX docs site that can import modules works, such as Fumadocs, Nextra, Docusaurus, and Astro Starlight. Import the definition and a component, and render it in the page:
+
+```mdx title="content/docs/connect.mdx"
+import { listVariants, renderExample } from "@copybook/core";
+
+import { CodeVariants } from "@/components/copybook/code-variants";
+import { connect } from "@/content/connect";
+
+# Connect to a branch
+
+<CodeVariants
+  items={listVariants(connect).map((variant) => ({
+    key: variant.key,
+    label: variant.label,
+    rendered: renderExample(connect, { variant: variant.key }),
+  }))}
+/>
+```
+
+Docs readers usually aren't signed in, so `renderExample` fills in each param's `.example()`, and secrets render as their placeholders. Where a page knows real values, call `render` with them instead.
+
+If the page is a server component, as in Fumadocs and Nextra on the App Router, the definition stays on the server and only the rendered tree reaches the browser. Otherwise, the definition is bundled into the page like any import.
+
+## Count docs pages as usages
+
+Add your docs to `usage.include`:
+
+```ts title="copybook.config.ts"
+export default defineConfig({
+  content: ["content/**/*.ts"],
+  usage: { include: ["app/**/*.tsx", "content/docs/**/*.mdx"] },
+});
+```
+
+Copybook reads an MDX file's `import` and `export` blocks, the same way it reads imports in code, and resolves them with your `tsconfig.json` paths. Imports shown in code fences don't count. If a page renders a definition through a component of yours, the component's file is the usage, so include it too.
+
+`copybook usages`, `show`, `report`, and Studio list each page, and `check` stops warning about definitions only your docs show. Add a placement such as `docs/connect` to the definition, so the catalog says where it appears.
+
+## Markdown prompts
+
+A docs page that links to a prompt by URL, such as a "Copy prompt" button that fetches `/prompts/nextjs.md`, doesn't import anything. See [Markdown prompts](/docs/guides/markdown-prompts) for prompts kept as Markdown files, which count as used wherever their URL appears.

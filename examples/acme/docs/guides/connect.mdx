@@ -1,0 +1,15 @@
+import { listVariants, renderExample, toText } from "@copybook/core";
+
+import { connect } from "../../src/connect";
+
+# Connect to a branch
+
+The Connect dialog shows this snippet with your branch's endpoint and credentials filled in.
+
+{listVariants(connect).map((variant) => (
+
+<pre key={variant.key} title={variant.label}>
+  {toText(renderExample(connect, { variant: variant.key }))}
+</pre>
+
+))}
