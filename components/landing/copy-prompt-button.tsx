@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { linkButtonVariants } from "@/components/landing/primitives";
 
 const RESET_AFTER_MS = 2000;
+const IDLE_LABEL = "Copy prompt for your agent";
 
 /** Copies the setup prompt, so people can hand Copybook to their agent. */
 export const CopyPromptButton = ({ prompt }: { prompt: string }) => {
@@ -35,8 +36,14 @@ export const CopyPromptButton = ({ prompt }: { prompt: string }) => {
       ) : (
         <RobotIcon aria-hidden="true" />
       )}
-      <span aria-live="polite">
-        {copied ? "Copied" : "Copy prompt for your agent"}
+      {/* The hidden label holds the button at its idle width while "Copied" shows. */}
+      <span className="grid text-center">
+        <span aria-hidden="true" className="invisible col-start-1 row-start-1">
+          {IDLE_LABEL}
+        </span>
+        <span aria-live="polite" className="col-start-1 row-start-1">
+          {copied ? "Copied" : IDLE_LABEL}
+        </span>
       </span>
     </button>
   );
