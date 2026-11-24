@@ -1,13 +1,21 @@
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/neon-solutions/copybook/main/public/brand/copybook-mark-dark.svg" />
-  <img alt="" height="48" src="https://raw.githubusercontent.com/neon-solutions/copybook/main/public/brand/copybook-mark.svg" width="48" />
-</picture>
+<div align="center">
 
-# Copybook
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/header/glow.svg?title=Copybook&amp;subtitle=Typed%2C%20tested%20snippets%2C%20commands%2C%20and%20agent%20prompts%20for%20your%20product&amp;theme=emerald&amp;mode=dark&amp;logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZD0iTTAgMCAxNC41IDYuNVYxNy41TDAgMjRWMTdMMTMgMTIgMCA3WiIgZmlsbD0iI2ZmZiIvPjxyZWN0IHg9IjE3IiB5PSIxNSIgd2lkdGg9IjciIGhlaWdodD0iMi41IiBmaWxsPSIjMDBlNTk5Ii8%2BPC9zdmc%2B" /><img alt="Copybook" src="https://shieldcn.dev/header/glow.svg?title=Copybook&amp;subtitle=Typed%2C%20tested%20snippets%2C%20commands%2C%20and%20agent%20prompts%20for%20your%20product&amp;theme=emerald&amp;mode=light&amp;logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZD0iTTAgMCAxNC41IDYuNVYxNy41TDAgMjRWMTdMMTMgMTIgMCA3WiIgZmlsbD0iIzBiMGMwZSIvPjxyZWN0IHg9IjE3IiB5PSIxNSIgd2lkdGg9IjciIGhlaWdodD0iMi41IiBmaWxsPSIjMDBjNzg1Ii8%2BPC9zdmc%2B" width="100%" /></picture>
+
+<a href="https://www.npmjs.com/package/@copybook/core"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/npm/@copybook/core.svg?label=core&amp;variant=outline&amp;theme=emerald&amp;mode=dark" /><img alt="@copybook/core on npm" src="https://shieldcn.dev/npm/@copybook/core.svg?label=core&amp;variant=outline&amp;theme=emerald&amp;mode=light" /></picture></a> <a href="https://www.npmjs.com/package/@copybook/cli"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/npm/@copybook/cli.svg?label=cli&amp;variant=outline&amp;theme=emerald&amp;mode=dark" /><img alt="@copybook/cli on npm" src="https://shieldcn.dev/npm/@copybook/cli.svg?label=cli&amp;variant=outline&amp;theme=emerald&amp;mode=light" /></picture></a> <a href="https://www.npmjs.com/package/@copybook/core"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/npm/dm/@copybook/core.svg?variant=outline&amp;theme=emerald&amp;mode=dark" /><img alt="Monthly downloads" src="https://shieldcn.dev/npm/dm/@copybook/core.svg?variant=outline&amp;theme=emerald&amp;mode=light" /></picture></a> <a href="https://github.com/neon-solutions/copybook/actions"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/ci/neon-solutions/copybook.svg?variant=outline&amp;theme=emerald&amp;mode=dark" /><img alt="CI" src="https://shieldcn.dev/github/ci/neon-solutions/copybook.svg?variant=outline&amp;theme=emerald&amp;mode=light" /></picture></a> <a href="LICENSE.md"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/license/neon-solutions/copybook.svg?variant=outline&amp;theme=emerald&amp;mode=dark" /><img alt="License" src="https://shieldcn.dev/github/license/neon-solutions/copybook.svg?variant=outline&amp;theme=emerald&amp;mode=light" /></picture></a> <a href="https://github.com/neon-solutions/copybook/stargazers"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/stars/neon-solutions/copybook.svg?variant=outline&amp;theme=emerald&amp;mode=dark" /><img alt="GitHub stars" src="https://shieldcn.dev/github/stars/neon-solutions/copybook.svg?variant=outline&amp;theme=emerald&amp;mode=light" /></picture></a> <a href="https://copybook.dev/docs/components"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/shadcn-%40copybook-10b981.svg?logo=shadcnui&amp;variant=outline&amp;theme=emerald&amp;mode=dark" /><img alt="shadcn registry" src="https://shieldcn.dev/badge/shadcn-%40copybook-10b981.svg?logo=shadcnui&amp;variant=outline&amp;theme=emerald&amp;mode=light" /></picture></a> <a href="https://copybook.dev/docs"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/docs-copybook.dev-10b981.svg?logo=lu:BookOpen&amp;variant=outline&amp;theme=emerald&amp;mode=dark" /><img alt="Docs" src="https://shieldcn.dev/badge/docs-copybook.dev-10b981.svg?logo=lu:BookOpen&amp;variant=outline&amp;theme=emerald&amp;mode=light" /></picture></a>
+
+</div>
 
 > Copybook is at 0.x, so minor releases can include breaking changes. The [changelog](content/docs/changelog.mdx) lists them.
 
 Define, test, and track the code snippets and agent prompts your users copy. Docs and examples are at [copybook.dev](https://copybook.dev).
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/neon-solutions/copybook/main/.github/assets/studio-dark.png" />
+  <img alt="Copybook Studio showing a prompt definition: where it is shown, its typed params, and the rendered prompt" src="https://raw.githubusercontent.com/neon-solutions/copybook/main/.github/assets/studio-light.png" />
+</picture>
+
+<sub>Copybook Studio (<code>npx copybook studio</code>) lists every definition, where it is shown, its params, and what users copy.</sub>
 
 Developer tools now ship a lot of copy-paste content: "Connect" dialogs with snippets in five languages, model pages with per-framework examples, and "paste this into your coding agent" prompts. That content usually lives as strings scattered across components, so nobody can easily answer:
 
@@ -64,6 +72,10 @@ npx copybook studio     # browse everything locally
 The [docs](https://copybook.dev/docs) cover the [quick start](https://copybook.dev/docs/quick-start), each concept, and the registry components.
 
 `examples/acme` models Neon's onboarding screens for a fictional "Acme DB", and every command above runs against it without an account.
+
+## Used by
+
+[Neon](https://neon.com) tracks the agent prompts on its docs with Copybook. Every pull request that changes one gets a report with the rendered before and after and the pages that use it, like [this one](https://github.com/neondatabase/website/pull/6926#issuecomment-7052237787).
 
 ## Development
 
