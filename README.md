@@ -1,6 +1,6 @@
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="public/brand/copybook-mark-dark.svg" />
-  <img alt="" height="48" src="public/brand/copybook-mark.svg" width="48" />
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/neon-solutions/copybook/main/public/brand/copybook-mark-dark.svg" />
+  <img alt="" height="48" src="https://raw.githubusercontent.com/neon-solutions/copybook/main/public/brand/copybook-mark.svg" width="48" />
 </picture>
 
 # Copybook
