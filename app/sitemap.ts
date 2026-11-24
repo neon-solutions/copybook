@@ -8,6 +8,7 @@ import { source } from "@/lib/source";
 // accurate, so pages without a git date have none.
 const sitemap = (): MetadataRoute.Sitemap => [
   { url: siteConfig.url },
+  { url: `${siteConfig.url}/stats` },
   ...source.getPages().map((page) => ({
     lastModified: getLastModified(page),
     url: `${siteConfig.url}${page.url}`,
