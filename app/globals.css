@@ -160,6 +160,8 @@
   --ring: #8a8b90;
   --landing-divider: rgb(0 0 0 / 0.06);
   --landing-faint: #a5a6ab;
+  /* The /stats chart line. Checked against the light background with the dataviz validator. */
+  --stats-series: #00a36c;
   --landing-selection: rgb(0 0 0 / 0.1);
   --landing-shadow-button: rgb(0 0 0 / 0.1) 0 1px 2px 0;
   --landing-shadow-window:
@@ -193,6 +195,8 @@
   --ring: #9c9c9d;
   --landing-divider: rgb(255 255 255 / 0.06);
   --landing-faint: #6a6b6c;
+  /* Brand neon is too light for a chart line; this step passes on the dark background. */
+  --stats-series: #00a86f;
   --landing-selection: rgb(255 255 255 / 0.18);
   --landing-shadow-button:
     rgb(0 0 0 / 0.03) 0 7px 3px 0, rgb(0 0 0 / 0.25) 0 4px 4px 0;

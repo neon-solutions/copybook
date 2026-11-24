@@ -8,6 +8,7 @@ const LINKS = [
   { href: "/docs", label: "Docs" },
   { href: "/docs/quick-start", label: "Quick start" },
   { href: "/docs/changelog", label: "Changelog" },
+  { href: "/stats", label: "Stats" },
   { external: true, href: githubUrl, label: "GitHub" },
 ] as const;
 
