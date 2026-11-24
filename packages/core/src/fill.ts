@@ -1,4 +1,5 @@
 import type { Node, ParamNode, Rendered } from "./nodes";
+import { markSecrets, treeSecrets } from "./secrets";
 
 export type ParamInfo = Omit<ParamNode, "type">;
 
@@ -44,17 +45,27 @@ const fillNodes = (
     if (value === undefined || value === "") {
       return node;
     }
-    const { placeholder: _placeholder, ...param } = node;
-    return { ...param, value };
+    // The typed value replaces the rendered one, and with it any secret the
+    // param held; only a secret param stays marked.
+    const { holdsSecret, placeholder: _placeholder, secret, ...param } = node;
+    const isSecretParam = secret === true && holdsSecret !== true;
+    return isSecretParam ? { ...param, secret, value } : { ...param, value };
   });
 
 /**
  * Replaces the value of every param named in `values`, in embedded
  * definitions too. A secret given a value is no longer a placeholder. Empty
  * values are ignored. Only params interpolated directly are param nodes, so
- * text derived from a param keeps the value it was rendered with.
+ * text derived from a param keeps the value it was rendered with, and keeps
+ * its secret mark. Text that holds a filled secret's value gets marked.
  */
 export const fillParams = (
   rendered: Rendered,
   values: Readonly<Record<string, string>>
-): Rendered => ({ ...rendered, nodes: fillNodes(rendered.nodes, values) });
+): Rendered => {
+  const filled = fillNodes(rendered.nodes, values);
+  return {
+    ...rendered,
+    nodes: markSecrets(filled, [...treeSecrets(filled)]),
+  };
+};

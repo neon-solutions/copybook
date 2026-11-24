@@ -7,6 +7,8 @@ import { readFileSync } from "node:fs";
 const ALLOWED_HOSTS = new Set([
   "codeload.github.com",
   "github.com",
+  // Public preview builds, for @tanstack/oracles until it is on npm.
+  "pkg.pr.new",
   "registry.npmjs.org",
 ]);
 const TARBALL_PATTERN = /tarball:\s*https?:\/\/(?<host>[^/\s,}]+)/gu;

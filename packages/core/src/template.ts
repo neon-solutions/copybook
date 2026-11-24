@@ -19,15 +19,29 @@ interface Embedded {
 
 /** Supplied by `render` for each template call. */
 export interface TemplateContext {
-  /** Renders an embedded definition with the current render mode. */
-  embed: (definition: unknown, values: unknown, variant?: unknown) => Embedded;
-  /** Param values that get highlighted when interpolated directly. */
-  params: ReadonlyMap<string, Omit<ParamNode, "type" | "value">>;
+  /**
+   * Renders an embedded definition with the current render mode. Absent in
+   * the labelling run, where an embed renders nothing: its labels are its own.
+   */
+  embed?: (definition: unknown, values: unknown, variant?: unknown) => Embedded;
+  /**
+   * Called once for every interpolated string, number, null, or undefined,
+   * in evaluation order, with `undefined` for a value that renders nothing.
+   * Returns the param the value came from, or nothing for plain text.
+   */
+  label: (
+    text: string | undefined
+  ) => Omit<ParamNode, "type" | "value"> | undefined;
 }
 
 const toNodes = (value: Interpolation, context: TemplateContext): Node[] => {
-  if (value === null || value === undefined || typeof value === "boolean") {
+  if (typeof value === "boolean") {
     return [];
+  }
+  if (value === null || value === undefined) {
+    // An omitted optional param still gets a node, so readers can fill it.
+    const param = context.label(undefined);
+    return param ? [{ ...param, type: "param", value: "" }] : [];
   }
   if (Array.isArray(value)) {
     return value.flatMap((item: Interpolation) => toNodes(item, context));
@@ -36,7 +50,7 @@ const toNodes = (value: Interpolation, context: TemplateContext): Node[] => {
     return value.nodes;
   }
   const text = String(value);
-  const param = text === "" ? undefined : context.params.get(text);
+  const param = context.label(text);
   if (param) {
     return [{ ...param, type: "param", value: text }];
   }
@@ -100,7 +114,10 @@ export const createTemplate = (context: TemplateContext): Template => {
     if (typeof command === "string" || isFragment(command)) {
       return fragment([{ children: content(command), type: "command" }]);
     }
-    const embedded = context.embed(command, values);
+    const embedded = context.embed?.(command, values);
+    if (!embedded) {
+      return fragment([]);
+    }
     return fragment([
       { children: embedded.nodes, id: embedded.id, type: "command" },
     ]);
@@ -120,11 +137,14 @@ export const createTemplate = (context: TemplateContext): Template => {
         { children: content(body), lang: langOrSnippet, type: "code" },
       ]);
     }
-    const embedded = context.embed(
+    const embedded = context.embed?.(
       langOrSnippet,
       contentOrValues,
       options?.variant
     );
+    if (!embedded) {
+      return fragment([]);
+    }
     return fragment([
       withVariant(
         { children: embedded.nodes, id: embedded.id, type: "code" },
@@ -134,7 +154,10 @@ export const createTemplate = (context: TemplateContext): Template => {
   };
 
   const include = (definition: unknown, values?: unknown): Fragment => {
-    const embedded = context.embed(definition, values);
+    const embedded = context.embed?.(definition, values);
+    if (!embedded) {
+      return fragment([]);
+    }
     return fragment([
       {
         children: embedded.nodes,

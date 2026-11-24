@@ -6,6 +6,12 @@ metaDescription: "What changed in each release of @copybook/core and @copybook/c
 
 ## Unreleased
 
+**Fixes in `@copybook/core`:**
+
+- A param is labelled where the template reads it, not wherever its value appears. Before, `render` matched interpolated text against param values, so two params with the same value both took the first one's name, and a constant or a transformed value that equalled a param, such as `` t`git diff ${"main"}` `` next to a `branch` of `"main"`, was labelled as that param. Agent Prompt then dropped an input, and filling one param rewrote the other, or the constant. `render` now runs each template a second time, with a fresh value for each param, to see which interpolations read which param. A template that branches on a value labels a value only when exactly one param has it.
+- A real secret is marked wherever it appears in the copied text, so Agent Prompt drops its `openIn` links. Before, a secret that shared a value with another param, came from `.default()` or `.example()`, or sat inside derived text, such as ``t.cmd(`curl -H "Bearer ${token}"`)``, had no `secret: true`, and the links kept it in their URLs. Text that holds a real secret now carries `secret: true`, and so does a param whose value holds one, with `holdsSecret: true`.
+- A param that renders `""`, or an optional param that is omitted, gets an empty param node, so Agent Prompt shows an input for it and filling it works.
+
 **New in the components:**
 
 - Code Variants takes a `kind: "prompt"` item, so a tabbed snippet can include a coding-agent prompt next to frameworks or package managers. `defaultView="rendered"` and `viewToggle` work on that tab the same way they do on Agent Prompt and Command Tabs.
