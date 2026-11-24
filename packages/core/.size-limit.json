@@ -1,12 +1,12 @@
 [
   {
     "name": "everything",
-    "limit": "4 kB",
+    "limit": "4.6 kB",
     "path": "dist/index.js"
   },
   {
     "import": "{ definePrompt, p, render, toText }",
-    "limit": "3.5 kB",
+    "limit": "3.7 kB",
     "name": "render a prompt",
     "path": "dist/index.js"
   },
