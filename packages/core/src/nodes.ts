@@ -3,11 +3,18 @@ import { FRAGMENT } from "./brand";
 export type DefinitionKind = "command" | "prompt" | "snippet";
 
 export interface TextNode {
+  /** Set when the text holds a real secret's value, such as `Bearer ${token}`. */
+  secret?: true;
   type: "text";
   value: string;
 }
 
 export interface ParamNode {
+  /**
+   * Set, with `secret`, on a param that isn't a secret when its value holds
+   * a real secret's value.
+   */
+  holdsSecret?: true;
   name: string;
   /** Set when a secret had no value and rendered as its placeholder. */
   placeholder?: true;

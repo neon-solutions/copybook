@@ -12,6 +12,7 @@ export interface Segment {
   /** The param name, for `param` segments. */
   name?: string;
   placeholder?: true;
+  /** Set on a secret param, and on text that holds a real secret's value. */
   secret?: true;
   text: string;
   type: "fence" | "param" | "text";
@@ -151,7 +152,12 @@ const walk: Walk = (state, nodes, indent, context) => {
   for (const node of nodes) {
     switch (node.type) {
       case "text": {
-        push(state, { ...context, text: node.value, type: "text" }, indent);
+        const secret = node.secret ? { secret: node.secret } : {};
+        push(
+          state,
+          { ...context, ...secret, text: node.value, type: "text" },
+          indent
+        );
         break;
       }
       case "param": {

@@ -50,13 +50,14 @@ interface Rendered {
 }
 
 type Node =
-  | { type: "text"; value: string }
+  | { type: "text"; value: string; secret?: true } // secret: holds a real secret
   | {
       type: "param";
       name: string;
-      value: string;
+      value: string; // "" for an empty or omitted param
       secret?: true;
       placeholder?: true;
+      holdsSecret?: true; // with secret, on a non-secret param whose value holds one
     }
   | { type: "command"; id?: string; children: Node[] }
   | {
@@ -92,8 +93,8 @@ Inline `children` are `text`, `param` (with `name`, `secret?`, `placeholder?`), 
 
 `@copybook/core/fill` lets readers fill in params in the browser, without the definition.
 
-- `listParams(rendered)` returns each param once, in the order they first appear: `{ name, value, secret?, placeholder? }`.
-- `fillParams(rendered, values)` returns a new tree in which every param named in `values` has that value, in embedded definitions too. A filled secret loses `placeholder`, and empty values are ignored.
+- `listParams(rendered)` returns each param once, in the order they first appear: `{ name, value, secret?, placeholder?, holdsSecret? }`.
+- `fillParams(rendered, values)` returns a new tree in which every param named in `values` has that value, in embedded definitions too. A filled secret loses `placeholder`, and empty values are ignored. Text that holds a filled secret's value gets `secret: true`, and text keeps the mark it rendered with.
 
 ```ts
 import { renderExample } from "@copybook/core";

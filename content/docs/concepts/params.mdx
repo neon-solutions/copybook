@@ -48,8 +48,12 @@ render(snippet); // Authorization: Bearer <your-api-key>
 render(snippet, { token }); // Authorization: Bearer sk-…
 ```
 
-In the rendered tree, secret params carry `secret: true`, and placeholders also carry `placeholder: true`. Test runs read the real value from `env` and redact it from all logs.
+In the rendered tree, secret params carry `secret: true`, and placeholders also carry `placeholder: true`. A secret's value counts as real wherever it came from, including `.default()` and `.example()`. Text that holds a real secret, such as ``t.cmd(`curl -H "Bearer ${token}"`)``, also carries `secret: true`, and so does another param whose value holds one, with `holdsSecret: true`. Test runs read the real value from `env` and redact it from all logs.
 
 ## Highlighting
 
 When you interpolate a param directly into a `t` template, it becomes a **param node**, so UIs can highlight it. If you transform the value first, as in `` t`${projectId.toUpperCase()}` ``, it renders as plain text.
+
+Copybook tells params apart by where the template reads them, not by their values, so two params with the same value each keep their name, and a constant that happens to equal a param stays plain text. A param that renders `""`, or an optional param that was omitted, still gets an empty param node, so readers can fill it in. Booleans render nothing.
+
+In a template that branches on a value, as in `` t`${framework === "next" ? t`${region}` : ""}` ``, a value is labelled only when exactly one param has it.

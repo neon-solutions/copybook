@@ -60,7 +60,7 @@ import { renderExample } from "@copybook/core";
 
 Each input shows the value the param rendered with as its placeholder. As the reader types, both views, the copied text, and the `openIn` links use their value. It also fills params with the same name in embedded commands and snippets. Secret params get a password input. Once a reader types a real secret, the component warns about it and drops the `openIn` links. What readers type stays in the component's state and isn't stored, though `onCopy` and `onOpen` receive the copied text.
 
-The inputs are plain text, and only params interpolated directly into a template update. Text the template derives from a param, such as `` t`${projectId.toUpperCase()}` ``, keeps the value it was rendered with. The substitution is `fillParams` from `@copybook/core/fill`, if you build your own inputs.
+A param that renders `""`, or an optional param that wasn't passed, still gets an input. The inputs are plain text, and only params interpolated directly into a template update. Text the template derives from a param, such as `` t`${projectId.toUpperCase()}` ``, keeps the value it was rendered with. The substitution is `fillParams` from `@copybook/core/fill`, if you build your own inputs.
 
 ## Open in an agent
 
@@ -80,7 +80,7 @@ Set `openIn` to add links under the prompt that open it in a coding agent, pre-f
 | `claude-code` | `claude-cli://open?q=…` | 5,000 characters of prompt |
 | `codex` | `codex://new?prompt=…` | 8,000 characters of URL |
 
-The Claude Code and Codex links do nothing on a computer without that app, so offer them where your readers are likely to have it. A prompt over an agent's limit gets a note to copy it instead of a link. A prompt with a real secret gets no links at all, because URLs end up in browser history and logs.
+The Claude Code and Codex links do nothing on a computer without that app, so offer them where your readers are likely to have it. A prompt over an agent's limit gets a note to copy it instead of a link. A prompt with a real secret gets no links at all, because URLs end up in browser history and logs. That includes a secret inside text the template builds, such as `` `Bearer ${token}` ``.
 
 ## Props
 
